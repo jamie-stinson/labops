@@ -5,8 +5,8 @@ crds:
   enabled: true
   keep: false
 podDisruptionBudget:
-  enabled:
-    minAvailable: 1
+  enabled: true
+  minAvailable: 1
 resources:
   requests:
     cpu: "10m"
@@ -17,8 +17,8 @@ resources:
     ephemeral-storage: "16Mi"
 webhook:
   podDisruptionBudget:
-    enabled:
-      minAvailable: 1
+    enabled: true
+    minAvailable: 1
   resources:
     requests:
       cpu: "10m"
@@ -29,8 +29,8 @@ webhook:
       ephemeral-storage: "16Mi"
 cainjector:
   podDisruptionBudget:
-    enabled:
-      minAvailable: 1
+    enabled: true
+    minAvailable: 1
   resources:
     requests:
       cpu: "10m"
