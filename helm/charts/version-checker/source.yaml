@@ -1,0 +1,3 @@
+repository: "https://charts.jetstack.io"
+chart: "version-checker"
+version: "0.*.*"

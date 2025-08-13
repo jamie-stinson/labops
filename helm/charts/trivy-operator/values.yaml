@@ -1,0 +1,28 @@
+resources:
+  requests:
+    cpu: "200m"
+    memory: "512Mi"
+    ephemeral-storage: "2Gi"
+  limits:
+    memory: "512Mi"
+    ephemeral-storage: "2Gi"
+
+operator:
+  metricsFindingsEnabled: true
+  metricsExposedSecretInfo: true
+  metricsConfigAuditInfo: true
+  metricsRbacAssessmentInfo: true
+  metricsInfraAssessmentInfo: true
+  metricsImageInfo: true
+  metricsClusterComplianceInfo: true
+
+trivy:
+  storageClassEnabled: false
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "1Gi"
+      ephemeral-storage: "3Gi"
+    limits:
+      memory: "1Gi"
+      ephemeral-storage: "3Gi"

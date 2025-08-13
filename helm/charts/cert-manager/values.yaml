@@ -1,0 +1,41 @@
+global:
+  leaderElection:
+    namespace: "cert-manager"
+crds:
+  enabled: true
+  keep: false
+podDisruptionBudget:
+  enabled:
+    minAvailable: 1
+resources:
+  requests:
+    cpu: "10m"
+    memory: "128Mi"
+    ephemeral-storage: "16Mi"
+  limits:
+    memory: "128Mi"
+    ephemeral-storage: "16Mi"
+webhook:
+  podDisruptionBudget:
+    enabled:
+      minAvailable: 1
+  resources:
+    requests:
+      cpu: "10m"
+      memory: "128Mi"
+      ephemeral-storage: "16Mi"
+    limits:
+      memory: "128Mi"
+      ephemeral-storage: "16Mi"
+cainjector:
+  podDisruptionBudget:
+    enabled:
+      minAvailable: 1
+  resources:
+    requests:
+      cpu: "10m"
+      memory: "128Mi"
+      ephemeral-storage: "16Mi"
+    limits:
+      memory: "128Mi"
+      ephemeral-storage: "16Mi"

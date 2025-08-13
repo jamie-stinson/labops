@@ -1,3 +1,0 @@
-repository: "https://kubernetes.github.io/dashboard"
-chart: "kubernetes-dashboard"
-version: "7.*.*"
