@@ -1,0 +1,56 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: this
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        files:
+          - path: helm/charts/*/source.yaml
+        repoURL: https://github.com/jamie-stinson/labops
+        revision: initial
+  goTemplate: true
+  template:
+    metadata:
+      name: "{{ index .path.segments 1 }}"
+    spec:
+      destination:
+        name: "in-cluster"
+        namespace: "{{ if .namespace }}{{ .namespace }}{{ else }}{{ index .path.segments 1 }}{{ end }}"
+      project: "production"
+      revisionHistoryLimit: 3
+      syncPolicy:
+        automated:
+          prune: true
+          allowEmpty: true
+          selfHeal: true
+        retry:
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m
+          limit: 3
+  templatePatch: |
+    {{- $appName := index .path.segments 1 -}}
+    spec:
+      syncPolicy:
+        syncOptions:
+          - Validate=true
+          - CreateNamespace=true
+          - PrunePropagationPolicy=foreground
+          - PruneLast=true
+          - ServerSideApply=true
+          - RespectIgnoreDifferences=false
+          - ApplyOutOfSyncOnly=false
+      sources:
+        - repoURL: "{{ .repository }}"
+          chart: "{{ .chart }}"
+          targetRevision: "{{ .version }}"
+          helm:
+            releaseName: "{{ index .path.segments 1 }}"
+            valueFiles:
+              - "$values/helm/charts/{{ index .path.segments 1 }}/values.yaml"
+        - repoURL: https://github.com/jamie-stinson/labops
+          targetRevision: initial
+          ref: values
