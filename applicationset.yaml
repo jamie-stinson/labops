@@ -13,11 +13,11 @@ spec:
   goTemplate: true
   template:
     metadata:
-      name: "{{ index .path.segments 1 }}"
+      name: "{{ index .path.segments 2 }}"
     spec:
       destination:
         name: "in-cluster"
-        namespace: "{{ if .namespace }}{{ .namespace }}{{ else }}{{ index .path.segments 1 }}{{ end }}"
+        namespace: "{{ if .namespace }}{{ .namespace }}{{ else }}{{ index .path.segments 2 }}{{ end }}"
       project: "production"
       revisionHistoryLimit: 3
       syncPolicy:
@@ -32,7 +32,7 @@ spec:
             maxDuration: 3m
           limit: 3
   templatePatch: |
-    {{- $appName := index .path.segments 1 -}}
+    {{- $appName := index .path.segments 2 -}}
     spec:
       syncPolicy:
         syncOptions:
@@ -48,9 +48,9 @@ spec:
           chart: "{{ .chart }}"
           targetRevision: "{{ .version }}"
           helm:
-            releaseName: "{{ index .path.segments 1 }}"
+            releaseName: "{{ index .path.segments 2 }}"
             valueFiles:
-              - "$values/helm/charts/{{ index .path.segments 1 }}/values.yaml"
+              - "$values/helm/charts/{{ index .path.segments 2 }}/values.yaml"
         - repoURL: https://github.com/jamie-stinson/labops
           targetRevision: initial
           ref: values
