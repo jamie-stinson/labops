@@ -1,0 +1,3 @@
+repository: "https://charts.appscode.com/stable"
+chart: "gateway-api"
+version: "2025.3.14"

@@ -1,0 +1,3 @@
+repository: "https://kiali.org/helm-charts"
+chart: "kiali-server"
+version: "2.14.0"
