@@ -15,6 +15,17 @@ spec:
     metadata:
       name: "{{ index .path.segments 2 }}"
     spec:
+      ignoreDifferences:
+        - group: admissionregistration.k8s.io
+          kind: ValidatingWebhookConfiguration
+          name: istio-validator-istio
+          jsonPointers:
+            - /webhooks/0/failurePolicy
+        - group: admissionregistration.k8s.io
+          kind: ValidatingWebhookConfiguration
+          name: istiod-default-validator
+          jsonPointers:
+            - /webhooks/0/failurePolicy
       destination:
         name: "in-cluster"
         namespace: "{{ if .namespace }}{{ .namespace }}{{ else }}{{ index .path.segments 2 }}{{ end }}"
