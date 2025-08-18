@@ -16,14 +16,13 @@ server:
     pvcDeleteOnStsDelete: true
     pvcDeleteOnStsScale: true
   resources:
-    custom:
-      requests:
-        cpu: "10m"
-        memory: "4Gi"
-        ephemeral-storage: "16Mi"
-      limits:
-        memory: "4Gi"
-        ephemeral-storage: "16Mi"
+    requests:
+      cpu: "10m"
+      memory: "4Gi"
+      ephemeral-storage: "16Mi"
+    limits:
+      memory: "4Gi"
+      ephemeral-storage: "16Mi"
   ingress:
     ingressClassName: "istio-ingress-gateway"
     hosts:
