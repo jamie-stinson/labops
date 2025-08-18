@@ -63,10 +63,10 @@ spec:
           chart: "common-helm-library"
           targetRevision: "1.*.*"
           helm:
-            releaseName: "{{ index .path.segments 1 }}"
+            releaseName: "{{ index .path.segments 2 }}"
             valueFiles:
               - "$values/helm/global-values.yaml"
-              - "$values/helm/charts/{{ index .path.segments 1 }}/values.yaml"
+              - "$values/helm/charts/{{ index .path.segments 2 }}/values.yaml"
         {{- end }}
         - repoURL: "{{ .repository }}"
           chart: "{{ .chart }}"
