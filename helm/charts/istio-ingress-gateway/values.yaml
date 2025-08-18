@@ -1,2 +1,7 @@
 service:
   type: "NodePort"
+
+ingressClass:
+  enabled: true
+  isDefault: false
+  controller: "istio.io/ingress-controller"
