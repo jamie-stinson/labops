@@ -1,14 +1,13 @@
 global:
   leaderElection:
     namespace: "cert-manager"
-  logLevel: 6
 crds:
   enabled: true
   keep: false
-extraArgs:
-  - --enable-certificate-owner-ref=true
-  - --dns01-recursive-nameservers-only
-  - --dns01-recursive-nameservers=8.8.8.8:53,1.1.1.1:53
+# extraArgs:
+#   - --enable-certificate-owner-ref=true
+#   - --dns01-recursive-nameservers-only
+#   - --dns01-recursive-nameservers=8.8.8.8:53,1.1.1.1:53
 podDisruptionBudget:
   enabled: true
   minAvailable: 1
