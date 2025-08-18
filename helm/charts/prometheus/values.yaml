@@ -24,6 +24,7 @@ server:
       memory: "4Gi"
       ephemeral-storage: "16Mi"
   ingress:
+    enabled: true
     ingressClassName: "istio-ingress-gateway"
     hosts:
       - prometheus.projectwhitebox.com
