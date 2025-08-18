@@ -46,6 +46,9 @@ spec:
     {{- $appName := index .path.segments 2 -}}
     spec:
       syncPolicy:
+        managedNamespaceMetadata:
+          labels:
+            istio.io/dataplane-mode: ambient
         syncOptions:
           - Validate=true
           - CreateNamespace=true
@@ -55,6 +58,16 @@ spec:
           - RespectIgnoreDifferences=false
           - ApplyOutOfSyncOnly=false
       sources:
+        {{- if .commonHelmLibrary.enabled }}
+        - repoURL: "ghcr.io/jamie-stinson/common-helm-library"
+          chart: "common-helm-library"
+          targetRevision: "1.*.*"
+          helm:
+            releaseName: "{{ index .path.segments 1 }}"
+            valueFiles:
+              - "$values/helm/global-values.yaml"
+              - "$values/helm/charts/{{ index .path.segments 1 }}/values.yaml"
+        {{- end }}
         - repoURL: "{{ .repository }}"
           chart: "{{ .chart }}"
           targetRevision: "{{ .version }}"
