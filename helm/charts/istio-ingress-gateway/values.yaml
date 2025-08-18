@@ -5,3 +5,46 @@ ingressClass:
   enabled: true
   isDefault: false
   controller: "istio.io/ingress-controller"
+
+certificate:
+  enabled: true
+  spec:
+    secretName: "letsencrypt-wildcard-certificate"
+    dnsNames:
+    - 'projectwhitebox.com'
+    - '*.projectwhitebox.com'
+    issuerRef:
+      name: "istio-ingress-gateway"
+      kind: Issuer
+issuer:
+  enabled: true
+  type: Issuer
+  spec:
+    acme:
+      email: "jamiestinson1@icloud.com"
+      solvers:
+      - dns01:
+          cloudflare:
+            email: "jamiestinson1@icloud.com"
+            apiTokenSecretRef:
+              name: cloudflare
+              key: API_TOKEN
+      server: https://acme-v02.api.letsencrypt.org/directory
+      privateKeySecretRef:
+        name: letsencrypt-acme-key
+
+extraObjects:
+  - |
+    apiVersion: bitnami.com/v1alpha1
+    kind: SealedSecret
+    metadata:
+      name: cloudflare
+      namespace: istio-ingress-gateway
+    spec:
+      encryptedData:
+        API_TOKEN: AgB86AGtZY8+93a/e+HLTsDD4LqbGGrU9w+vDiqWRSJi82DyBTPR+K5rfBdl0yrqvihryh0N+vcsdFOholJRjLM9TbqGBvkEzubPdAGguUtcV8DNrfinGJN0P/kfERJJwieOM90AVrNuYynlEB3BwIDIniOFx8P91viqI9qNijc5Vd2UAlWxqcAaWYedE27p9Gvh4P+HtKZ7A0ZtU1j9OOYHbHjeg6r9jEgxdYYgpYg/cTogzzpqEmbTuvRXGY2yKdRvTZDqZQE3WjEHY7rBl1tSbzkYQYFhpIrKb3tBqhYXh7dDTqBcrymKbCbaRCjuAFJheTE3qcCOrsVY0pezLzyCdfcMwcNahjHoJRPoW2B4ekU/kRe7TbGnkIYe1wjj6VAP4B8avmvqBz/Lk7o0p8I1NOtkn3Q9YXNlR9t/ONtAU8Q0lbl+9CL07AY/A07H3xrsgE+lO1g3sylfKc3PGiE0iWLf+3A2Q9XRGJ7fFfRqcQV1pOe98gk8eCxzsG6yMf5qmXiNPGQ/aUP9zMxyuqzoCFXVTAvrA2v44L9m8l25KlkYORkF+2Q6m95WdJ6NAI0c3U1SBzpk2ZJTNpou2eXvl870chP5DEue5wnvoU7iOZvATTWGg1GnBsFIRXizRl55sJhP5j0QnNKPN2GOzboUQjGZ3S7/i2IenLRxfuNz0fZ18mnEmmtqU5b5/VZhx19Bk59EF1NVQTfolhrVggiUYZG93xU8r1GvNJDCHJkTJqxiHDfY+nwN
+      template:
+        metadata:
+          name: cloudflare
+          namespace: istio-ingress-gateway
+        type: Opaque

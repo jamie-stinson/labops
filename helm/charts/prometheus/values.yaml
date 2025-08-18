@@ -1,0 +1,46 @@
+configmapReload:
+  prometheus:
+    enabled: false
+
+server:
+  name: "prometheus"
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+  retention: "2h"
+  persistentVolume:
+    size: 25Gi
+    storageClass: "openebs"
+  statefulSet:
+    enabled: true
+    pvcDeleteOnStsDelete: true
+    pvcDeleteOnStsScale: true
+  resources:
+    custom:
+      requests:
+        cpu: "10m"
+        memory: "4Gi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "4Gi"
+        ephemeral-storage: "16Mi"
+  ingress:
+    ingressClassName: "istio-ingress-gateway"
+    hosts:
+      - prometheus.projectwhitebox.com
+    tls:
+      secretName: letsencrypt-wildcard-certificate
+      hosts:
+        - prometheus.projectwhitebox.com
+
+alertmanager:
+  enabled: false
+
+kube-state-metrics:
+  enabled: false
+
+prometheus-node-exporter:
+  enabled: false
+
+prometheus-pushgateway:
+  enabled: false
