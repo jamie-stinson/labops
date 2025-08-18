@@ -1,6 +1,7 @@
 global:
   leaderElection:
     namespace: "cert-manager"
+  logLevel: 6
 crds:
   enabled: true
   keep: false
