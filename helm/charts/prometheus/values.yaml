@@ -29,9 +29,9 @@ server:
     hosts:
       - prometheus.projectwhitebox.com
     tls:
-      secretName: letsencrypt-wildcard-certificate
-      hosts:
-        - prometheus.projectwhitebox.com
+      - secretName: letsencrypt-wildcard-certificate
+        hosts:
+          - prometheus.projectwhitebox.com
 
 alertmanager:
   enabled: false

@@ -39,12 +39,12 @@ extraObjects:
     kind: SealedSecret
     metadata:
       name: cloudflare
-      namespace: istio-ingress-gateway
+      namespace: istio
     spec:
       encryptedData:
-        API_TOKEN: AgB86AGtZY8+93a/e+HLTsDD4LqbGGrU9w+vDiqWRSJi82DyBTPR+K5rfBdl0yrqvihryh0N+vcsdFOholJRjLM9TbqGBvkEzubPdAGguUtcV8DNrfinGJN0P/kfERJJwieOM90AVrNuYynlEB3BwIDIniOFx8P91viqI9qNijc5Vd2UAlWxqcAaWYedE27p9Gvh4P+HtKZ7A0ZtU1j9OOYHbHjeg6r9jEgxdYYgpYg/cTogzzpqEmbTuvRXGY2yKdRvTZDqZQE3WjEHY7rBl1tSbzkYQYFhpIrKb3tBqhYXh7dDTqBcrymKbCbaRCjuAFJheTE3qcCOrsVY0pezLzyCdfcMwcNahjHoJRPoW2B4ekU/kRe7TbGnkIYe1wjj6VAP4B8avmvqBz/Lk7o0p8I1NOtkn3Q9YXNlR9t/ONtAU8Q0lbl+9CL07AY/A07H3xrsgE+lO1g3sylfKc3PGiE0iWLf+3A2Q9XRGJ7fFfRqcQV1pOe98gk8eCxzsG6yMf5qmXiNPGQ/aUP9zMxyuqzoCFXVTAvrA2v44L9m8l25KlkYORkF+2Q6m95WdJ6NAI0c3U1SBzpk2ZJTNpou2eXvl870chP5DEue5wnvoU7iOZvATTWGg1GnBsFIRXizRl55sJhP5j0QnNKPN2GOzboUQjGZ3S7/i2IenLRxfuNz0fZ18mnEmmtqU5b5/VZhx19Bk59EF1NVQTfolhrVggiUYZG93xU8r1GvNJDCHJkTJqxiHDfY+nwN
+        API_TOKEN: AgBYOzWnVsdN8YRZKwZ/8Spm3A/ptvKlIzHcZDHqo2ttFMqH1sfe4ooSDkcb6/DacXmcU+O0Q3u28WIBlJ5A2Vfwg9iLUSySPfih3P9pjQhJ9mdJbQcdwL2kqEPb2+KN0C2fLy7cSEkFqw6gpW8sJQs5k+xD2YLKx/Qi8zhFEoHddXNAw+wws6X+04lGDF9/07H71spDklZu+S2DpCE9h2Li0m9XFqNc3ULmUuV+Ewz0saoMZy+xrzOULcYgmQ1nlyWE8l9vliCZ5BbnwKje7ANVayXcB9NtHJSXKeWmj6b5yF80SX5exQSalb7C0Or6NGTPhSBjhiU2xg9WUPz5vS6PfLq33fxvLTnkRNPdaXjXj3DUdpmcAYcvhbS3gpaVdTPCUtNKsfQLOUUSQymi6kjShB7rJdmknIf7Iwg8DOZ/tKpwjckuEfpOV/qGuAMAB1tEE30BKDJO2sCL1l6AWMHCQ7kIiDA2hIPQYQA4iJSCwQftufYhEPWUu5hyV8lvxZLWi+6GCJDSp6iq+8xBWFdzQI1TAznAJDN8st1L5tfWNDVY3saW2liLWwsAFA7tvb/nXWOBrwcf7DEEu+jUmXKUOQRhL8f+elxKmYkLmbZzKrV+dfOXAO0/EFfB5lhwj6+FUm51KjDRkOfx4p+Ez/LZm+OwUsxVfSOLHJurbBuie4F0OavL6Kp9Eanz7bh3r14MAZ+AJ7pXzo4GgUnwhaBdVwKdvypYjdemt2+LUq2JFlkfOKmX+xtg
       template:
         metadata:
           name: cloudflare
-          namespace: istio-ingress-gateway
+          namespace: istio
         type: Opaque
