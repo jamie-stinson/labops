@@ -57,10 +57,6 @@ extraObjects:
           number: 443
           name: https
           protocol: HTTPS
-      - port:
-          number: 80
-          name: https
-          protocol: HTTP
         tls:
           mode: SIMPLE
           credentialName: letsencrypt-wildcard-certificate
