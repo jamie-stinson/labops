@@ -1,0 +1,3 @@
+repository: "https://cloudnative-pg.io/charts/"
+chart: "cloudnative-pg"
+version: "0.26.*"
