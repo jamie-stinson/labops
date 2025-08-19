@@ -1,11 +1,6 @@
 service:
   type: "NodePort"
 
-ingressClass:
-  enabled: true
-  isDefault: false
-  controller: "istio.io/ingress-controller"
-
 certificate:
   enabled: true
   spec:
@@ -48,3 +43,27 @@ extraObjects:
           name: cloudflare
           namespace: istio
         type: Opaque
+  - |
+    apiVersion: networking.istio.io/v1beta1
+    kind: Gateway
+    metadata:
+      name: external
+      namespace: istio
+    spec:
+      selector:
+        istio: ingress-gateway
+      servers:
+      - port:
+          number: 443
+          name: https
+          protocol: HTTPS
+      - port:
+          number: 80
+          name: https
+          protocol: HTTP
+        tls:
+          mode: SIMPLE
+          credentialName: letsencrypt-wildcard-certificate
+        hosts:
+        - "*.projectwhitebox.com"
+

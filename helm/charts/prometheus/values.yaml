@@ -23,15 +23,6 @@ server:
     limits:
       memory: "4Gi"
       ephemeral-storage: "16Mi"
-  ingress:
-    enabled: true
-    ingressClassName: "istio-ingress-gateway"
-    hosts:
-      - prometheus.projectwhitebox.com
-    tls:
-      - secretName: letsencrypt-wildcard-certificate
-        hosts:
-          - prometheus.projectwhitebox.com
 
 alertmanager:
   enabled: false
@@ -44,3 +35,25 @@ prometheus-node-exporter:
 
 prometheus-pushgateway:
   enabled: false
+
+extraObjects:
+  - |
+    apiVersion: networking.istio.io/v1beta1
+    kind: VirtualService
+    metadata:
+      name: prometheus
+      namespace: prometheus
+    spec:
+      hosts:
+      - "prometheus.projectwhitebox.com"
+      gateways:
+      - istio/external
+      http:
+      - match:
+        - uri:
+            prefix: /
+        route:
+        - destination:
+            host: prometheus-prometheus.prometheus.svc.cluster.local
+            port:
+              number: 80
