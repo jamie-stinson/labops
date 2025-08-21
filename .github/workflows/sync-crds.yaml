@@ -86,7 +86,6 @@ jobs:
                 echo "$crd_file does not exist yet, skipping validation"
             fi
 
-
             echo "$crd_file tests passed"
           done
 
