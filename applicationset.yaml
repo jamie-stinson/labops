@@ -80,3 +80,6 @@ spec:
         - repoURL: https://github.com/jamie-stinson/labops
           targetRevision: initial
           ref: values
+          {{- if .installCRDs }}
+          path: helm/charts/{{ index .path.segments 2 }}/crds
+          {{- end }}

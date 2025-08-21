@@ -438,7 +438,7 @@ rbac:
         - create
 grafana:
   dashboard:
-    enabled: true
+    enabled: false
     dashboards:
     - name: cert-manager
       title: "Cert Manager"
