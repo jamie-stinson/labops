@@ -32,29 +32,27 @@ jobs:
             [ -f "$values" ] || continue
 
             tag=$(yq '.workload.image.tag' "$values")
+            chart_name=$(basename "$chart")
 
-            case "$(basename $chart)" in
+            echo "Fetching CRDs for $chart_name ($tag)"
+            mkdir -p "$chart/crds"
+
+            case "$chart_name" in
               cert-manager-controller)
                 url="https://github.com/cert-manager/cert-manager/releases/download/${tag}/cert-manager.crds.yaml"
+                curl -sSL "$url" -o "$chart/crds/${chart_name}.crds.yaml"
                 ;;
               cloudnative-pg)
                 url="https://github.com/cloudnative-pg/cloudnative-pg/releases/download/v${tag}/cnpg-${tag}.yaml"
                 tmpfile="$(mktemp)"
                 curl -sSL "$url" -o "$tmpfile"
-                mkdir -p "$chart/crds"
-                # extract only CRDs
-                yq eval 'select(.kind == "CustomResourceDefinition")' "$tmpfile" > "$chart/crds/cloudnative-pg.crds.yaml"
+                yq eval 'select(.kind == "CustomResourceDefinition")' "$tmpfile" > "$chart/crds/${chart_name}.crds.yaml"
                 rm "$tmpfile"
                 ;;
               *)
-                echo "No CRD fetch rule for $(basename $chart), skipping"
-                continue
+                echo "No CRD fetch rule for $chart_name, skipping"
                 ;;
             esac
-
-            echo "Fetching CRDs for $(basename $chart) ($tag)"
-            mkdir -p "$chart/crds"
-            curl -sSL "$url" -o "$chart/crds/crds.yaml"
           done
 
       - name: Commit CRDs to PR branch
@@ -62,14 +60,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # Stage new/changed CRDs (including new dirs)
           git add helm/charts/*/crds || true
 
-          # Commit only if something is staged
           if ! git diff --cached --quiet; then
             git commit -m "chore: sync CRDs for updated tags"
             git push origin HEAD:${{ github.head_ref }}
           else
             echo "No CRD changes detected"
           fi
-
