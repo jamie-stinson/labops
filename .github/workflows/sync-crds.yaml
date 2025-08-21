@@ -45,14 +45,14 @@ jobs:
               cloudnative-pg)
                 url="https://github.com/cloudnative-pg/cloudnative-pg/releases/download/v${tag}/cnpg-${tag}.yaml"
                 curl -sSL "$url" -o "$tmpfile"
-                yq eval 'select(.kind == "CustomResourceDefinition")' "$tmpfile" > "$chart/crds/cloudnative-pg.crds.yaml"
+                yq eval-all 'select(.kind == "CustomResourceDefinition")' "$tmpfile" > "$chart/crds/cloudnative-pg.crds.yaml"
                 rm "$tmpfile"
                 crd_file="$chart/crds/cloudnative-pg.crds.yaml"
                 ;;
               argo-rollouts-controller)
                 url="https://github.com/argoproj/argo-rollouts/releases/download/v${tag}/install.yaml"
                 curl -sSL "$url" -o "$tmpfile"
-                yq eval 'select(.kind == "CustomResourceDefinition")' "$tmpfile" > "$chart/crds/argo-rollouts-controller.crds.yaml"
+                yq eval-all 'select(.kind == "CustomResourceDefinition")' "$tmpfile" > "$chart/crds/argo-rollouts-controller.crds.yaml"
                 rm "$tmpfile"
                 crd_file="$chart/crds/argo-rollouts-controller.crds.yaml"
                 ;;
@@ -65,23 +65,19 @@ jobs:
             echo "Fetching CRDs for $chart_name ($tag)"
 
             # Validate CRDs
-            if [ ! -f "$crd_file" ]; then
-                echo "❌ ERROR: $crd_file does not exist!"
+            if [ ! -f "$crd_file" ] || [ ! -s "$crd_file" ]; then
+                echo "ERROR: $crd_file does not exist or is empty!"
                 exit 1
             fi
 
-            if [ ! -s "$crd_file" ]; then
-                echo "❌ ERROR: $crd_file is empty!"
-                exit 1
-            fi
-
-            non_crds=$(yq eval 'select(.kind != "CustomResourceDefinition")' "$crd_file" | wc -l)
+            # Ensure all documents are CRDs
+            non_crds=$(yq eval-all 'select(.kind != "CustomResourceDefinition")' "$crd_file" | wc -l)
             if [ "$non_crds" -ne 0 ]; then
-                echo "❌ ERROR: $crd_file contains non-CRD resources!"
+                echo "ERROR: $crd_file contains non-CRD resources!"
                 exit 1
             fi
 
-            echo "✅ $crd_file looks good"
+            echo "$crd_file looks good"
 
           done
 
@@ -90,7 +86,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # Stage new/changed CRDs (including new dirs)
+          # Stage new/changed CRDs
           git add helm/charts/*/crds || true
 
           # Commit only if something is staged
