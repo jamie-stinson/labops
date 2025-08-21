@@ -78,7 +78,7 @@ jobs:
             fi
 
             # Log number of CRDs extracted
-            crd_count=$(yq eval 'length' "$crd_file")
+            crd_count=$(yq eval-all 'select(.kind == "CustomResourceDefinition")' "$crd_file" | yq eval 'length' - 2>/dev/null | wc -l)
             echo "$crd_file looks good ($crd_count CRDs)"
           done
 
