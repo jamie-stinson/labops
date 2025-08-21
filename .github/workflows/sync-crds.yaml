@@ -40,7 +40,7 @@ jobs:
             crd_file="$chart/crds/${chart_name}.crds.yaml"
 
             case "$chart_name" in
-              argo-rollouts)
+              argo-rollouts-controller)
                 url="https://github.com/argoproj/argo-rollouts/releases/download/v${tag}/install.yaml"
                 tmpfile="$(mktemp)"
                 curl -sSL "$url" -o "$tmpfile"
