@@ -37,6 +37,15 @@ jobs:
               cert-manager-controller)
                 url="https://github.com/cert-manager/cert-manager/releases/download/${tag}/cert-manager.crds.yaml"
                 ;;
+              cloudnative-pg)
+                url="https://github.com/cloudnative-pg/cloudnative-pg/releases/download/v${tag}/cnpg-${tag}.yaml"
+                tmpfile="$(mktemp)"
+                curl -sSL "$url" -o "$tmpfile"
+                mkdir -p "$chart/crds"
+                # extract only CRDs
+                yq eval 'select(.kind == "CustomResourceDefinition")' "$tmpfile" > "$chart/crds/cloudnative-pg.crds.yaml"
+                rm "$tmpfile"
+                ;;
               *)
                 echo "No CRD fetch rule for $(basename $chart), skipping"
                 continue
