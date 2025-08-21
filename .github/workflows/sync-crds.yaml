@@ -55,7 +55,6 @@ jobs:
                 url="https://github.com/cloudnative-pg/cloudnative-pg/releases/download/v${tag}/cnpg-${tag}.yaml"
                 tmpfile="$(mktemp)"
                 curl -sSL "$url" -o "$tmpfile"
-                # Extract only CRDs
                 yq eval 'select(.kind == "CustomResourceDefinition")' "$tmpfile" > "$crd_file"
                 rm "$tmpfile"
                 ;;
