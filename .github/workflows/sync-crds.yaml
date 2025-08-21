@@ -68,7 +68,6 @@ jobs:
                 echo "ERROR: $crd_file does not exist or is empty!"
                 exit 1
             fi
-
             # Ensure all documents are CRDs
             non_crds=$(yq eval-all 'select(.kind != "CustomResourceDefinition")' "$crd_file" | wc -l)
             if [ "$non_crds" -ne 0 ]; then
