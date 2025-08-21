@@ -1,3 +1,18 @@
+workload:
+  enabled: false
+
+service:
+  enabled: false
+
+autoscaling:
+  enabled: false
+
+pdb:
+  enabled: false
+
+serviceAccount:
+  enabled: false
+
 configmapReload:
   prometheus:
     enabled: false

@@ -1,4 +1,5 @@
 service:
+  enabled: false
   type: "NodePort"
 
 certificate:
@@ -63,3 +64,14 @@ extraObjects:
         hosts:
         - "*.projectwhitebox.com"
 
+workload:
+  enabled: false
+
+autoscaling:
+  enabled: false
+
+pdb:
+  enabled: false
+
+serviceAccount:
+  enabled: false
