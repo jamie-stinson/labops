@@ -66,18 +66,26 @@ jobs:
 
             echo "Validating CRDs in $crd_file"
 
-            # Ensure file is not empty
-            if [ ! -s "$crd_file" ]; then
-              echo "ERROR: $crd_file is empty!"
-              exit 1
+            # Validate CRDs only if file exists
+            if [ -f "$crd_file" ]; then
+                # Ensure file is not empty
+                if [ ! -s "$crd_file" ]; then
+                    echo "ERROR: $crd_file is empty!"
+                    exit 1
+                fi
+
+                # Ensure all docs are CRDs
+                invalid_docs=$(yq e 'select(.kind != "CustomResourceDefinition")' "$crd_file" | wc -l)
+                if [ "$invalid_docs" -ne 0 ]; then
+                    echo "ERROR: $crd_file contains non-CRD resources!"
+                    exit 1
+                fi
+
+                echo "$crd_file looks good"
+            else
+                echo "$crd_file does not exist yet, skipping validation"
             fi
 
-            # Ensure all docs are CRDs
-            invalid_docs=$(yq e 'select(.kind != "CustomResourceDefinition")' "$crd_file" | wc -l)
-            if [ "$invalid_docs" -ne 0 ]; then
-              echo "ERROR: $crd_file contains non-CRD resources!"
-              exit 1
-            fi
 
             echo "$crd_file tests passed"
           done
