@@ -1,0 +1,177 @@
+autoPatching:
+  enabled: true
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: "cert-manager-cainjector=quay.io/jetstack/cert-manager-cainjector:~v1"
+workload:
+  annotations:
+    match-regex.version-checker.io/cert-manager-cainjector: 'v(\d+)\.(\d+)\.(\d+)'
+  image:
+    repository: "quay.io/jetstack/cert-manager-cainjector"
+    tag: "v1.18.2"
+  args:
+  - '--v=2'
+  - '--leader-election-namespace=$(POD_NAMESPACE)'
+  probes:
+    readinessProbe:
+      path: "/metrics"
+      port: 9402
+    livenessProbe:
+      path: "/metrics"
+      port: 9402
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "10m"
+        memory: "128Mi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "128Mi"
+        ephemeral-storage: "16Mi"
+service:
+  ports:
+  - name: http-metrics
+    protocol: TCP
+    port: 9402
+rbac:
+  enabled: true
+  roles:
+    clusterRole:
+      rules:
+      - apiGroups:
+        - cert-manager.io
+        resources:
+        - certificates
+        verbs:
+        - get
+        - list
+        - watch
+      - apiGroups:
+        - ''
+        resources:
+        - secrets
+        verbs:
+        - get
+        - list
+        - watch
+      - apiGroups:
+        - ''
+        resources:
+        - events
+        verbs:
+        - get
+        - create
+        - update
+        - patch
+      - apiGroups:
+        - admissionregistration.k8s.io
+        resources:
+        - validatingwebhookconfigurations
+        - mutatingwebhookconfigurations
+        verbs:
+        - get
+        - list
+        - watch
+        - update
+        - patch
+      - apiGroups:
+        - apiregistration.k8s.io
+        resources:
+        - apiservices
+        verbs:
+        - get
+        - list
+        - watch
+        - update
+        - patch
+      - apiGroups:
+        - apiextensions.k8s.io
+        resources:
+        - customresourcedefinitions
+        verbs:
+        - get
+        - list
+        - watch
+        - update
+        - patch
+      - apiGroups:
+        - cert-manager.io
+        resources:
+        - clusterissuers
+        verbs:
+        - get
+        - list
+        - watch
+      - apiGroups:
+        - cert-manager.io
+        resources:
+        - certificates
+        - certificaterequests
+        - issuers
+        verbs:
+        - create
+        - delete
+        - deletecollection
+        - patch
+        - update
+      - apiGroups:
+        - cert-manager.io
+        resources:
+        - certificates/status
+        verbs:
+        - update
+      - apiGroups:
+        - acme.cert-manager.io
+        resources:
+        - challenges
+        - orders
+        verbs:
+        - create
+        - delete
+        - deletecollection
+        - patch
+        - update
+      - apiGroups:
+        - cert-manager.io
+        resources:
+        - certificates
+        - certificaterequests
+        - issuers
+        verbs:
+        - get
+        - list
+        - watch
+      - apiGroups:
+        - acme.cert-manager.io
+        resources:
+        - challenges
+        - orders
+        verbs:
+        - get
+        - list
+        - watch
+      - apiGroups:
+        - ''
+        resourceNames:
+        - cert-manager
+        resources:
+        - serviceaccounts/token
+        verbs:
+        - create
+      - apiGroups:
+        - coordination.k8s.io
+        resourceNames:
+        - cert-manager-cainjector-leader-election
+        - cert-manager-cainjector-leader-election-core
+        resources:
+        - leases
+        verbs:
+        - get
+        - update
+        - patch
+      - apiGroups:
+        - coordination.k8s.io
+        resources:
+        - leases
+        verbs:
+        - create

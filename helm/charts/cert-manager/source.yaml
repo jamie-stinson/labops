@@ -1,3 +1,0 @@
-repository: "https://charts.jetstack.io"
-chart: "cert-manager"
-version: "1.*.*"
