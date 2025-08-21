@@ -1,3 +1,0 @@
-repository: "https://argoproj.github.io/argo-helm"
-chart: "argo-rollouts"
-version: "2.*.*"

@@ -40,6 +40,13 @@ jobs:
             crd_file="$chart/crds/${chart_name}.crds.yaml"
 
             case "$chart_name" in
+              argo-rollouts)
+                url="https://github.com/argoproj/argo-rollouts/releases/download/v${tag}/install.yaml"
+                tmpfile="$(mktemp)"
+                curl -sSL "$url" -o "$tmpfile"
+                yq eval 'select(.kind == "CustomResourceDefinition")' "$tmpfile" > "$crd_file"
+                rm "$tmpfile"
+                ;;
               cert-manager-controller)
                 url="https://github.com/cert-manager/cert-manager/releases/download/${tag}/cert-manager.crds.yaml"
                 curl -sSL "$url" -o "$crd_file"
