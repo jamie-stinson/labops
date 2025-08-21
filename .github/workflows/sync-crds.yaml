@@ -23,7 +23,7 @@ jobs:
             https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
 
-      - name: Fetch CRDs
+      - name: Fetch and Validate CRDs
         run: |
           set -euo pipefail
 
@@ -33,30 +33,28 @@ jobs:
 
             tag=$(yq '.workload.image.tag' "$values")
             chart_name=$(basename "$chart")
-
-            echo "Fetching CRDs for $chart_name ($tag)"
+            tmpfile="$(mktemp)"
             mkdir -p "$chart/crds"
 
-            crd_file="$chart/crds/${chart_name}.crds.yaml"
-
             case "$chart_name" in
-              argo-rollouts-controller)
-                url="https://github.com/argoproj/argo-rollouts/releases/download/v${tag}/install.yaml"
-                tmpfile="$(mktemp)"
-                curl -sSL "$url" -o "$tmpfile"
-                yq eval 'select(.kind == "CustomResourceDefinition")' "$tmpfile" > "$crd_file"
-                rm "$tmpfile"
-                ;;
               cert-manager-controller)
                 url="https://github.com/cert-manager/cert-manager/releases/download/${tag}/cert-manager.crds.yaml"
-                curl -sSL "$url" -o "$crd_file"
+                curl -sSL "$url" -o "$chart/crds/crds.yaml"
+                crd_file="$chart/crds/crds.yaml"
                 ;;
               cloudnative-pg)
                 url="https://github.com/cloudnative-pg/cloudnative-pg/releases/download/v${tag}/cnpg-${tag}.yaml"
-                tmpfile="$(mktemp)"
                 curl -sSL "$url" -o "$tmpfile"
-                yq eval 'select(.kind == "CustomResourceDefinition")' "$tmpfile" > "$crd_file"
+                yq eval 'select(.kind == "CustomResourceDefinition")' "$tmpfile" > "$chart/crds/cloudnative-pg.crds.yaml"
                 rm "$tmpfile"
+                crd_file="$chart/crds/cloudnative-pg.crds.yaml"
+                ;;
+              argo-rollouts-controller)
+                url="https://github.com/argoproj/argo-rollouts/releases/download/v${tag}/install.yaml"
+                curl -sSL "$url" -o "$tmpfile"
+                yq eval 'select(.kind == "CustomResourceDefinition")' "$tmpfile" > "$chart/crds/argo-rollouts-controller.crds.yaml"
+                rm "$tmpfile"
+                crd_file="$chart/crds/argo-rollouts-controller.crds.yaml"
                 ;;
               *)
                 echo "No CRD fetch rule for $chart_name, skipping"
@@ -64,39 +62,38 @@ jobs:
                 ;;
             esac
 
-            echo "Validating CRDs in $crd_file"
+            echo "Fetching CRDs for $chart_name ($tag)"
 
-            # Validate CRDs only if file exists
-            if [ -f "$crd_file" ]; then
-                # Ensure file is not empty
-                if [ ! -s "$crd_file" ]; then
-                    echo "ERROR: $crd_file is empty!"
-                    exit 1
-                fi
-
-                # Ensure all docs are CRDs
-                invalid_docs=$(yq e 'select(.kind != "CustomResourceDefinition")' "$crd_file" | wc -l)
-                if [ "$invalid_docs" -ne 0 ]; then
-                    echo "ERROR: $crd_file contains non-CRD resources!"
-                    exit 1
-                fi
-
-                echo "$crd_file looks good"
-            else
-                echo "$crd_file does not exist yet, skipping validation"
+            # Validate CRDs
+            if [ ! -f "$crd_file" ]; then
+                echo "❌ ERROR: $crd_file does not exist!"
+                exit 1
             fi
 
-            echo "$crd_file tests passed"
-          done
+            if [ ! -s "$crd_file" ]; then
+                echo "❌ ERROR: $crd_file is empty!"
+                exit 1
+            fi
 
+            non_crds=$(yq eval 'select(.kind != "CustomResourceDefinition")' "$crd_file" | wc -l)
+            if [ "$non_crds" -ne 0 ]; then
+                echo "❌ ERROR: $crd_file contains non-CRD resources!"
+                exit 1
+            fi
+
+            echo "✅ $crd_file looks good"
+
+          done
 
       - name: Commit CRDs to PR branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+          # Stage new/changed CRDs (including new dirs)
           git add helm/charts/*/crds || true
 
+          # Commit only if something is staged
           if ! git diff --cached --quiet; then
             git commit -m "chore: sync CRDs for updated tags"
             git push origin HEAD:${{ github.head_ref }}
