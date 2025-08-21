@@ -67,7 +67,7 @@ spec:
           helm:
             releaseName: "{{ index .path.segments 2 }}"
             valueFiles:
-              - "$values/helm/global-values.yaml"
+              - "$values/helm/charts/global-values.yaml"
               - "$values/helm/charts/{{ index .path.segments 2 }}/values.yaml"
         {{- end }}
         - repoURL: "{{ .repository }}"
