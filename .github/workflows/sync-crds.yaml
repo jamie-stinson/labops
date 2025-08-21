@@ -27,15 +27,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Ensure temporary files are cleaned up on exit
-          tmpfiles=()
-          cleanup() {
-            for f in "${tmpfiles[@]}"; do
-              [ -f "$f" ] && rm -f "$f"
-            done
-          }
-          trap cleanup EXIT
-
           for chart in helm/charts/*; do
             values="$chart/values.yaml"
             [ -f "$values" ] || continue
@@ -43,23 +34,17 @@ jobs:
             tag=$(yq '.workload.image.tag' "$values")
             chart_name=$(basename "$chart")
             mkdir -p "$chart/crds"
+            crd_file="$chart/crds/$chart.crds.yaml"
 
             case "$chart_name" in
               cert-manager-controller)
                 url="https://github.com/cert-manager/cert-manager/releases/download/${tag}/cert-manager.crds.yaml"
-                crd_file="$chart/crds/crds.yaml"
                 ;;
               cloudnative-pg)
-                tmpfile=$(mktemp)
-                tmpfiles+=("$tmpfile")
                 url="https://github.com/cloudnative-pg/cloudnative-pg/releases/download/v${tag}/cnpg-${tag}.yaml"
-                crd_file="$chart/crds/cloudnative-pg.crds.yaml"
                 ;;
               argo-rollouts-controller)
-                tmpfile=$(mktemp)
-                tmpfiles+=("$tmpfile")
                 url="https://github.com/argoproj/argo-rollouts/releases/download/${tag}/install.yaml"
-                crd_file="$chart/crds/argo-rollouts-controller.crds.yaml"
                 ;;
               *)
                 echo "No CRD fetch rule for $chart_name, skipping"
@@ -68,25 +53,21 @@ jobs:
             esac
 
             echo "Fetching $chart_name CRDs from $url"
-            
-            # Download file
-            if [[ "${chart_name}" == "cert-manager-controller" ]]; then
-              curl -sSL "$url" -o "$crd_file"
+
+            if [[ "$chart_name" == "cert-manager-controller" ]]; then
+              curl -sSL -f "$url" -o "$crd_file"
             else
-              curl -sSL "$url" -o "$tmpfile"
-              echo "Downloaded ${tmpfile} size: $(stat -c%s "$tmpfile") bytes"
+              tmpfile=$(mktemp)
+              curl -sSL -f "$url" -o "$tmpfile"
               yq eval-all 'select(.kind == "CustomResourceDefinition")' "$tmpfile" > "$crd_file"
+              rm -f "$tmpfile"
             fi
 
-            # Debug: show number of CRDs found
-            crd_count=$(yq eval '... | select(.kind == "CustomResourceDefinition") | length' "$crd_file" 2>/dev/null || echo 0)
-            echo "CRDs extracted: $crd_count"
-
             # Validate CRDs exist and are non-empty
-            if [ ! -f "$crd_file" ] || [ ! -s "$crd_file" ]; then
+            if [ ! -s "$crd_file" ]; then
               echo "ERROR: $crd_file does not exist or is empty!"
               echo "Downloaded file preview:"
-              head -n 20 "${tmpfile:-$crd_file}" || true
+              head -n 20 "$crd_file" || true
               exit 1
             fi
 
@@ -96,10 +77,10 @@ jobs:
               exit 1
             fi
 
-            echo "$crd_file looks good"
+            # Log number of CRDs extracted
+            crd_count=$(yq eval 'length' "$crd_file")
+            echo "$crd_file looks good ($crd_count CRDs)"
           done
-
-
 
       - name: Commit CRDs to PR branch
         run: |
