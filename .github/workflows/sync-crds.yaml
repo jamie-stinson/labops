@@ -1,0 +1,62 @@
+name: Sync CRDs
+
+on:
+  pull_request:
+    paths:
+      - "helm/charts/**/values.yaml"
+
+jobs:
+  sync-crds:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Fetch CRDs
+        run: |
+          set -euo pipefail
+
+          for chart in helm/charts/*; do
+            values="$chart/values.yaml"
+            [ -f "$values" ] || continue
+
+            tag=$(yq '.workload.image.tag' "$values")
+
+            case "$(basename $chart)" in
+              cert-manager-controller)
+                url="https://github.com/cert-manager/cert-manager/releases/download/${tag}/cert-manager.crds.yaml"
+                ;;
+              *)
+                echo "No CRD fetch rule for $(basename $chart), skipping"
+                continue
+                ;;
+            esac
+
+            echo "Fetching CRDs for $(basename $chart) ($tag)"
+            mkdir -p "$chart/crds"
+            curl -sSL "$url" -o "$chart/crds/crds.yaml"
+          done
+
+      - name: Commit CRDs to PR branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if ! git diff --quiet; then
+            git add helm/charts/*/crds/*.yaml
+            git commit -m "chore: sync CRDs for updated tags"
+            git push origin HEAD:${{ github.head_ref }}
+          else
+            echo "No CRD changes detected"
+          fi
