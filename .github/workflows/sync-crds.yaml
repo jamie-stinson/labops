@@ -50,7 +50,7 @@ jobs:
                 url="https://github.com/bitnami-labs/sealed-secrets/releases/download/v${tag}/controller.yaml"
                 ;;
               trivy-operator)
-                url="https://raw.githubusercontent.com/aquasecurity/trivy-operator/refs/tags/${tag}/deploy/static/trivy-operator.yaml"
+                url="https://raw.githubusercontent.com/aquasecurity/trivy-operator/refs/tags/v${tag}/deploy/static/trivy-operator.yaml"
                 ;;
               *)
                 echo "No CRD fetch rule for $chart_name, skipping"
