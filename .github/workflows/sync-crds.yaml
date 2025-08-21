@@ -46,6 +46,18 @@ jobs:
               argo-rollouts-controller)
                 url="https://github.com/argoproj/argo-rollouts/releases/download/${tag}/install.yaml"
                 ;;
+              sealed-secrets)
+                url="https://github.com/bitnami-labs/sealed-secrets/releases/download/v${tag}/controller.yaml"
+                ;;
+              trivy-operator)
+                url="https://github.com/aquasecurity/trivy-operator/archive/refs/tags/v${tag}.zip"
+                tmpdir=$(mktemp -d)
+                curl -sSL -f "$url" -o "$tmpdir/trivy.zip"
+                unzip -q "$tmpdir/trivy.zip" -d "$tmpdir"
+                # Concatenate all CRD YAMLs into one file
+                find "$tmpdir/trivy-operator-${tag}/deploy/helm/crds" -name '*.yaml' -exec cat {} + > "$crd_file"
+                rm -rf "$tmpdir"
+                ;;
               *)
                 echo "No CRD fetch rule for $chart_name, skipping"
                 continue

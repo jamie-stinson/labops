@@ -1,3 +1,4 @@
-repository: "https://charts.jetstack.io"
-chart: "version-checker"
-version: "0.*.*"
+repository: "ghcr.io/jamie-stinson/common-helm-library"
+chart: "common-helm-library"
+version: "1.*.*"
+namespace: "version-checker"

@@ -1,8 +1,140 @@
-resources:
-  requests:
-    cpu: "10m"
-    memory: "128Mi"
-    ephemeral-storage: "16Mi"
-  limits:
-    memory: "128Mi"
-    ephemeral-storage: "16Mi"
+workload:
+  image:
+    registry: "docker.io"
+    repository: "bitnami/sealed-secrets-controller"
+    tag: "0.30.0"
+  args:
+    - '--update-status'
+    - '--key-prefix'
+    - sealed-secrets-key
+    - '--listen-addr'
+    - ':8080'
+    - '--listen-metrics-addr'
+    - ':8081'
+    - '--log-level'
+    - 'info'
+    - '--log-format'
+    - 'json'
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "10m"
+        memory: "128Mi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "128Mi"
+        ephemeral-storage: "16Mi"
+  probes:
+    readinessProbe:
+      path: "/healthz"
+      port: 8080
+      initialDelaySeconds: 0
+      periodSeconds: 10
+      timeoutSeconds: 1
+      failureThreshold: 3
+      successThreshold: 1
+    livenessProbe:
+      path: "/healthz"
+      port: 8080
+      initialDelaySeconds: 0
+      periodSeconds: 10
+      timeoutSeconds: 1
+      failureThreshold: 3
+      successThreshold: 1
+  # storage:
+  #   - name: tmp-dashboards
+  #     type: emptyDir
+  #     mountPath: /tmp/dashboards
+
+service:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+    - name: http-metrics
+      protocol: TCP
+      port: 8081
+
+rbac:
+  enabled: true
+  roles:
+    clusterRole:
+      rules:
+        - apiGroups:
+            - bitnami.com
+          resources:
+            - sealedsecrets
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - bitnami.com
+          resources:
+            - sealedsecrets/status
+          verbs:
+            - update
+        - apiGroups:
+            - ''
+          resources:
+            - secrets
+          verbs:
+            - get
+            - list
+            - create
+            - update
+            - delete
+            - watch
+        - apiGroups:
+            - ''
+          resources:
+            - events
+          verbs:
+            - create
+            - patch
+    role:
+      rules:
+        - apiGroups:
+            - ''
+          resourceNames:
+            - sealed-secrets
+          resources:
+            - services
+          verbs:
+            - get
+        - apiGroups:
+            - ''
+          resourceNames:
+            - 'http:sealed-secrets:'
+            - http:sealed-secrets:http
+            - sealed-secrets
+          resources:
+            - services/proxy
+          verbs:
+            - create
+            - get
+        - apiGroups:
+            - ''
+          resourceNames:
+            - sealed-secrets-key
+          resources:
+            - secrets
+          verbs:
+            - get
+        - apiGroups:
+            - ''
+          resources:
+            - secrets
+          verbs:
+            - create
+            - list
+
+grafana:
+  dashboard:
+    enabled: false
+    dashboards:
+      - name: sealed-secrets
+        title: "Sealed Secrets"
+        url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/charts/sealed-secrets/dashboards/sealed-secrets.json"
+        folder: "System"

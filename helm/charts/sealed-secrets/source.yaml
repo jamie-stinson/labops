@@ -1,3 +1,5 @@
-repository: "https://bitnami-labs.github.io/sealed-secrets"
-chart: "sealed-secrets"
-version: "2.*.*"
+repository: "ghcr.io/jamie-stinson/common-helm-library"
+chart: "common-helm-library"
+version: "1.*.*"
+namespace: "sealed-secrets"
+installCRDs: true
