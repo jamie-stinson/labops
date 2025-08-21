@@ -53,10 +53,14 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          if ! git diff --quiet; then
-            git add helm/charts/*/crds/*.yaml
+          # Stage new/changed CRDs (including new dirs)
+          git add helm/charts/*/crds || true
+
+          # Commit only if something is staged
+          if ! git diff --cached --quiet; then
             git commit -m "chore: sync CRDs for updated tags"
             git push origin HEAD:${{ github.head_ref }}
           else
             echo "No CRD changes detected"
           fi
+
