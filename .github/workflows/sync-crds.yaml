@@ -37,23 +37,45 @@ jobs:
             echo "Fetching CRDs for $chart_name ($tag)"
             mkdir -p "$chart/crds"
 
+            crd_file="$chart/crds/${chart_name}.crds.yaml"
+
             case "$chart_name" in
               cert-manager-controller)
                 url="https://github.com/cert-manager/cert-manager/releases/download/${tag}/cert-manager.crds.yaml"
-                curl -sSL "$url" -o "$chart/crds/${chart_name}.crds.yaml"
+                curl -sSL "$url" -o "$crd_file"
                 ;;
               cloudnative-pg)
                 url="https://github.com/cloudnative-pg/cloudnative-pg/releases/download/v${tag}/cnpg-${tag}.yaml"
                 tmpfile="$(mktemp)"
                 curl -sSL "$url" -o "$tmpfile"
-                yq eval 'select(.kind == "CustomResourceDefinition")' "$tmpfile" > "$chart/crds/${chart_name}.crds.yaml"
+                # Extract only CRDs
+                yq eval 'select(.kind == "CustomResourceDefinition")' "$tmpfile" > "$crd_file"
                 rm "$tmpfile"
                 ;;
               *)
                 echo "No CRD fetch rule for $chart_name, skipping"
+                continue
                 ;;
             esac
+
+            echo "Validating CRDs in $crd_file"
+
+            # Ensure file is not empty
+            if [ ! -s "$crd_file" ]; then
+              echo "ERROR: $crd_file is empty!"
+              exit 1
+            fi
+
+            # Ensure all docs are CRDs
+            invalid_docs=$(yq e 'select(.kind != "CustomResourceDefinition")' "$crd_file" | wc -l)
+            if [ "$invalid_docs" -ne 0 ]; then
+              echo "ERROR: $crd_file contains non-CRD resources!"
+              exit 1
+            fi
+
+            echo "$crd_file tests passed"
           done
+
 
       - name: Commit CRDs to PR branch
         run: |
