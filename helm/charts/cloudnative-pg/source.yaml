@@ -1,3 +1,5 @@
-repository: "https://cloudnative-pg.io/charts/"
-chart: "cloudnative-pg"
-version: "0.26.*"
+repository: "ghcr.io/jamie-stinson/common-helm-library"
+chart: "common-helm-library"
+version: "1.*.*"
+namespace: "cloudnative-pg"
+installCRDs: true
