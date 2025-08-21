@@ -27,13 +27,21 @@ jobs:
         run: |
           set -euo pipefail
 
+          # Ensure temporary files are cleaned up on exit
+          tmpfiles=()
+          cleanup() {
+            for f in "${tmpfiles[@]}"; do
+              [ -f "$f" ] && rm -f "$f"
+            done
+          }
+          trap cleanup EXIT
+
           for chart in helm/charts/*; do
             values="$chart/values.yaml"
             [ -f "$values" ] || continue
 
             tag=$(yq '.workload.image.tag' "$values")
             chart_name=$(basename "$chart")
-            tmpfile="$(mktemp)"
             mkdir -p "$chart/crds"
 
             case "$chart_name" in
@@ -43,17 +51,19 @@ jobs:
                 crd_file="$chart/crds/crds.yaml"
                 ;;
               cloudnative-pg)
+                tmpfile=$(mktemp)
+                tmpfiles+=("$tmpfile")
                 url="https://github.com/cloudnative-pg/cloudnative-pg/releases/download/v${tag}/cnpg-${tag}.yaml"
                 curl -sSL "$url" -o "$tmpfile"
                 yq eval-all 'select(.kind == "CustomResourceDefinition")' "$tmpfile" > "$chart/crds/cloudnative-pg.crds.yaml"
-                rm "$tmpfile"
                 crd_file="$chart/crds/cloudnative-pg.crds.yaml"
                 ;;
               argo-rollouts-controller)
+                tmpfile=$(mktemp)
+                tmpfiles+=("$tmpfile")
                 url="https://github.com/argoproj/argo-rollouts/releases/download/v${tag}/install.yaml"
                 curl -sSL "$url" -o "$tmpfile"
                 yq eval-all 'select(.kind == "CustomResourceDefinition")' "$tmpfile" > "$chart/crds/argo-rollouts-controller.crds.yaml"
-                rm "$tmpfile"
                 crd_file="$chart/crds/argo-rollouts-controller.crds.yaml"
                 ;;
               *)
@@ -61,16 +71,17 @@ jobs:
                 continue
                 ;;
             esac
+
             echo "Fetching CRDs for $chart_name ($tag)"
 
-            # Validate CRDs
+            # Validate CRDs exist and are non-empty
             if [ ! -f "$crd_file" ] || [ ! -s "$crd_file" ]; then
                 echo "ERROR: $crd_file does not exist or is empty!"
                 exit 1
             fi
+
             # Ensure all documents are CRDs
-            non_crds=$(yq eval-all 'select(.kind != "CustomResourceDefinition")' "$crd_file" | wc -l)
-            if [ "$non_crds" -ne 0 ]; then
+            if [ -n "$(yq eval-all 'select(.kind != "CustomResourceDefinition")' "$crd_file")" ]; then
                 echo "ERROR: $crd_file contains non-CRD resources!"
                 exit 1
             fi
@@ -78,6 +89,7 @@ jobs:
             echo "$crd_file looks good"
 
           done
+
 
       - name: Commit CRDs to PR branch
         run: |
