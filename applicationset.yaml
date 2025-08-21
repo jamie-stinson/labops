@@ -76,6 +76,7 @@ spec:
           helm:
             releaseName: "{{ index .path.segments 2 }}"
             valueFiles:
+              - "$values/helm/charts/global-values.yaml"
               - "$values/helm/charts/{{ index .path.segments 2 }}/values.yaml"
         - repoURL: https://github.com/jamie-stinson/labops
           targetRevision: initial
