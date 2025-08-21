@@ -34,7 +34,7 @@ jobs:
             tag=$(yq '.workload.image.tag' "$values")
             chart_name=$(basename "$chart")
             mkdir -p "$chart/crds"
-            crd_file="$chart/crds/$chart.crds.yaml"
+            crd_file="$chart/crds/$chart_name.crds.yaml"
 
             case "$chart_name" in
               cert-manager-controller)
