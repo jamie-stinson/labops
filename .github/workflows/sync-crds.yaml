@@ -41,7 +41,7 @@ jobs:
                 url="https://github.com/cert-manager/cert-manager/releases/download/${tag}/cert-manager.crds.yaml"
                 ;;
               grafana-operator)
-                url"https://github.com/grafana/grafana-operator/releases/download/${tag}/crds.yaml
+                url="https://github.com/grafana/grafana-operator/releases/download/${tag}/crds.yaml
                 ;;
               cloudnative-pg)
                 url="https://github.com/cloudnative-pg/cloudnative-pg/releases/download/v${tag}/cnpg-${tag}.yaml"
