@@ -1,0 +1,618 @@
+sautoPatching:
+  enabled: true
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: "argocd-server=quay.io/argoproj/argocd:~v3"
+workload:
+  image:
+    repository: "quay.io/argoproj/argocd"
+    tag: v3.1.0
+  command:
+  - 'argocd-server'
+  args:
+  - '--port=8080'
+  - '--metrics-port=8083'
+  envs:
+  - name: ARGOCD_SERVER_NAME
+    value: argocd-server
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "25m"
+        memory: "128Mi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "128Mi"
+        ephemeral-storage: "16Mi"
+  probes:
+    readinessProbe:
+      path: "/healthz"
+      port: 8080
+    livenessProbe:
+      path: "/healthz?full=true"
+      port: 8080
+  storage:
+  - name: tmp
+    type: emptyDir
+    mountPath: /tmp
+    ramDisk: false
+    readOnly: false
+  envsConfigMap:
+  - name: ARGOCD_SERVER_INSECURE
+    configMap: argocd-cmd-params-cm
+    key: server.insecure
+  - name: ARGOCD_SERVER_BASEHREF
+    configMap: argocd-cmd-params-cm
+    key: server.basehref
+  - name: ARGOCD_SERVER_ROOTPATH
+    configMap: argocd-cmd-params-cm
+    key: server.rootpath
+  - name: ARGOCD_SERVER_LOGFORMAT
+    configMap: argocd-cmd-params-cm
+    key: server.log.format
+  - name: ARGOCD_SERVER_LOG_LEVEL
+    configMap: argocd-cmd-params-cm
+    key: server.log.level
+  - name: ARGOCD_SERVER_REPO_SERVER
+    configMap: argocd-cmd-params-cm
+    key: repo.server
+  - name: ARGOCD_SERVER_REPO_SERVER_TIMEOUT_SECONDS
+    configMap: argocd-cmd-params-cm
+    key: server.repo.server.timeout.seconds
+  - name: ARGOCD_SERVER_DEX_SERVER
+    configMap: argocd-cmd-params-cm
+    key: server.dex.server
+  - name: ARGOCD_SERVER_DISABLE_AUTH
+    configMap: argocd-cmd-params-cm
+    key: server.disable.auth
+  - name: ARGOCD_SERVER_ENABLE_GZIP
+    configMap: argocd-cmd-params-cm
+    key: server.enable.gzip
+  - name: ARGOCD_SERVER_X_FRAME_OPTIONS
+    configMap: argocd-cmd-params-cm
+    key: server.x.frame.options
+  - name: ARGOCD_SERVER_REPO_SERVER_STRICT_TLS
+    configMap: argocd-cmd-params-cm
+    key: server.repo.server.strict.tls
+  - name: ARGOCD_SERVER_DEX_SERVER_STRICT_TLS
+    configMap: argocd-cmd-params-cm
+    key: server.dex.server.strict.tls
+  - name: ARGOCD_SERVER_STATIC_ASSETS
+    configMap: argocd-cmd-params-cm
+    key: server.staticassets
+  - name: REDIS_SERVER
+    configMap: argocd-cmd-params-cm
+    key: redis.server
+  - name: ARGOCD_SERVER_OTLP_ADDRESS
+    configMap: argocd-cmd-params-cm
+    key: otlp.address
+  - name: ARGOCD_APPLICATION_NAMESPACES
+    configMap: argocd-cmd-params-cm
+    key: application.namespaces
+  - name: ARGOCD_SERVER_ENABLE_PROXY_EXTENSION
+    configMap: argocd-cmd-params-cm
+    key: server.enable.proxy.extension
+  - name: ARGOCD_APPLICATIONSET_CONTROLLER_ENABLE_LEADER_ELECTION
+    configMap: argocd-cmd-params-cm
+    key: applicationsetcontroller.enable.leader.election
+  - name: ARGOCD_APPLICATIONSET_CONTROLLER_ENABLE_PROGRESSIVE_SYNCS
+    configMap: argocd-cmd-params-cm
+    key: applicationsetcontroller.enable.progressive.syncs
+  - name: ARGOCD_APPLICATIONSET_CONTROLLER_LOGFORMAT
+    configMap: argocd-cmd-params-cm
+    key: applicationsetcontroller.log.format
+  - name: ARGOCD_APPLICATIONSET_CONTROLLER_LOG_LEVEL
+    configMap: argocd-cmd-params-cm
+    key: applicationsetcontroller.log.level
+  - name: ARGOCD_APPLICATIONSET_CONTROLLER_NAMESPACES
+    configMap: argocd-cmd-params-cm
+    key: applicationsetcontroller.namespaces
+  - name: ARGOCD_APPLICATIONSET_CONTROLLER_POLICY
+    configMap: argocd-cmd-params-cm
+    key: applicationsetcontroller.policy
+  - name: ARGOCD_CONTROLLER_IGNORE_NORMALIZER_JQ_TIMEOUT
+    configMap: argocd-cmd-params-cm
+    key: controller.ignore.normalizer.jq.timeout
+  - name: ARGOCD_CONTROLLER_LOGFORMAT
+    configMap: argocd-cmd-params-cm
+    key: controller.log.format
+  - name: ARGOCD_CONTROLLER_LOG_LEVEL
+    configMap: argocd-cmd-params-cm
+    key: controller.log.level
+  - name: ARGOCD_CONTROLLER_OPERATION_PROCESSORS
+    configMap: argocd-cmd-params-cm
+    key: controller.operation.processors
+  - name: ARGOCD_CONTROLLER_REPO_SERVER_TIMEOUT_SECONDS
+    configMap: argocd-cmd-params-cm
+    key: controller.repo.server.timeout.seconds
+  - name: ARGOCD_CONTROLLER_SELF_HEAL_TIMEOUT_SECONDS
+    configMap: argocd-cmd-params-cm
+    key: controller.self.heal.timeout.seconds
+  - name: ARGOCD_CONTROLLER_STATUS_PROCESSORS
+    configMap: argocd-cmd-params-cm
+    key: controller.status.processors
+  - name: ARGOCD_CONTROLLER_SYNC_TIMEOUT_SECONDS
+    configMap: argocd-cmd-params-cm
+    key: controller.sync.timeout.seconds
+  - name: ARGOCD_DEXSERVER_LOGFORMAT
+    configMap: argocd-cmd-params-cm
+    key: dexserver.log.format
+  - name: ARGOCD_DEXSERVER_LOG_LEVEL
+    configMap: argocd-cmd-params-cm
+    key: dexserver.log.level
+  - name: ARGOCD_NOTIFICATIONS_CONTROLLER_LOGFORMAT
+    configMap: argocd-cmd-params-cm
+    key: notificationscontroller.log.format
+  - name: ARGOCD_NOTIFICATIONS_CONTROLLER_LOG_LEVEL
+    configMap: argocd-cmd-params-cm
+    key: notificationscontroller.log.level
+  - name: ARGOCD_REPOSERVER_LOGFORMAT
+    configMap: argocd-cmd-params-cm
+    key: reposerver.log.format
+  - name: ARGOCD_REPOSERVER_LOG_LEVEL
+    configMap: argocd-cmd-params-cm
+    key: reposerver.log.level
+  - name: ARGOCD_REPOSERVER_PARALLELISM_LIMIT
+    configMap: argocd-cmd-params-cm
+    key: reposerver.parallelism.limit
+configMap:
+  enabled: true
+  configMaps:
+  - name: "argocd-cmd-params-cm"
+    data:
+      application.namespaces: ""
+      applicationsetcontroller.enable.leader.election: "true"
+      applicationsetcontroller.enable.progressive.syncs: "false"
+      applicationsetcontroller.log.format: "text"
+      applicationsetcontroller.log.level: "info"
+      applicationsetcontroller.namespaces: ""
+      applicationsetcontroller.policy: "sync"
+      controller.ignore.normalizer.jq.timeout: "1s"
+      controller.log.format: "text"
+      controller.log.level: "info"
+      controller.operation.processors: "300"
+      controller.repo.server.timeout.seconds: "180"
+      controller.self.heal.timeout.seconds: "5"
+      controller.status.processors: "600"
+      controller.sync.timeout.seconds: "0"
+      controller.kubectl.parallelism.limit: "100"
+      controller.sharding.algorithm: "round-robin"
+      dexserver.log.format: "text"
+      dexserver.log.level: "info"
+      notificationscontroller.log.format: "text"
+      notificationscontroller.log.level: "info"
+      otlp.address: ""
+      redis.server: "argocd-redis:6379"
+      repo.server: "argocd-repo-server:8081"
+      reposerver.log.format: "text"
+      reposerver.log.level: "info"
+      reposerver.parallelism.limit: "100"
+      server.basehref: "/"
+      server.dex.server: "https://argocd-dex.argocd.svc.cluster.local:5556"
+      server.dex.server.strict.tls: "false"
+      server.disable.auth: "false"
+      server.enable.gzip: "true"
+      server.enable.proxy.extension: "false"
+      server.insecure: "true"
+      server.log.format: "text"
+      server.log.level: "info"
+      server.repo.server.strict.tls: "false"
+      server.rootpath: ""
+      server.staticassets: "/shared/app"
+      server.x.frame.options: "sameorigin"
+      server.repo.server.timeout.seconds: "180"
+service:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+  - name: http-metrics
+    port: 8083
+    protocol: TCP
+rbac:
+  enabled: true
+  roles:
+    role:
+      rules:
+      - apiGroups:
+        - ''
+        resources:
+        - secrets
+        - configmaps
+        verbs:
+        - create
+        - get
+        - list
+        - watch
+        - update
+        - patch
+        - delete
+      - apiGroups:
+        - argoproj.io
+        resources:
+        - applications
+        - applicationsets
+        - appprojects
+        verbs:
+        - create
+        - get
+        - list
+        - watch
+        - update
+        - delete
+        - patch
+      - apiGroups:
+        - ''
+        resources:
+        - events
+        verbs:
+        - create
+        - list
+    clusterRole:
+      rules:
+      - apiGroups:
+        - '*'
+        resources:
+        - '*'
+        verbs:
+        - delete
+        - get
+        - patch
+      - apiGroups:
+        - ''
+        resources:
+        - events
+        verbs:
+        - list
+        - create
+      - apiGroups:
+        - ''
+        resources:
+        - pods
+        - pods/log
+        verbs:
+        - get
+      - apiGroups:
+        - argoproj.io
+        resources:
+        - applications
+        - applicationsets
+        verbs:
+        - get
+        - list
+        - update
+        - watch
+      - apiGroups:
+        - batch
+        resources:
+        - jobs
+        verbs:
+        - create
+      - apiGroups:
+        - argoproj.io
+        resources:
+        - workflows
+        verbs:
+        - create
+ingress:
+  enabled: true
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "internalweb, internalwebsecure"
+  hosts:
+  - host: argocd.projectwhitebox.com
+    path: /
+    pathType: "Prefix"
+    tls:
+      enabled: false
+    backend:
+      service:
+        name: "argocd-server"
+        port: 8080
+grafana:
+  dashboard:
+    enabled: true
+    dashboards:
+    - name: argo-cd-overview
+      title: "Argo-CD / Overview"
+      url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/charts/argo-cd-server/dashboards/argo-cd-overview.json"
+      folder: "System"
+extraObjects:
+- |
+  apiVersion: bitnami.com/v1alpha1
+  kind: SealedSecret
+  metadata:
+    name: argocd
+    namespace: argocd
+  spec:
+    encryptedData:
+      CLIENTSECRET: AgBov6KFkE4RVjwvP1kPvRE9TYX+swNHV6x6iF1HNayMByDqZ2Ry+MpX1E9u/2hXdQDmMFeO7uLN6cAA27nczR6stXOoO0pMRroc4GKbKFelsJDDDBW0WpVWPcItj7ucRIf4UZiociDe302A1FI0sPerAlshF2O1hjWj1Pw64xPTZQ3EEm0QJM9hiiTcHtHhNYYEWqNkdX5+ZzM+MbxGpA2OMWjmohwYiSJ6Z/0PtALz6d0Whhg5EBhWy/k5kxO/80AtZ/6k0k7u1W/AYfmc/gheH23os1L6YCi3jitJv0C3Cmmp5lJqRQDqpexBXPz6PpYZjz2dIBSglBSMhn+n3DwcJez15l1EPDVtfr3Gk2kjKZcJvZMcLRiRAuBpWBXxuiUaZwYdweWOBDv9uel69fOC4zfyh5Prp0MGt6XrAMeEOYdHea1tcIX1DRl1Kcj3651/ryCCWKFBJcn97sfdPYn/513ArGGWLdpKzUEINoRwW+/jSPAJJdVC3wd94TKeG/xX2Aj9BlWYEmjiinV31XVNvpP5FRj8T8aHAx5TYDxPLtyGyGDFbWk/7pPN3IxbycrpVLNKXQOC0bG9IvpWpxC7haygvqOvso/XUWv6f3eM9mnTIt+1mDjMeWAqoYCvPRxu6oemUjqF5YDQxWtC18NqiEhavAi+Ti3R5BxfwsqVBCU76tci9SPCpmE9JvIUHZmlpR8NeE+Vwa/9bs0IlDq7Ts3zIJus+C0a3xOVctVVjw==
+    template:
+      metadata:
+        labels:
+          app.kubernetes.io/part-of: argocd
+        name: argocd
+        namespace: argocd
+      type: Opaque
+- |
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: argocd-cm
+    labels:
+      app.kubernetes.io/name: argocd-cm
+      app.kubernetes.io/part-of: argocd
+  data:
+    url: https://argocd.projectwhitebox.com
+    webhook.maxPayloadSizeMB: "50"
+    oidc.config: |
+      name: Pocket ID
+      issuer: https://auth.projectwhitebox.com
+      clientID: db2b13aa-2341-4f73-97d0-3bcfd8dd98d9
+      clientSecret: $argocd:CLIENTSECRET
+      requestedScopes: ["openid", "profile", "email", "groups"]
+    admin.enabled: 'false'
+    users.anonymous.enabled: "false"
+    application.instanceLabelKey: argocd.argoproj.io/instance
+    application.sync.impersonation.enabled: 'false'
+    users.session.duration: '24h'
+    exec.enabled: 'false'
+    resource.customizations.ignoreResourceUpdates.ConfigMap: |
+      jqPathExpressions:
+        # Ignore the cluster-autoscaler status
+        - '.metadata.annotations."cluster-autoscaler.kubernetes.io/last-updated"'
+        # Ignore the annotation of the legacy Leases election
+        - '.metadata.annotations."control-plane.alpha.kubernetes.io/leader"'
+    resource.customizations.ignoreResourceUpdates.Endpoints: |
+      jsonPointers:
+        - /metadata
+        - /subsets
+    resource.customizations.ignoreResourceUpdates.all: |
+      jsonPointers:
+        - /status
+    resource.customizations.ignoreResourceUpdates.apps_ReplicaSet: |
+      jqPathExpressions:
+        - '.metadata.annotations."deployment.kubernetes.io/desired-replicas"'
+        - '.metadata.annotations."deployment.kubernetes.io/max-replicas"'
+        - '.metadata.annotations."rollout.argoproj.io/desired-replicas"'
+    resource.customizations.ignoreResourceUpdates.argoproj.io_Application: |
+      jqPathExpressions:
+        - '.metadata.annotations."notified.notifications.argoproj.io"'
+        - '.metadata.annotations."argocd.argoproj.io/refresh"'
+        - '.metadata.annotations."argocd.argoproj.io/hydrate"'
+        - '.operation'
+    resource.customizations.ignoreResourceUpdates.argoproj.io_Rollout: |
+      jqPathExpressions:
+        - '.metadata.annotations."notified.notifications.argoproj.io"'
+    # Enable resource.customizations.ignoreResourceUpdates rules. If "false," those rules are not applied, and all updates
+    # to resources are applied to the cluster cache. Default is true.
+    resource.ignoreResourceUpdatesEnabled: "true"
+
+    # Configuration to define customizations ignoring differences during watched resource updates to skip application reconciles.
+    resource.customizations.ignoreResourceUpdates.all: |
+      jsonPointers:
+      - /metadata/resourceVersion
+
+    # Configuration to define customizations ignoring differences during watched resource updates can be configured via splitted sub key.
+    resource.customizations.ignoreResourceUpdates.argoproj.io_Application: |
+      jsonPointers:
+      - /status
+
+    # jsonPointers and jqPathExpressions can be specified.
+    resource.customizations.ignoreResourceUpdates.autoscaling_HorizontalPodAutoscaler: |
+      jqPathExpressions:
+      - '.metadata.annotations."autoscaling.alpha.kubernetes.io/behavior"'
+      - '.metadata.annotations."autoscaling.alpha.kubernetes.io/conditions"'
+      - '.metadata.annotations."autoscaling.alpha.kubernetes.io/metrics"'
+      - '.metadata.annotations."autoscaling.alpha.kubernetes.io/current-metrics"'
+      jsonPointers:
+      - /metadata/annotations/autoscaling.alpha.kubernetes.io~1behavior
+      - /metadata/annotations/autoscaling.alpha.kubernetes.io~1conditions
+      - /metadata/annotations/autoscaling.alpha.kubernetes.io~1metrics
+      - /metadata/annotations/autoscaling.alpha.kubernetes.io~1current-metrics
+
+    resource.customizations.health.certmanager.k8s.io_Certificate: |
+      hs = {}
+      if obj.status ~= nil then
+        if obj.status.conditions ~= nil then
+          for i, condition in ipairs(obj.status.conditions) do
+            if condition.type == "Ready" and condition.status == "False" then
+              hs.status = "Degraded"
+              hs.message = condition.message
+              return hs
+            end
+            if condition.type == "Ready" and condition.status == "True" then
+              hs.status = "Healthy"
+              hs.message = condition.message
+              return hs
+            end
+          end
+        end
+      end
+      hs.status = "Progressing"
+      hs.message = "Waiting for certificate"
+      return hs
+
+    resource.customizations.health.cert-manager.io_Certificate: |
+      hs = {}
+      if obj.status ~= nil then
+        if obj.status.conditions ~= nil then
+          for i, condition in ipairs(obj.status.conditions) do
+            if condition.type == "Ready" and condition.status == "False" then
+              hs.status = "Degraded"
+              hs.message = condition.message
+              return hs
+            end
+            if condition.type == "Ready" and condition.status == "True" then
+              hs.status = "Healthy"
+              hs.message = condition.message
+              return hs
+            end
+          end
+        end
+      end
+      hs.status = "Progressing"
+      hs.message = "Waiting for certificate"
+      return hs
+    resource.customizations.ignoreResourceUpdates.discovery.k8s.io_EndpointSlice: |
+      jsonPointers:
+        - /metadata
+        - /endpoints
+        - /ports
+    resource.exclusions: >
+      ### Network resources created by the Kubernetes control plane and excluded
+      to reduce the number of watched events and UI clutter
+
+      - apiGroups:
+        - ''
+        - discovery.k8s.io
+        kinds:
+        - Endpoints
+        - EndpointSlice
+      ### Internal Kubernetes resources excluded reduce the number of watched
+      events
+
+      - apiGroups:
+        - coordination.k8s.io
+        kinds:
+        - Lease
+      ### Internal Kubernetes Authz/Authn resources excluded reduce the number of
+      watched events
+
+      - apiGroups:
+        - authentication.k8s.io
+        - authorization.k8s.io
+        kinds:
+        - SelfSubjectReview
+        - TokenReview
+        - LocalSubjectAccessReview
+        - SelfSubjectAccessReview
+        - SelfSubjectRulesReview
+        - SubjectAccessReview
+      ### Intermediate Certificate Request excluded reduce the number of watched
+      events
+
+      - apiGroups:
+        - certificates.k8s.io
+        kinds:
+        - CertificateSigningRequest
+      - apiGroups:
+        - cert-manager.io
+        kinds:
+        - CertificateRequest
+      ### Cilium internal resources excluded reduce the number of watched events
+      and UI Clutter
+
+      - apiGroups:
+        - cilium.io
+        kinds:
+        - CiliumIdentity
+        - CiliumEndpoint
+        - CiliumEndpointSlice
+      ### Kyverno intermediate and reporting resources excluded reduce the number
+      of watched events and improve performance
+
+      # - apiGroups:
+      #   - kyverno.io
+      #   - reports.kyverno.io
+      #   - wgpolicyk8s.io
+      #   kinds:
+      #   - PolicyReport
+      #   - ClusterPolicyReport
+      #   - EphemeralReport
+      #   - ClusterEphemeralReport
+      #   - AdmissionReport
+      #   - ClusterAdmissionReport
+      #   - BackgroundScanReport
+      #   - ClusterBackgroundScanReport
+      #   - UpdateRequest
+    resource.customizations: |
+      networking.k8s.io/Ingress:
+        health.lua: |
+          hs = {}
+          hs.status = "Healthy"
+          return hs
+    server.rbac.log.enforce.enable: 'false'
+    statusbadge.enabled: 'false'
+    timeout.hard.reconciliation: 0s
+    timeout.reconciliation: 180s
+- |
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: argocd-rbac-cm
+    labels:
+      app.kubernetes.io/name: argocd-rbac-cm
+      app.kubernetes.io/part-of: argocd
+  data:
+    policy.default: role:readonly
+    policy.matchMode: glob
+    scopes: '[groups, email]'
+    policy.csv: |
+      g, platform_engineering, role:admin
+- |
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: argocd-ssh-known-hosts-cm
+    labels:
+      app.kubernetes.io/name: argocd-ssh-known-hosts-cm
+      app.kubernetes.io/part-of: argocd
+  data:
+    ssh_known_hosts: >
+      [ssh.github.com]:443 ecdsa-sha2-nistp256
+      AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg=
+
+      [ssh.github.com]:443 ssh-ed25519
+      AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl
+
+      [ssh.github.com]:443 ssh-rsa
+      AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=
+
+      github.com ecdsa-sha2-nistp256
+      AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg=
+
+      github.com ssh-ed25519
+      AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl
+
+      github.com ssh-rsa
+      AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=
+- |
+  apiVersion: bitnami.com/v1alpha1
+  kind: SealedSecret
+  metadata:
+    name: argocd-secret
+    namespace: argocd
+  spec:
+    encryptedData:
+      server.secretkey: AgCN/76+S9SV3CUz3knsiKiTT+a/SQaI2H/toNL22XNHiduGOu8ufc5SKqG6QdcGfyzhCtdNQGtyCkzTByftd8+9/gaUk/fLwAfA1WqzHQ52U5M+rE7W18tlQ573llyYJqu4G0Uh6dqHNvAV8QAB8OlxX8dVA3AAB3o+VZKReMzExV8305gYGO+1xn3Aijx8x+4hlR69E4RwORlE9eOozRe/nhhLZ1XOgc+Rzfw/kWzFxj3SA/ofITZzaklARIeNrJDcNLJirystZowOD2EvAOeOXIlsY7uaxSFVYsSONEbyucGxy9ypuyM5SZOP2ns83P+rRdbVSDUMH8+jsl7doExarWNj2AHVgsXbJZHyZlWbrwIn05PgXJ3dSfDp9vgF4FyKpAV0rJXeIzOgadWEkmsskzs2O2Eoy/WPl/eI9j2I/LLioLMQbsF8tKFbJCqN9wxC/aYmKIkf0lyL0w+rJYJC6HwrNH//74adlVwtEZ8SESLR8EqWFO/bQTvcPWWCLI2UyO+FIfVJNrzuMPa7+CNhgAqb+kDnLrhIcna8NmNuH+Be9y6L7UJRttvUjZmf4ceHJh4fAmqxENVOwswAWNWdhpH5d03KHPPnJ1FEMs2B/vL4vSkuARDDI7oDaLlnM28ZjSfeT0kJ2jfyU13fY6+Y5Xt8QeqJNmhtYweodwjysFqmse3FE4D43qAxGz43i3c6rsFR37jrQ+zG4QqWxstKjgvblDeOBeEhuulCC8igrfeZE2quOa2RTpMA9g==
+      webhook.github.secret: AgAXkFTiNRKl+Jfb3YVMnDBpUYmjwLjEAri3rH2X7xCrt+OwhyFMgUnABw3PVztTmvtK+pNvu4I25jQReD0lQGm+/YiW5ZJJviSCmjXJI9kkEW4ZnC5IYSTv3BlfOANaeK/gbItvGelmuYYE/m8ycrVq8ozxf0q34Gkx8Zo9ShMsXmG9Aj/kkU0e0guqWysNLml2jLKp/3VKShkIeMDqEVv89UJXRj87gZiqvNDi/SRmkCS9I12mzg7fShy+EFuPr4UBNjfPS+6fP9qW9eesNEKtarbwHNsfNcDQvIx39HPW0Q7SSrYow0ZmP7eA+v63C2k/bSZ92qVBna+n2P1QVexEk5jfHNAwJgYPcofSGLQHCSndc4GRZwSvTMHkULdEvhcVy8sNZ0KmdlDfisrRGAG5jZc//Al3T4/jHRF4+OEvOFWoGc+iIHmaSF7VNNH7Ayverf/OXQZWt5I6tVP1BnAc4gk4/JLopKImGShO6b2bxNK+fxaQSwCe3H27OeVb0UI/RJimOuA5PuYUh0Uce4lhLZXIPhKz7LAkfWTuthZ9sewhY65sAb0J+WDM/HqpYrtq3wTjabqVUJPcUNEnqFIPGI08PFdZMXfcKGXo5sxGEy0ZlHn7DBPXqvs6jm6ErOxxLu0bD0pR+7yxYramv77QxPtYirTO9lQamHWTgM+2aLGKKeAIa3EIj4RnIDZ0wzB0gzQRIROo4GA3QiaUJNHOqM0iSB5bbLn/
+    template:
+      metadata:
+        labels:
+          app.kubernetes.io/name: argocd-secret
+          app.kubernetes.io/part-of: argocd
+        name: argocd-secret
+        namespace: argocd
+      type: Opaque
+- |
+  apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: externalwebsecure
+    name: argocd-server-webhook
+    namespace: argocd
+  spec:
+    ingressClassName: traefik
+    rules:
+      - host: argocd.projectwhitebox.com
+        http:
+          paths:
+            - backend:
+                service:
+                  name: argocd-server
+                  port:
+                    number: 8080
+              path: /api/webhook
+              pathType: Prefix
+    tls: null

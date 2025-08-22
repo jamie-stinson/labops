@@ -1,0 +1,111 @@
+namespace: "argocd"
+autoPatching:
+  enabled: true
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: "argocd-application-controller=quay.io/argoproj/argocd:~v3"
+workload:
+  type: StatefulSet
+  # Sharding is only done on a cluster level, as we run argocd per cluster multiple replicas doesn't actually do anything at the moment.
+  replicaCount: 1
+  image:
+    repository: "quay.io/argoproj/argocd"
+    tag: "v3.1.0"
+  command:
+  - 'argocd-application-controller'
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "200m"
+        memory: "2Gi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "2Gi"
+        ephemeral-storage: "16Mi"
+  envs:
+  - name: ARGOCD_APPLICATION_CONTROLLER_NAME
+    value: argocd-application-controller
+  - name: ARGOCD_CONTROLLER_REPLICAS
+    value: 1
+  - name: ARGOCD_K8S_CLIENT_QPS
+    value: "150"
+  - name: ARGOCD_K8S_CLIENT_BURST
+    value: "300"
+  envsConfigMap:
+  - name: ARGOCD_APPLICATION_CONTROLLER_REPO_SERVER
+    configMap: argocd-cmd-params-cm
+    key: repo.server
+  - name: ARGOCD_APPLICATION_CONTROLLER_REPO_SERVER_TIMEOUT_SECONDS
+    configMap: argocd-cmd-params-cm
+    key: controller.repo.server.timeout.seconds
+  - name: ARGOCD_APPLICATION_CONTROLLER_STATUS_PROCESSORS
+    configMap: argocd-cmd-params-cm
+    key: controller.status.processors
+  - name: ARGOCD_APPLICATION_CONTROLLER_OPERATION_PROCESSORS
+    configMap: argocd-cmd-params-cm
+    key: controller.operation.processors
+  - name: ARGOCD_APPLICATION_CONTROLLER_LOGFORMAT
+    configMap: argocd-cmd-params-cm
+    key: controller.log.format
+  - name: ARGOCD_APPLICATION_CONTROLLER_LOGLEVEL
+    configMap: argocd-cmd-params-cm
+    key: controller.log.level
+  - name: ARGOCD_APPLICATION_CONTROLLER_SELF_HEAL_TIMEOUT_SECONDS
+    configMap: argocd-cmd-params-cm
+    key: controller.self.heal.timeout.seconds
+  - name: ARGOCD_APPLICATION_CONTROLLER_SYNC_TIMEOUT
+    configMap: argocd-cmd-params-cm
+    key: controller.sync.timeout.seconds
+  - name: REDIS_SERVER
+    configMap: argocd-cmd-params-cm
+    key: redis.server
+  - name: ARGOCD_APPLICATION_CONTROLLER_OTLP_ADDRESS
+    configMap: argocd-cmd-params-cm
+    key: otlp.address
+  - name: ARGOCD_APPLICATION_NAMESPACES
+    configMap: argocd-cmd-params-cm
+    key: application.namespaces
+  - name: ARGOCD_IGNORE_NORMALIZER_JQ_TIMEOUT
+    configMap: argocd-cmd-params-cm
+    key: controller.ignore.normalizer.jq.timeout
+  - name: ARGOCD_CONTROLLER_SHARDING_ALGORITHM
+    configMap: argocd-cmd-params-cm
+    key: controller.sharding.algorithm
+  - name: ARGOCD_APPLICATION_CONTROLLER_KUBECTL_PARALLELISM_LIMIT
+    configMap: argocd-cmd-params-cm
+    key: controller.kubectl.parallelism.limit
+  probes:
+    readinessProbe:
+      path: "/healthz"
+      port: 8082
+    livenessProbe:
+      path: "/healthz?full=true"
+      port: 8082
+      # storage:
+      # - name: tmp
+      #   type: emptyDir
+      #   mountPath: /tmp
+      #   ramDisk: false
+      #   readOnly: false
+service:
+  ports:
+  - name: http-metrics
+    port: 8082
+    protocol: TCP
+autoscaling:
+  enabled: false
+rbac:
+  enabled: true
+  roles:
+    clusterRole:
+      rules:
+      - apiGroups:
+        - '*'
+        resources:
+        - '*'
+        verbs:
+        - '*'
+      - nonResourceURLs:
+        - '*'
+        verbs:
+        - '*'

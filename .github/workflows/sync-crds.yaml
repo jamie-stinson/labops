@@ -49,6 +49,9 @@ jobs:
               argo-rollouts-controller)
                 url="https://github.com/argoproj/argo-rollouts/releases/download/${tag}/install.yaml"
                 ;;
+              argo-cd-server)
+                url="https://raw.githubusercontent.com/argoproj/argo-cd/${tag}/manifests/ha/install.yaml"
+                ;;
               sealed-secrets)
                 url="https://github.com/bitnami-labs/sealed-secrets/releases/download/v${tag}/controller.yaml"
                 ;;
