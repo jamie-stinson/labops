@@ -1,0 +1,202 @@
+autoPatching:
+  enabled: true
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: "grafana=ghcr.io/grafana/grafana-operator:~v5"
+workload:
+  image:
+    repository: "ghcr.io/grafana/grafana-operator"
+    tag: "v5.18.0"
+  args:
+    - --metrics-bind-address=0.0.0.0:9090
+    - --health-probe-bind-address=:8081
+    - --pprof-addr=0.0.0.0:8888
+    - --zap-encoder=json
+    - --zap-log-level=info
+    - --zap-time-encoding=rfc3339
+    - --leader-elect
+  probes:
+    readinessProbe:
+      port: 8081
+    livenessProbe:
+      path: "/healthz"
+      port: 8081
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "10m"
+        memory: "128Mi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "128Mi"
+        ephemeral-storage: "16Mi"
+  # storage:
+  #   - name: tmp-dashboards
+  #     type: emptyDir
+  #     mountPath: /tmp/dashboards
+
+service:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8888
+    - name: healthcheck
+      protocol: TCP
+      port: 8081
+    - name: http-metrics
+      protocol: TCP
+      port: 9090
+
+autoscaling:
+  enabled: false
+
+configMap:
+  enabled: true
+  configMaps:
+    - name: "grafana-operator"
+      data:
+        controller_manager_config.yaml: |
+          apiVersion: controller-runtime.sigs.k8s.io/v1alpha1
+          kind: ControllerManagerConfig
+          health:
+            healthProbeBindAddress: :8081
+          metrics:
+            bindAddress: 127.0.0.1:8080
+          webhook:
+            port: 9443
+          leaderElection:
+            leaderElect: true
+            resourceName: f75f3bba.integreatly.org
+
+rbac:
+  enabled: true
+  roles:
+    clusterRole:
+      rules:
+      - apiGroups:
+          - ""
+        resources:
+          - configmaps
+          - persistentvolumeclaims
+          - secrets
+          - serviceaccounts
+          - services
+        verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+      - apiGroups:
+          - ""
+        resources:
+          - events
+        verbs:
+          - create
+          - get
+          - list
+          - patch
+          - watch
+      - apiGroups:
+          - apps
+        resources:
+          - deployments
+        verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+      - apiGroups:
+          - coordination.k8s.io
+        resources:
+          - leases
+        verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+      - apiGroups:
+          - grafana.integreatly.org
+        resources:
+          - grafanaalertrulegroups
+          - grafanacontactpoints
+          - grafanadashboards
+          - grafanadatasources
+          - grafanafolders
+          - grafanalibrarypanels
+          - grafanamutetimings
+          - grafananotificationpolicies
+          - grafananotificationpolicyroutes
+          - grafananotificationtemplates
+          - grafanas
+        verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+      - apiGroups:
+          - grafana.integreatly.org
+        resources:
+          - grafanaalertrulegroups/finalizers
+          - grafanacontactpoints/finalizers
+          - grafanadashboards/finalizers
+          - grafanadatasources/finalizers
+          - grafanafolders/finalizers
+          - grafanalibrarypanels/finalizers
+          - grafanamutetimings/finalizers
+          - grafananotificationpolicies/finalizers
+          - grafananotificationpolicyroutes/finalizers
+          - grafananotificationtemplates/finalizers
+          - grafanas/finalizers
+        verbs:
+          - update
+      - apiGroups:
+          - grafana.integreatly.org
+        resources:
+          - grafanaalertrulegroups/status
+          - grafanacontactpoints/status
+          - grafanadashboards/status
+          - grafanadatasources/status
+          - grafanafolders/status
+          - grafanalibrarypanels/status
+          - grafanamutetimings/status
+          - grafananotificationpolicies/status
+          - grafananotificationpolicyroutes/status
+          - grafananotificationtemplates/status
+          - grafanas/status
+        verbs:
+          - get
+          - patch
+          - update
+      - apiGroups:
+          - networking.k8s.io
+        resources:
+          - ingresses
+        verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+
+grafana:
+  dashboard:
+    enabled: true
+    dashboards:
+      - name: grafana-operator
+        title: "Grafana / Operator"
+        url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/charts/grafana-operator/dashboards/grafana-operator.json"
+        folder: "System"

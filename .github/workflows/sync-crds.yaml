@@ -40,6 +40,9 @@ jobs:
               cert-manager-controller)
                 url="https://github.com/cert-manager/cert-manager/releases/download/${tag}/cert-manager.crds.yaml"
                 ;;
+              grafana-operator)
+                url"https://github.com/grafana/grafana-operator/releases/download/${tag}/crds.yaml
+                ;;
               cloudnative-pg)
                 url="https://github.com/cloudnative-pg/cloudnative-pg/releases/download/v${tag}/cnpg-${tag}.yaml"
                 ;;
@@ -60,7 +63,7 @@ jobs:
 
             echo "Fetching $chart_name CRDs from $url"
 
-            if [[ "$chart_name" == "cert-manager-controller" ]]; then
+            if [[ "$chart_name" == "cert-manager-controller" || "$chart_name" == "grafana-operator" ]]; then
               curl -sSL -f "$url" -o "$crd_file"
             else
               tmpfile=$(mktemp)

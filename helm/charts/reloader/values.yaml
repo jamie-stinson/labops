@@ -1,0 +1,89 @@
+autoPatching:
+  enabled: true
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: "reloader=ghcr.io/stakater/reloader:~v1"
+workload:
+  image:
+    repository: ghcr.io/stakater/reloader
+    tag: v1.4.6
+  args:
+  - '--log-format=json'
+  - '--log-level=info'
+  - '--reload-on-delete=true'
+  - '--enable-ha=true'
+  - '--auto-reload-all=true'
+  probes:
+    readinessProbe:
+      path: "/metrics"
+      port: 9090
+    livenessProbe:
+      path: "/live"
+      port: 9090
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "10m"
+        memory: "128Mi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "128Mi"
+        ephemeral-storage: "16Mi"
+service:
+  ports:
+  - name: http-metrics
+    port: 9090
+    protocol: TCP
+rbac:
+  enabled: true
+  roles:
+    clusterRole:
+      rules:
+      - apiGroups:
+        - ''
+        resources:
+        - secrets
+        - configmaps
+        verbs:
+        - list
+        - get
+        - watch
+      - apiGroups:
+        - apps
+        resources:
+        - deployments
+        - daemonsets
+        - statefulsets
+        verbs:
+        - list
+        - get
+        - update
+        - patch
+      - apiGroups:
+        - batch
+        resources:
+        - cronjobs
+        verbs:
+        - list
+        - get
+      - apiGroups:
+        - batch
+        resources:
+        - jobs
+        verbs:
+        - create
+      - apiGroups:
+        - coordination.k8s.io
+        resources:
+        - leases
+        verbs:
+        - create
+        - get
+        - update
+      - apiGroups:
+        - ''
+        resources:
+        - events
+        verbs:
+        - create
+        - patch

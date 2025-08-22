@@ -1,0 +1,207 @@
+autoPatching:
+  enabled: true
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: "grafana=docker.io/grafana/grafana:~v12"
+workload:
+  annotations:
+    match-regex.version-checker.io/grafana: '(\d+)\.(\d+)\.(\d+)'
+  image:
+    repository: "docker.io/grafana/grafana"
+    tag: "12.1.1"
+  envsSecret:
+  - name: GF_SECURITY_ADMIN_USER
+    secret: grafana
+    key: ADMIN_USER
+  - name: GF_SECURITY_ADMIN_PASSWORD
+    secret: grafana
+    key: ADMIN_PASSWORD
+  - name: GF_DATABASE_HOST
+    secret: grafana-postgres-app
+    key: host
+  - name: GF_DATABASE_NAME
+    secret: grafana-postgres-app
+    key: dbname
+  - name: GF_DATABASE_USER
+    secret: grafana-postgres-app
+    key: username
+  - name: GF_DATABASE_PASSWORD
+    secret: grafana-postgres-app
+    key: password
+  - name: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+    secret: grafana
+    key: CLIENT_SECRET
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "10m"
+        memory: "512Mi"
+        ephemeral-storage: "512Mi"
+      limits:
+        memory: "512Mi"
+        ephemeral-storage: "512Mi"
+  probes:
+    readinessProbe:
+      path: "/api/health"
+      port: 3000
+    livenessProbe:
+      path: "/api/health"
+      port: 3000
+  storage:
+  - name: config
+    type: configMap
+    mountPath: /etc/grafana
+    configMapName: grafana
+    # - name: data
+    #   type: emptyDir
+    #   mountPath: /var/lib/grafana
+autoscaling:
+  enabled: false
+service:
+  ports:
+  - name: http
+    protocol: TCP
+    port: 3000
+configMap:
+  enabled: true
+  configMaps:
+  - name: "grafana"
+    data:
+      grafana.ini: |
+        [analytics]
+        check_for_updates = false
+        [grafana_net]
+        url = https://grafana.net
+        [log]
+        mode = console
+        [server]
+        root_url = "https://grafana.projectwhitebox.com"
+        [database]
+        type = postgres
+        [auth]
+        disable_login_form = true
+        [auth.generic_oauth]
+        enabled = true
+        name = Pocket ID
+        use_refresh_token = true
+        allow_sign_up = true
+        auto_login = false
+        client_id = 38bbcb12-3db6-402e-b537-261e3ad1a038
+        scopes = openid email profile groups
+        auth_url = https://auth.projectwhitebox.com/authorize
+        token_url = https://auth.projectwhitebox.com/api/oidc/token
+        api_url = https://auth.projectwhitebox.com/api/oidc/userinfo
+        role_attribute_path = "'Admin'"
+ingress:
+  enabled: true
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "internalweb, internalwebsecure"
+  hosts:
+  - host: grafana.projectwhitebox.com
+    path: /
+    pathType: "Prefix"
+    tls:
+      enabled: false
+    backend:
+      service:
+        name: "grafana"
+        port: 3000
+grafana:
+  folder:
+    enabled: false
+    folders:
+    - name: "system"
+      title: "System"
+  dashboard:
+    enabled: false
+    dashboards:
+    - name: kubernetes-global
+      title: "Kubernetes / Global"
+      url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/charts/grafana/dashboards/kubernetes-global.json"
+      folder: "System"
+    - name: kubernetes-pods
+      title: "Kubernetes / Pods"
+      url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/charts/grafana/dashboards/kubernetes-pods.json"
+      folder: "System"
+    - name: kubernetes-api-server
+      title: "Kubernetes / API Server"
+      url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/charts/grafana/dashboards/kubernetes-api-server.json"
+      folder: "System"
+    - name: compute-cluster
+      title: "Compute / Cluster"
+      url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/charts/grafana/dashboards/compute-cluster.json"
+      folder: "System"
+    - name: compute-nodes
+      title: "Compute / Nodes"
+      url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/charts/grafana/dashboards/compute-nodes.json"
+      folder: "System"
+    - name: kubernetes-storage
+      title: "Kubernetes / Storage"
+      url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/charts/grafana/dashboards/kubernetes-storage.json"
+      folder: "System"
+extraObjects:
+- |
+  apiVersion: grafana.integreatly.org/v1beta1
+  kind: Grafana
+  metadata:
+    name: grafana
+    labels:
+      dashboards: "grafana"
+  spec:
+    external:
+      url: http://grafana.grafana.svc.cluster.local:3000
+      adminUser:
+        name: grafana
+        key: ADMIN_USER
+      adminPassword:
+        name: grafana
+        key: ADMIN_PASSWORD
+- |
+  apiVersion: bitnami.com/v1alpha1
+  kind: SealedSecret
+  metadata:
+    name: grafana
+    namespace: grafana
+  spec:
+    encryptedData:
+      ADMIN_PASSWORD: AgCQeKwkqyzfhW0LMLIzqsrridpj8bknvNCXaJHlDlBUmjysPI3fJp9/N/6iqkw6nS7jDAtt6Ro3I6yDbNAbuH+HjKCAupNV3s1hr54fCVG5Fj5B2dG49nscQ2QAuorJgjr1tADg3dSrn/ub7OnoCdwouAjGTZlefROHVTPCQ0iNgaVMrOiQjsu1IV2ETIBjptH8lGvAWcFLpbo7MSTCwEKa2WKeE3WpghDSOtkVP9VLNceH8xehMG4mn8zeIDup34jq25SlhAid58uM1I73iULOGZ4ImTSrbSVbf9/XG+ocUcjau9sVmZ6bdBfKsAwPpd4jkAkwahR6oTLUGBW241RleyeqJG2JAFHeBpL/vHZnQGUv2eLAWaYXZ5WYuRnd9qJY7AbUzlet5W3/+jkPcIW92xXKKBrtvX56Oww+inVoKOn6oVHntsoyN8buNXnWnwd/d/IJG9pkUSRWjhw9bCrZbzb4xWJgh1yvdJi2jUNcN+cebLlkN94tx89L421bm0iYezYEXA6PNBNL7077h/oA5ZYTFSnZhEPjHie0/pbJEQqitPZhoS0V/sp+hSegNvWwehw2dWjs+IQm66yTSUYkr+zim5DodtIer/UEcUmvVSnjkkISeG42CVnSCy12VkO8EN9DO6U16NzdAzol7cc31oY0QjRor07IBtr89i2F/10LECIF3vr1Inzra1LMFb5ALpTOzo6YLynfcRZBx0jmnXCc8cYmUq+QMmKJJiMhs+PkqFCH6iycVnHD8eoQ6ELEZlscgYBWJSndL4XeVQlI
+      ADMIN_USER: AgBWC1A1HYf0ac/i6K1eh4ojH+aOmYi6ScJg7vwjIWqM7xqF4QzxHlf+05+E8PHvezlPTf150/8VN7aeLAk+Ba1ubkD6JwaV0LCTAJQU/IMi/O2qXTSfN6rdTlh/j8yzHT4+178jrMfOwFINE3IbcCIxYs73ROfT++Ef1cCfuB+bYAoZ3+RxJnzx1QAsWcMN4DGqGxueY+iTMLUpKB83HlT9AdruZ9grktuAn+0dmatjAX0eZ2XxVdfiXOMksTFOpNotNdKof0QNTxF/TJIzILOmcuEKIDqQEaJRN+NG97t1J9/qma4YjEbA+agTHOCHKjE58i+Xh5aoV+bWXRPTcN3wP1lUyIvarThahPoGMY0jHCvMMA7c66GtrsjL74NCzr+++hxDuxuQZDx1R30WcJhpYvXWT6lGiBA3RDiA+ON46qyEKWBT0B4LpoYtQNc9jl7oNHVbs2W2nMF6cq+XEitpGt9FNa/FB4qWfhizAMKi061+XTLf7L1dQDdBzedM4g7os8mT/wrW8selAy7OTykG9bzukmpKM0ZwoXiySUF1npD4TrHYk0kEolpbcRIxIa7fI9DK/xKHQzeqdZlHmc1AcpFDLJTAKTTXgZNW+d+gGJ0IP070i9MrLETkRVoH4dVY5lA/Bt9ZqZl3jMTqRkgrrXacGbsfWIKCUbJCFAgONAuw3bIqtLq+PI+Euv89A9p42RKV6Q==
+      CLIENT_SECRET: AgBrjzrYeu7EZWvgS5rPNA8qGRXTH17sPf9Q2OZDEhSeRb4RIp0FtrxG1OUdK0yMbJjid3D4G8aKltBuszQENAE2pKHT9Nhhaw0ZiMMS5HO7jpHoVx3s+DR4zPBwmmpORaZ1eTSNGpEUn2CNAuEiDv6ZbBXZppbZU8+I+U8+JZuD7niH68/2tfDHDtN0B/tWYfLSF6OXkq9+Vw8yjpXTABVc9PU/gVdTaR7+Pje4qIa0EusclxBtYegsvtyL7h5M7eKcjXYPFahzJwIHAm17pAKYMoj1fMbm/crQTKkh6aO4CEhyO4e/P6K5DrgpLar11GWm6rbpSUGkafFaRNr3qsuGxXCgrsJ6myiyTzqIehl9BsyK9Z1n9Z9szHtUeoe6dsEjMrKi+xNbL73MalcL6t3uOo3AXgoSJ4zkJCE89A4E1cQBNPvRjZO2PQ+XE4D53LevdsdZNUDQxCUGz7w+o22i4Uc9FwvnsUNdy8jJL/Laoy71Ptt58vWYjKFMojskie1UWEeg+a03DNce2gQ/N+j8Vm7t2WYLCaKpIwzFu4TYNy0tYM8rFObu0CGFck4Cvb+sgKNAQDFkHv0JYTk6i1dzWvU8eOodfBPL5Fx11bl9X6Ff3onOFJXTsrKu8BovbJosnx9EjvZGjeXPuArdVVt2O3iXSofQ/4MC++VxLUp7I9ic87fW0yoBxTmOVGXY/xwbfwCFHKFV6XKt54Bfkcfzx6YpTPMHi07fnEiDLSrtMA==
+    template:
+      metadata:
+        name: grafana
+        namespace: grafana
+  - |
+    apiVersion: postgresql.cnpg.io/v1
+    kind: Cluster
+    metadata:
+      name: grafana-postgres
+      labels:
+        kube-image-keeper.enix.io/image-caching-policy: ignore
+    spec:
+      description: "Grafana Database"
+      imageName: ghcr.io/cloudnative-pg/postgresql:17.5
+      instances: 1
+      inheritedMetadata:
+        labels:
+          kube-image-keeper.enix.io/image-caching-policy: ignore
+      bootstrap:
+        initdb:
+          database: grafana
+          owner: grafana
+      enableSuperuserAccess: false
+      storage:
+        pvcTemplate:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 5Gi
+          storageClassName: "openebs"
+          volumeMode: Filesystem
+      resources:
+        requests:
+          cpu: "10m"
+          memory: "256Mi"
+        limits:
+          memory: "256Mi"
