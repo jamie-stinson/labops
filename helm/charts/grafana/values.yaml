@@ -16,16 +16,16 @@ workload:
     secret: grafana
     key: ADMIN_PASSWORD
   - name: GF_DATABASE_HOST
-    secret: grafana-postgres-app
+    secret: grafana-postgresql-app
     key: host
   - name: GF_DATABASE_NAME
-    secret: grafana-postgres-app
+    secret: grafana-postgresql-app
     key: dbname
   - name: GF_DATABASE_USER
-    secret: grafana-postgres-app
+    secret: grafana-postgresql-app
     key: username
   - name: GF_DATABASE_PASSWORD
-    secret: grafana-postgres-app
+    secret: grafana-postgresql-app
     key: password
   - name: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
     secret: grafana
