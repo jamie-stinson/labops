@@ -58,6 +58,21 @@ jobs:
               trivy-operator)
                 url="https://raw.githubusercontent.com/aquasecurity/trivy-operator/refs/tags/v${tag}/deploy/static/trivy-operator.yaml"
                 ;;
+              minio-operator)
+                echo "Fetching $chart_name CRDs for tag $tag"
+                tmpdir=$(mktemp -d)
+
+                urls=$(curl -sSL "https://api.github.com/repos/minio/operator/contents/resources/base/crds?ref=${tag}" \
+                  | yq -r '.[].download_url')
+
+                for url in $urls; do
+                  curl -sSL -f "$url" -o "$tmpdir/$(basename "$url")"
+                done
+
+                # Concatenate into single CRD file
+                yq eval-all '.' "$tmpdir"/*.yaml > "$crd_file"
+                rm -rf "$tmpdir"
+                ;;
               *)
                 echo "No CRD fetch rule for $chart_name, skipping"
                 continue
