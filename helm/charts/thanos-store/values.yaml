@@ -1,0 +1,59 @@
+workload:
+  type: StatefulSet
+  image:
+    registry: quay.io
+    repository: thanos/thanos
+    tag: v0.38.0
+  envsSecret:
+    - name: OBJSTORE_CONFIG
+      secret: thanos
+      key: thanos.yaml
+  args:
+    - 'store'
+    - '--objstore.config=$(OBJSTORE_CONFIG)'
+    - '--ignore-deletion-marks-delay=24h'
+    - '--log.level=info'
+    - '--log.format=logfmt'
+    - '--grpc-address=0.0.0.0:10901'
+    - '--http-address=0.0.0.0:10902'
+    - '--data-dir=/thanos'
+  probes:
+    readinessProbe:
+      path: "/-/ready"
+      port: 10902
+    livenessProbe:
+      path: "/-/ready"
+      port: 10902
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "10m"
+        memory: "2Gi"
+        ephemeral-storage: "4Gi"
+      limits:
+        memory: "2Gi"
+        ephemeral-storage: "4Gi"
+  storage:
+    - name: config
+      type: configMap
+      mountPath: /etc/config
+      configMapName: prometheus
+    - name: thanos
+      type: emptyDir
+      mountPath: /thanos
+      ramDisk: false
+      readOnly: false
+
+service:
+  clusterIP: "None"
+  ports:
+    - name: grpc
+      port: 10901
+      protocol: TCP
+    - name: http
+      port: 10902
+      protocol: TCP
+    - name: remote-write
+      port: 19291
+      protocol: TCP

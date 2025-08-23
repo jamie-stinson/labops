@@ -1,0 +1,64 @@
+workload:
+  image:
+    registry: quay.io
+    repository: thanos/thanos
+    tag: v0.38.0
+  args:
+    - 'query-frontend'
+    - '--http-address=0.0.0.0:9090'
+    - '--query-frontend.downstream-url=http://thanos-query.thanos.svc.cluster.local:10902'
+  probes:
+    readinessProbe:
+      path: "/-/ready"
+      port: 9090
+    livenessProbe:
+      path: "/-/healthy"
+      port: 9090
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "10m"
+        memory: "512Mi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "512Mi"
+        ephemeral-storage: "16Mi"
+
+service:
+  ports:
+    - name: http
+      port: 9090
+      protocol: TCP
+
+ingress:
+  enabled: true
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "internalweb, internalwebsecure"
+  hosts:
+    - host: thanos.projectwhitebox.com
+      path: /
+      pathType: "Prefix"
+      tls:
+        enabled: false
+      backend:
+        service:
+          name: "thanos-query-frontend"
+          port: 9090
+
+grafana:
+  datasource:
+    enabled: true
+    spec:
+      resyncPeriod: 30s
+      allowCrossNamespaceImport: true
+      instanceSelector:
+        matchLabels:
+          dashboards: "grafana"
+      datasource:
+        name: thanos
+        type: prometheus
+        access: proxy
+        basicAuth: false
+        url: http://thanos-query-frontend.thanos.svc.cluster.local:9090
+        isDefault: true

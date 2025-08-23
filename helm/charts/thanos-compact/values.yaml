@@ -1,0 +1,66 @@
+workload:
+  type: Deployment
+  # Only 1 needs to be ran
+  replicaCount: 1
+  image:
+    registry: quay.io
+    repository: thanos/thanos
+    tag: v0.38.0
+  envsSecret:
+    - name: OBJSTORE_CONFIG
+      secret: thanos
+      key: thanos.yaml
+  args:
+    - 'compact'
+    - '--objstore.config=$(OBJSTORE_CONFIG)'
+    - '--data-dir=/thanos'
+    - "--log.level=info"
+    - "--retention.resolution-raw=0d"
+    - "--retention.resolution-5m=0d"
+    - "--retention.resolution-1h=0d"
+    - "--consistency-delay=15m"
+    - "--wait"
+    - "--wait-interval=5m"
+    - "--delete-delay=0"
+  probes:
+    readinessProbe:
+      path: "/-/ready"
+      port: 10902
+    livenessProbe:
+      path: "/-/healthy"
+      port: 10902
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "10m"
+        memory: "10Gi"
+        ephemeral-storage: "75Gi"
+      limits:
+        memory: "10Gi"
+        ephemeral-storage: "75Gi"
+  storage:
+    - configMapName: prometheus
+      mountPath: /etc/config
+      name: config
+      type: configMap
+    - name: thanos
+      type: emptyDir
+      mountPath: /thanos
+      ramDisk: false
+      readOnly: false
+
+service:
+  ports:
+    - name: grpc
+      port: 10901
+      protocol: TCP
+    - name: http
+      port: 10902
+      protocol: TCP
+    - name: cluster
+      port: 19000
+      protocol: TCP
+
+autoscaling:
+  enabled: false
