@@ -63,9 +63,10 @@ jobs:
                 tmpdir=$(mktemp -d)
 
                 urls=$(curl -sSL "https://api.github.com/repos/minio/operator/contents/resources/base/crds?ref=${tag}" \
-                  | yq -r '.[].download_url')
+                  | yq -r '.[] | .download_url')
 
                 for url in $urls; do
+                  echo "Fetching from $url"
                   curl -sSL -f "$url" -o "$tmpdir/$(basename "$url")"
                 done
 
