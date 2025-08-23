@@ -4,6 +4,9 @@ workload:
     registry: quay.io
     repository: thanos/thanos
     tag: v0.38.0
+  envs:
+    - name: "AWS_WEB_IDENTITY_TOKEN_FILE"
+      value: "/var/run/secrets/kubernetes.io/serviceaccount/token"
   envsSecret:
     - name: OBJSTORE_CONFIG
       secret: thanos
