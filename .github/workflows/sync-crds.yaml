@@ -73,6 +73,7 @@ jobs:
                 yq eval-all 'select(.kind == "CustomResourceDefinition")' "$tmpdir"/*.yaml > "$crd_file"
 
                 rm -rf "$tmpdir"
+                continue
                 ;;
               *)
                 echo "No CRD fetch rule for $chart_name, skipping"
