@@ -70,7 +70,8 @@ jobs:
                   curl -sSL -f "$url" -o "$tmpdir/$(basename "$url")"
                 done
 
-                yq eval-all 'select(fileIndex >= 0)' "$tmpdir"/*.yaml > "$crd_file"
+                yq eval-all 'select(.kind == "CustomResourceDefinition")' "$tmpdir"/*.yaml > "$crd_file"
+
                 rm -rf "$tmpdir"
                 ;;
               *)
