@@ -1,5 +1,4 @@
-repository: "https://prometheus-community.github.io/helm-charts"
-chart: "prometheus"
-version: "27.*.*"
-commonHelmLibrary:
-  enabled: true
+repository: "ghcr.io/jamie-stinson/common-helm-library"
+chart: "common-helm-library"
+version: "1.*.*"
+namespace: "thanos"
