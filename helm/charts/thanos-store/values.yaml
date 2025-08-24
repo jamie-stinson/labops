@@ -21,9 +21,8 @@ workload:
         bucket: thanos
         endpoint: minio.minio.svc.cluster.local
         insecure: true
-        sts_endpoint: "https://sts.minio.svc.cluster.local:4223/sts"
     - '--ignore-deletion-marks-delay=24h'
-    - '--log.level=info'
+    - '--log.level=debug'
     - '--log.format=logfmt'
     - '--grpc-address=0.0.0.0:10901'
     - '--http-address=0.0.0.0:10902'
