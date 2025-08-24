@@ -45,14 +45,14 @@ rbac:
     clusterRole:
       rules:
         - apiGroups:
-            - apiextensions.k8s.io
+            - "apiextensions.k8s.io"
           resources:
             - customresourcedefinitions
           verbs:
             - get
             - update
         - apiGroups:
-            - ''
+            - ""
           resources:
             - persistentvolumeclaims
           verbs:
@@ -60,7 +60,7 @@ rbac:
             - update
             - list
         - apiGroups:
-            - ''
+            - ""
           resources:
             - namespaces
             - nodes
@@ -70,7 +70,7 @@ rbac:
             - watch
             - list
         - apiGroups:
-            - ''
+            - ""
           resources:
             - pods
             - services
@@ -86,7 +86,7 @@ rbac:
             - update
             - patch
         - apiGroups:
-            - ''
+            - ""
           resources:
             - secrets
           verbs:
@@ -98,7 +98,7 @@ rbac:
             - delete
             - deletecollection
         - apiGroups:
-            - ''
+            - ""
           resources:
             - serviceaccounts
           verbs:
@@ -149,11 +149,11 @@ rbac:
             - update
             - delete
         - apiGroups:
-            - certificates.k8s.io
+            - "certificates.k8s.io"
           resources:
-            - certificatesigningrequests
-            - certificatesigningrequests/approval
-            - certificatesigningrequests/status
+            - "certificatesigningrequests"
+            - "certificatesigningrequests/approval"
+            - "certificatesigningrequests/status"
           verbs:
             - update
             - create
@@ -183,15 +183,15 @@ rbac:
             - sts.min.io
             - job.min.io
           resources:
-            - '*'
+            - "*"
           verbs:
-            - '*'
+            - "*"
         - apiGroups:
             - min.io
           resources:
-            - '*'
+            - "*"
           verbs:
-            - '*'
+            - "*"
         - apiGroups:
             - monitoring.coreos.com
           resources:
@@ -202,7 +202,7 @@ rbac:
             - update
             - list
         - apiGroups:
-            - coordination.k8s.io
+            - "coordination.k8s.io"
           resources:
             - leases
           verbs:

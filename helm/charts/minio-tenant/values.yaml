@@ -91,4 +91,3 @@ extraObjects:
       prometheusOperator: false
       requestAutoCert: false
       subPath: /data
-
