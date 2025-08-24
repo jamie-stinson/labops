@@ -60,7 +60,7 @@ extraObjects:
       features:
         bucketDNS: true
         enableSFTP: false
-      image: quay.io/minio/minio:RELEASE.2025-07-23T15-54-02Z
+      image: quay.io/minio/minio:RELEASE.2025-04-08T15-41-24Z
       imagePullPolicy: IfNotPresent
       mountPath: /export
       podManagementPolicy: Parallel
