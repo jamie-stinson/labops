@@ -15,16 +15,7 @@ workload:
       key: thanos.yaml
   args:
     - 'store'
-    - |
-      --objstore.config=type: s3
-      config:
-        trace:
-          enable: true
-        bucket: thanos
-        endpoint: minio.minio.svc.cluster.local
-        insecure: true
-        aws_sdk_auth: true
-        sts_endpoint: "https://minio-operator.minio.svc.cluster.local:4223/sts"
+    - '--objstore.config=$(OBJSTORE_CONFIG)'
     - '--ignore-deletion-marks-delay=24h'
     - '--log.level=debug'
     - '--log.format=logfmt'
@@ -71,17 +62,3 @@ service:
     - name: remote-write
       port: 19291
       protocol: TCP
-
-extraObjects:
-  - |
-    apiVersion: sts.min.io/v1alpha1
-    kind: PolicyBinding
-    metadata:
-      name: thanos-store
-      namespace: minio
-    spec:
-      application:
-        namespace: thanos
-        serviceaccount: thanos-store
-      policies:
-        - thanos-policy
