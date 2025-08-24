@@ -91,15 +91,4 @@ extraObjects:
       prometheusOperator: false
       requestAutoCert: false
       subPath: /data
-  - |
-    apiVersion: sts.min.io/v1alpha1
-    kind: PolicyBinding
-    metadata:
-      name: thanos
-      namespace: minio
-    spec:
-      application:
-        namespace: thanos
-        serviceaccount: thanos-store
-      policies:
-        - readwrite
+

@@ -60,3 +60,17 @@ service:
     - name: remote-write
       port: 19291
       protocol: TCP
+
+extraObjects:
+  - |
+    apiVersion: sts.min.io/v1alpha1
+    kind: PolicyBinding
+    metadata:
+      name: thanos-store
+      namespace: minio
+    spec:
+      application:
+        namespace: thanos
+        serviceaccount: thanos-store
+      policies:
+        - consoleAdmin
