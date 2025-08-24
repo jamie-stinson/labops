@@ -23,6 +23,7 @@ workload:
         insecure: true
         aws_sdk_auth: true
         sts_endpoint: "https://sts.minio.svc.cluster.local:4223/sts"
+        signature_version2: false
 
     - '--ignore-deletion-marks-delay=24h'
     - '--log.level=debug'
