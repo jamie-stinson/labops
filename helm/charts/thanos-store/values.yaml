@@ -16,6 +16,8 @@ workload:
     - |
       --objstore.config=type: s3
       config:
+        trace:
+          enable: true
         bucket: thanos
         endpoint: minio.minio.svc.cluster.local
         insecure: true
