@@ -18,7 +18,7 @@ extraObjects:
     apiVersion: postgresql.cnpg.io/v1
     kind: Cluster
     metadata:
-      name: grafana-postgresql
+      name: grafana-postgres
       labels:
         kube-image-keeper.enix.io/image-caching-policy: ignore
     spec:
