@@ -7,6 +7,4 @@ vminsert:
 vmauth:
   service:
     type: "NodePort"
-vmstorage:
-  service:
-    type: "NodePort"
+
