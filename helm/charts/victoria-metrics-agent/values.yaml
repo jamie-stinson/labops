@@ -1,6 +1,9 @@
 remoteWrite:
   - url: http://victoria-metrics-victoria-metrics-cluster-vminsert.victoria-metrics.svc.cluster.local:8480/insert/0/prometheus/
 
+service:
+  type: "NodePort"
+
 config:
   global:
     scrape_interval: 10s
