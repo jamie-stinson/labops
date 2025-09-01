@@ -1,0 +1,30 @@
+cluster:
+  allowSchedulingOnControlPlanes: false
+  network:
+    cni:
+      name: ${cni}
+    dnsDomain: cluster.local
+    %{~ if pod_subnets != null ~}
+    podSubnets:
+      %{~ for subnet in pod_subnets ~}
+        - ${subnet}
+      %{~ endfor ~}
+    %{~ endif ~}
+    %{~ if service_subnets != null ~}
+    serviceSubnets:
+      %{~ for subnet in service_subnets ~}
+        - ${subnet}
+      %{~ endfor ~}
+    %{~ endif ~}
+  apiServer:
+    certSANs:
+      - ${api_server_endpoint}
+  etcd:
+    extraArgs:
+      listen-metrics-urls: http://0.0.0.0:2381
+  controllerManager:
+    extraArgs:
+      bind-address: 0.0.0.0
+  scheduler:
+    extraArgs:
+      bind-address: 0.0.0.0

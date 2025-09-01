@@ -7,4 +7,3 @@ vminsert:
 vmauth:
   service:
     type: "NodePort"
-
