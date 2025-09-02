@@ -37,6 +37,48 @@ workload:
     type: configMap
     mountPath: /etc/vector
     configMapName: victoria-logs-collector
+configMap:
+  enabled: true
+  configMaps:
+  - name: "victoria-metrics-collector"
+    data:
+      vector.yaml: |
+        data_dir: /vl-collector
+
+        sources:
+          k8s:
+            type: kubernetes_logs
+            pod_annotation_fields:
+              # Disable "pod_ips" as "pod_ip" already includes required info
+              pod_ips: ""
+
+        transforms:
+          json_parser:
+            type: remap
+            inputs: [k8s]
+            source: |
+              .message = parse_json(.message) ?? .message
+
+        sinks:
+
+          remote_write_0:
+            type: http
+            inputs: [json_parser]
+            uri: "http://victoria-logs:9428/insert/jsonline"
+            encoding:
+              codec: json
+            framing:
+              method: newline_delimited
+            healthcheck:
+              enabled: false
+            request:
+              headers:
+                AccountID: "0"
+                ProjectID: "0"
+                VL-Stream-Fields: kubernetes.pod_name,kubernetes.container_name,kubernetes.pod_namespace
+                VL-Msg-Field: message
+                VL-Time-Field: timestamp
+            compression: "zstd"
 
 service:
   enabled: false
