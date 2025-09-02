@@ -40,7 +40,7 @@ workload:
 configMap:
   enabled: true
   configMaps:
-  - name: "victoria-metrics-collector"
+  - name: "victoria-logs-collector"
     data:
       vector.yaml: |
         data_dir: /vl-collector
