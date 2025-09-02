@@ -52,7 +52,6 @@ configMap:
       scrape.yaml: |
         global:
           scrape_interval: 5s
-          evaluation_interval: 5s
 
         scrape_configs:
           # Scraper for Kubernetes services with HTTP metrics
