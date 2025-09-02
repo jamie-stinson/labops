@@ -38,6 +38,9 @@ workload:
     mountPath: /etc/vector
     configMapName: victoria-logs-collector
 
+service:
+  enabled: false
+
 rbac:
   enabled: true
   roles:
