@@ -1,0 +1,49 @@
+workload:
+  type: "StatefulSet"
+  image:
+    repository: "docker.io/victoriametrics/vmstorage"
+    tag: "v1.124.0-cluster"
+  args:
+    - '--envflag.enable'
+    - '--envflag.prefix=VM_'
+    - '--httpListenAddr=:8482'
+    - '--loggerFormat=json'
+    - '--retentionPeriod=1'
+    - '--storageDataPath=/storage'
+  probes:
+    readinessProbe:
+      type: tcpSocket
+      port: 8482
+    livenessProbe:
+      type: tcpSocket
+      port: 8482
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "10m"
+        memory: "128Mi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "128Mi"
+        ephemeral-storage: "16Mi"
+  storage:
+    - name: storage
+      type: pvcTemplate
+      mountPath: /storage
+      accessModes:
+      - "ReadWriteOnce"
+      storageClass: "openebs"
+      size: "8Gi"
+      readOnly: false
+service:
+  ports:
+  - name: http
+    protocol: TCP
+    port: 8482
+  - name: vminsert
+    protocol: TCP
+    port: 8400
+  - name: vmselect
+    protocol: TCP
+    port: 8401

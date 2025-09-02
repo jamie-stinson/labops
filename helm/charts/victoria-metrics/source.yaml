@@ -1,3 +1,0 @@
-repository: "https://victoriametrics.github.io/helm-charts/"
-chart: "victoria-metrics-cluster"
-version: "0.28.1"

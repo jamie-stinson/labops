@@ -1,0 +1,40 @@
+workload:
+  image:
+    repository: "docker.io/victoriametrics/vmselect"
+    tag: "v1.124.0-cluster"
+  args:
+    - '--cacheDataPath=/cache'
+    - '--envflag.enable'
+    - '--envflag.prefix=VM_'
+    - '--httpListenAddr=:8481'
+    - '--loggerFormat=json'
+    - >-
+      --storageNode=victoria-metrics-storage-0.victoria-metrics-storage.victoria-metrics.svc.cluster.local.:8401
+  probes:
+    readinessProbe:
+      type: tcpSocket
+      port: 8481
+    livenessProbe:
+      type: tcpSocket
+      port: 8481
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "10m"
+        memory: "128Mi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "128Mi"
+        ephemeral-storage: "16Mi"
+  storage:
+  - name: cache
+    type: emptyDir
+    mountPath: /cache
+    ramDisk: false
+    readOnly: false
+service:
+  ports:
+  - name: http
+    protocol: TCP
+    port: 8481

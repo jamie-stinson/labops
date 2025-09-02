@@ -1,0 +1,33 @@
+workload:
+  image:
+    repository: "docker.io/victoriametrics/vminsert"
+    tag: "v1.124.0-cluster"
+  args:
+    - '--envflag.enable'
+    - '--envflag.prefix=VM_'
+    - '--httpListenAddr=:8480'
+    - '--loggerFormat=json'
+    - >-
+      --storageNode=victoria-metrics-storage-0.victoria-metrics-storage.victoria-metrics.svc.cluster.local.:8400
+  probes:
+    readinessProbe:
+      type: tcpSocket
+      port: 8480
+    livenessProbe:
+      type: tcpSocket
+      port: 8480
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "10m"
+        memory: "128Mi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "128Mi"
+        ephemeral-storage: "16Mi"
+service:
+  ports:
+  - name: http
+    protocol: TCP
+    port: 8480

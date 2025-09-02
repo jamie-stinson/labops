@@ -1,9 +1,0 @@
-vmselect:
-  service:
-    type: "NodePort"
-vminsert:
-  service:
-    type: "NodePort"
-vmauth:
-  service:
-    type: "NodePort"
