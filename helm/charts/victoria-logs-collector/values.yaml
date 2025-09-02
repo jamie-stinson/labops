@@ -1,0 +1,55 @@
+workload:
+  type: "DaemonSet"
+  image:
+    repository: "docker.io/timberio/vector"
+    tag: "0.48.0-distroless-libc"
+  envsFromField:
+    - name: "VECTOR_SELF_NODE_NAME"
+      fieldPath: spec.nodeName
+  probes: {}
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "10m"
+        memory: "4Gi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "4Gi"
+        ephemeral-storage: "16Mi"
+  storage:
+  - name: var-log
+    type: hostPath
+    mountPath: /var/log
+    hostPath: /var/log
+    readOnly: true
+  - name: var-lib
+    type: hostPath
+    mountPath: /var/lib
+    hostPath: /var/lib
+    readOnly: true
+  - name: var-lib-vl-connector
+    type: hostPath
+    mountPath: /vl-collector
+    hostPath: /var/lib/vl-connector
+    readOnly: false
+  - name: config
+    type: configMap
+    mountPath: /etc/vector
+    configMapName: victoria-logs-collector
+
+rbac:
+  enabled: true
+  roles:
+    clusterRole:
+      rules:
+      - apiGroups:
+          - ''
+        resources:
+          - nodes
+          - namespaces
+          - pods
+        verbs:
+          - get
+          - list
+          - watch
