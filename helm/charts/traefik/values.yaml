@@ -264,7 +264,7 @@ issuer:
         name: letsencrypt-acme-key
 grafana:
   dashboard:
-    enabled: true
+    enabled: false
     dashboards:
     - name: traefik
       title: "Traefik"
