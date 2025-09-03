@@ -6,7 +6,9 @@ workload:
   envsFromField:
     - name: "VECTOR_SELF_NODE_NAME"
       fieldPath: spec.nodeName
-  probes: {}
+  probes:
+    readinessProbe: {}
+    livenessProbe: {}
   resources:
     preset: ""
     custom:
