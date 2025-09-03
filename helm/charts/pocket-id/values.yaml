@@ -73,6 +73,14 @@ service:
       port: 9464
       protocol: TCP
 
+expose:
+  enabled: true
+  type: "NodePort"
+  ports:
+    - name: http
+      port: 1411
+      protocol: TCP
+      nodePort: 30195
 ingress:
   enabled: true
   annotations:
