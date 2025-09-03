@@ -47,6 +47,10 @@ extraObjects:
               name: istiod-default-validator
               jsonPointers:
                 - /webhooks/0/failurePolicy
+            - group: apps
+              kind: Deployment
+              jqPathExpressions:
+                - '.spec.template.spec.containers[].env[].valueFrom.resourceFieldRef.divisor'
           destination:
             name: "in-cluster"
             namespace: "{{ if .namespace }}{{ .namespace }}{{ else }}{{ index .path.segments 2 }}{{ end }}"
