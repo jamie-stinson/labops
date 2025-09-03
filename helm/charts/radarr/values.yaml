@@ -1,0 +1,242 @@
+workload:
+  type: "StatefulSet"
+  image:
+    registry: ghcr.io
+    repository: home-operations/radarr
+    tag: 5.26.2
+  envsSecret:
+    - name: RADARR__POSTGRES__HOST
+      secret: radarr-postgres-app
+      key: host
+    - name: RADARR__POSTGRES__USER
+      secret: radarr-postgres-app
+      key: username
+    - name: RADARR__POSTGRES__PASSWORD
+      secret: radarr-postgres-app
+      key: password
+    - name: RADARR__AUTH__APIKEY
+      secret: radarr
+      key: API_KEY
+  envs:
+    - name: "RADARR__POSTGRES__PORT"
+      value: "5432"
+    - name: RADARR__AUTH__METHOD
+      value: "External"
+    - name: RADARR__AUTH__REQUIRED
+      value: "Enabled"
+  strategy:
+    type: OnDelete
+  probes:
+    readinessProbe:
+      type: tcpSocket
+      port: 7878
+    livenessProbe:
+      type: tcpSocket
+      port: 7878
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "500m"
+        memory: "1Gi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "1Gi"
+        ephemeral-storage: "16Mi"
+  storage:
+    - name: config
+      type: pvc
+      mountPath: /config
+      claimName: "radarr-config"
+    - name: radarr-downloads
+      type: pvc
+      mountPath: /data/downloads
+      claimName: "radarr-downloads"
+    - name: radarr-movies
+      type: pvc
+      mountPath: /data/movies
+      claimName: "radarr-movies"
+    # - name: tmp
+    #   type: emptyDir
+    #   mountPath: /tmp
+  extraContainers:
+    - name: exportarr
+      image: "ghcr.io/onedr0p/exportarr:v2.2.0"
+      ports:
+        - containerPort: 9707
+          name: http-metrics
+          protocol: TCP
+      env:
+        - name: "PORT"
+          value: "9707"
+        - name: "URL"
+          value: "http://localhost:7878"
+        - name: APIKEY
+          valueFrom:
+            secretKeyRef:
+              name: radarr
+              key: API_KEY
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        privileged: false
+        readOnlyRootFilesystem: true
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      args:
+        - radarr
+service:
+  ports:
+    - name: http
+      port: 7878
+      protocol: TCP
+    - name: http-metrics
+      port: 9707
+      protocol: TCP
+
+ingress:
+  enabled: true
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "internalweb, internalwebsecure"
+  hosts:
+    - host: radarr.projectwhitebox.com
+      path: /
+      pathType: "Prefix"
+      tls:
+        enabled: false
+      backend:
+        service:
+          name: "radarr"
+          port: 7878
+
+autoscaling:
+  enabled: false
+
+extraObjects:
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: radarr-downloads
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+        - ReadWriteMany
+      nfs:
+        server: 10.0.0.10
+        path: "/mnt/data-pool/downloads"
+      mountOptions:
+        - nfsvers=4.1 
+        - hard      
+        - noatime
+        - rsize=1048576 
+        - wsize=1048576 
+        - proto=tcp
+        - async
+        - nconnect=8
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: radarr-downloads
+      namespace: radarr
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ""
+      resources:
+        requests:
+          storage: 1Ti
+      volumeName: radarr-downloads
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: radarr-movies
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+        - ReadWriteMany
+      nfs:
+        server: 10.0.0.10
+        path: "/mnt/hdd-pool/movies"
+      mountOptions:
+        - nfsvers=4.1 
+        - hard      
+        - noatime
+        - rsize=1048576 
+        - wsize=1048576 
+        - proto=tcp
+        - async
+        - nconnect=8
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: radarr-movies
+      namespace: radarr
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ""
+      resources:
+        requests:
+          storage: 1Ti
+      volumeName: radarr-movies
+  - |
+    apiVersion: bitnami.com/v1alpha1
+    kind: SealedSecret
+    metadata:
+      name: radarr
+      namespace: radarr
+    spec:
+      encryptedData:
+        API_KEY: AgAuMwITxoU94MUgT8Yfw+9PK+NA84Z6LcipPq5AKn2qqH/09OQlpo6qwpd8ZZ7V7zrMPmDM6xwfw5k1P2YB1QMZT01Q3aQrUGOe/f4LB3W94AE89RDwLfx86DW+DSoXKkWUyGNUFJRtUItKWZRUsiGecMWgBkfXBflG9Jjxu6HwY3JnlYxQ3YNHBtYw0j1qpwWuc11V4hgRNIVHyutvQ2SljFqf6NOGmkEMJiR3d1DsDBxI/93iGk6svM26SjM9GTORzMHzXZ2FLdkN6AXqjtuwa7gTzMs119hfucVdui6v0Skvy3/9iRg4w8pBbYXijJV4JufW94txbRo8QlobPVIgsLBVwcW1dUIsN4TNS2/N+Ufxq/N+1HBAYU1+8/DCT/+nND7f2eoinMnmVfKpfy29mNCryE2syT5hTUAtIaL9z3hiImKSoSlcOIzjAVUxRFrtzqpGEv+hUO7+g1OcRfKQlPfVvfJTYUljV1L/aBN08DdRKzAOTngO5bYex27cfuqpECTCsbB6JSiStcUABaREwnGsqz9hXsHy3G6kEgXVcXvpvDe1r4wuIS4/aytB36WuoNTcvmt9ulSovjr52xJIsF8CLuMWljPJTw/W9a06dktqVp7J7Co0B5tyH4cWfuo+RmoP3xcMAdXQy3vMHWDTbNH83lyH5P+jwWtyNab0FfikqGsqwHaqr76ErmkjYQs6hY88RgCFr18+bm2Bvp66MC0XSik8HZRLuxrWeSBz/g==
+      template:
+        metadata:
+          name: radarr
+          namespace: radarr
+        type: Opaque
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: radarr-config
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+        - ReadWriteMany
+      nfs:
+        server: 10.0.0.10
+        path: "/mnt/data-pool/radarr"
+      mountOptions:
+        - nfsvers=4.1 
+        - hard      
+        - noatime
+        - rsize=1048576 
+        - wsize=1048576 
+        - proto=tcp
+        - async
+        - nconnect=8
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: radarr-config
+      namespace: radarr
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ""
+      resources:
+        requests:
+          storage: 1Ti
+      volumeName: radarr-config

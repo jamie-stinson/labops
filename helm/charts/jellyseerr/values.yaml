@@ -1,0 +1,86 @@
+autoPatching:
+  enabled: true
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: "jellyseerr=ghcr.io/fallenbagel/jellyseerr:~v2"
+workload:
+  image:
+    repository: ghcr.io/fallenbagel/jellyseerr
+    tag: 2.7.3
+  probes:
+    readinessProbe:
+      type: tcpSocket
+      port: 5055
+    livenessProbe:
+      type: tcpSocket
+      port: 5055
+  envsSecret:
+  - name: DB_HOST
+    secret: jellyseerr-postgres-app
+    key: host
+  - name: DB_USER
+    secret: jellyseerr-postgres-app
+    key: username
+  - name: DB_PASS
+    secret: jellyseerr-postgres-app
+    key: password
+  - name: DB_PORT
+    secret: jellyseerr-postgres-app
+    key: port
+  - name: DB_NAME
+    secret: jellyseerr-postgres-app
+    key: dbname
+  envs:
+  - name: "DB_TYPE"
+    value: "postgres"
+  storage:
+  - name: jellyseerr-config
+    type: pvc
+    mountPath: /app/config
+    claimName: "jellyseerr-config"
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "100m"
+        memory: "1Gi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "1Gi"
+        ephemeral-storage: "16Mi"
+service:
+  ports:
+  - name: http
+    port: 5055
+    protocol: TCP
+ingress:
+  enabled: true
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "internalweb, internalwebsecure, externalweb, externalwebsecure"
+  hosts:
+  - host: request.projectwhitebox.com
+    path: /
+    pathType: "Prefix"
+    tls:
+      enabled: false
+    backend:
+      service:
+        name: "jellyseerr"
+        port: 5055
+autoscaling:
+  enabled: false
+extraObjects:
+- "apiVersion: v1\nkind: PersistentVolume\nmetadata:\n  name: jellyseerr-config\nspec:\n  capacity:\n    storage: 1Ti\n  accessModes:\n    - ReadWriteMany\n  nfs:\n    server: 10.0.0.10\n    path: \"/mnt/data-pool/jellyseerr\"\n  mountOptions:\n    - nfsvers=4.1 \n    - hard      \n    - noatime\n    - rsize=1048576 \n    - wsize=1048576 \n    - proto=tcp\n    - async\n    - nconnect=8\n"
+- |
+  apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: jellyseerr-config
+    namespace: jellyseerr
+  spec:
+    accessModes:
+      - ReadWriteMany
+    storageClassName: ""
+    resources:
+      requests:
+        storage: 1Ti
+    volumeName: jellyseerr-config
