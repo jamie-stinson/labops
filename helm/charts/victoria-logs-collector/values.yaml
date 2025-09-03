@@ -7,8 +7,12 @@ workload:
     - name: "VECTOR_SELF_NODE_NAME"
       fieldPath: spec.nodeName
   probes:
-    readinessProbe: {}
-    livenessProbe: {}
+    readinessProbe:
+      type: exec
+      command: ["ls", "-l"]
+    livenessProbe:
+      type: exec
+      command: ["ls", "-l"]
   resources:
     preset: ""
     custom:
