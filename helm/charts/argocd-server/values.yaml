@@ -310,7 +310,7 @@ ingress:
         port: 8080
 grafana:
   dashboard:
-    enabled: true
+    enabled: false
     dashboards:
     - name: argo-cd-overview
       title: "Argo-CD / Overview"
