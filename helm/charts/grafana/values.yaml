@@ -113,31 +113,31 @@ grafana:
     - name: "system"
       title: "System"
   dashboard:
-    enabled: false
+    enabled: true
     dashboards:
     - name: kubernetes-global
       title: "Kubernetes / Global"
-      url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/charts/grafana/dashboards/kubernetes-global.json"
+      url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/tmp/dashboards/kubernetes-global.json"
       folder: "System"
     - name: kubernetes-pods
       title: "Kubernetes / Pods"
-      url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/charts/grafana/dashboards/kubernetes-pods.json"
+      url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/tmp/dashboards/kubernetes-pods.json"
       folder: "System"
     - name: kubernetes-api-server
       title: "Kubernetes / API Server"
-      url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/charts/grafana/dashboards/kubernetes-api-server.json"
+      url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/tmp/dashboards/kubernetes-api-server.json"
       folder: "System"
     - name: compute-cluster
       title: "Compute / Cluster"
-      url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/charts/grafana/dashboards/compute-cluster.json"
+      url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/tmp/dashboards/compute-cluster.json"
       folder: "System"
     - name: compute-nodes
       title: "Compute / Nodes"
-      url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/charts/grafana/dashboards/compute-nodes.json"
+      url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/tmp/dashboards/compute-nodes.json"
       folder: "System"
     - name: kubernetes-storage
       title: "Kubernetes / Storage"
-      url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/charts/grafana/dashboards/kubernetes-storage.json"
+      url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/tmp/dashboards/kubernetes-storage.json"
       folder: "System"
 extraObjects:
 - |
