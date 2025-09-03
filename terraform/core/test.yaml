@@ -5,6 +5,5 @@ metadata:
   namespace: k8s-secret-backup
 type: Opaque
 data:
-  s3_access_key: MDAzZGY2OWM0Mzk3NTVjMDAwMDAwMDAwMDAz
-  s3_secret_key: SzAwM2dYa1g2T2pyYWszTzU4UHdRRWlsM1pnLzlIbw==
-
+  s3_access_key: MDAzZGY2OWM0Mzk3NTVjMDAwMDAwMDAwNA==
+  s3_secret_key: SzAwM2JLYlFoL0tXd1RxMGtybGNZSFYvKzl4MkNibw==

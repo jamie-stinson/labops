@@ -1,0 +1,286 @@
+autoPatching:
+  enabled: true
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: "traefik=docker.io/traefik:~v3"
+workload:
+  # replicaCount: 2
+  image:
+    repository: docker.io/traefik
+    tag: v3.5.1
+  priorityClassName: "system-cluster-critical"
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "100m"
+        memory: "256Mi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "256Mi"
+        ephemeral-storage: "16Mi"
+  args:
+  # Entrypoints
+  - '--entryPoints.internalweb.address=:80/tcp'
+  - '--entryPoints.externalweb.address=:81/tcp'
+  - '--entryPoints.internalwebsecure.address=:443/tcp'
+  - '--entryPoints.externalwebsecure.address=:444/tcp'
+  - '--entryPoints.ping.address=:8080/tcp'
+  - '--entryPoints.traefik.address=:8082/tcp'
+  - '--entryPoints.metrics.address=:9100/tcp'
+  # Timeouts
+  - '--entryPoints.externalweb.transport.respondingTimeouts.readTimeout=600'
+  - '--entryPoints.internalweb.transport.respondingTimeouts.readTimeout=600'
+  - '--entryPoints.externalweb.transport.respondingTimeouts.writeTimeout=600'
+  - '--entryPoints.internalweb.transport.respondingTimeouts.writeTimeout=600'
+  - '--entryPoints.externalweb.transport.respondingTimeouts.idleTimeout=600'
+  - '--entryPoints.internalweb.transport.respondingTimeouts.idleTimeout=600'
+  # TLS
+  - '--entryPoints.internalwebsecure.http.tls=true'
+  - '--entryPoints.externalwebsecure.http.tls=true'
+  # Metrics
+  - '--metrics.prometheus=true'
+  - '--metrics.prometheus.entrypoint=metrics'
+  - '--metrics.addinternals=true'
+  # Healthcheck
+  - '--ping=true'
+  - '--ping.entryPoint=ping'
+  # Dashboard
+  - '--api=true'
+  - '--api.dashboard=true'
+  - '--api.insecure=true'
+  # Providers
+  - "--providers.file.filename=/config/traefik.yaml"
+  - '--providers.kubernetesingress=true'
+  - '--providers.kubernetesingress.allowemptyservices=true'
+  # Logs
+  - '--log.level=INFO'
+  - '--log.format=json'
+  # Access logs
+  - '--accesslog=true'
+  - '--accesslog.format=json'
+  - '--accesslog.addinternals=true'
+  - '--accesslog.fields.defaultmode=keep'
+  - '--accesslog.fields.headers.defaultmode=drop'
+  probes:
+    readinessProbe:
+      path: "/ping"
+    livenessProbe:
+      path: "/ping"
+  storage:
+  - name: traefik
+    type: configMap
+    mountPath: /config
+    configMapName: traefik
+  - name: letsencrypt-wildcard-certificate
+    type: secret
+    mountPath: /tls
+    secretName: letsencrypt-wildcard-certificate
+    optional: false
+configMap:
+  enabled: true
+  configMaps:
+  - name: "traefik"
+    data:
+      traefik.yaml: |
+        http:
+          middlewares:
+            preserve-host:
+              headers:
+                customRequestHeaders:
+                  Host: "minio.projectwhitebox.com"
+            minio-cors:
+              headers:
+                accessControlAllowMethods:
+                  - GET
+                  - OPTIONS
+                accessControlAllowHeaders: "*"
+                accessControlAllowOriginList:
+                  - https://auth.projectwhitebox.com
+                accessControlMaxAge: 100
+                addVaryHeader: true
+        tls:
+          certificates:
+            - certFile: /tls/tls.crt
+              keyFile: /tls/tls.key
+          stores:
+            default:
+              defaultCertificate:
+                certFile: /tls/tls.crt
+                keyFile: /tls/tls.key
+service:
+  ports:
+  - name: ping
+    port: 8080
+    protocol: TCP
+  - name: traefik
+    port: 8082
+    protocol: TCP
+  - name: http-metrics
+    port: 9100
+    protocol: TCP
+expose:
+  enabled: true
+  type: NodePort
+  ports:
+  - name: internalweb
+    nodePort: 30080
+    port: 80
+    protocol: TCP
+  - name: externalweb
+    nodePort: 30081
+    port: 81
+    protocol: TCP
+  - name: internalwebsecure
+    nodePort: 30443
+    port: 443
+    protocol: TCP
+  - name: externalwebsecure
+    nodePort: 30444
+    port: 444
+    protocol: TCP
+rbac:
+  enabled: true
+  roles:
+    clusterRole:
+      rules:
+      - apiGroups:
+        - ''
+        resources:
+        - nodes
+        verbs:
+        - get
+        - list
+        - watch
+      - apiGroups:
+        - ''
+        resources:
+        - services
+        verbs:
+        - get
+        - list
+        - watch
+      - apiGroups:
+        - discovery.k8s.io
+        resources:
+        - endpointslices
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - ''
+        resources:
+        - secrets
+        verbs:
+        - get
+        - list
+        - watch
+      - apiGroups:
+        - extensions
+        - networking.k8s.io
+        resources:
+        - ingressclasses
+        verbs:
+        - get
+        - list
+        - watch
+      - apiGroups:
+        - traefik.io
+        resources:
+        - ingressroutes
+        - ingressroutetcps
+        - ingressrouteudps
+        - middlewares
+        - middlewaretcps
+        - serverstransports
+        - serverstransporttcps
+        - tlsoptions
+        - tlsstores
+        - traefikservices
+        verbs:
+        - get
+        - list
+        - watch
+      - apiGroups:
+        - extensions
+        - networking.k8s.io
+        resources:
+        - ingressclasses
+        - ingresses
+        verbs:
+        - get
+        - list
+        - watch
+      - apiGroups:
+        - extensions
+        - networking.k8s.io
+        resources:
+        - ingresses/status
+        verbs:
+        - update
+ingress:
+  enabled: true
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "internalweb, internalwebsecure"
+  hosts:
+  - host: traefik.projectwhitebox.com
+    path: /
+    pathType: "Prefix"
+    tls:
+      enabled: false
+    backend:
+      service:
+        name: "traefik"
+        port: 8080
+ingressClass:
+  enabled: true
+  isDefault: true
+  controller: "traefik.io/ingress-controller"
+certificate:
+  enabled: true
+  spec:
+    secretName: "letsencrypt-wildcard-certificate"
+    dnsNames:
+    - 'projectwhitebox.com'
+    - '*.projectwhitebox.com'
+    issuerRef:
+      name: "traefik"
+      kind: Issuer
+issuer:
+  enabled: true
+  type: Issuer
+  spec:
+    acme:
+      email: "jamiestinson1@icloud.com"
+      solvers:
+      - dns01:
+          cloudflare:
+            email: "jamiestinson1@icloud.com"
+            apiTokenSecretRef:
+              name: cloudflare
+              key: API_TOKEN
+      server: https://acme-v02.api.letsencrypt.org/directory
+      privateKeySecretRef:
+        name: letsencrypt-acme-key
+grafana:
+  dashboard:
+    enabled: true
+    dashboards:
+    - name: traefik
+      title: "Traefik"
+      url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/charts/traefik/dashboards/traefik.json"
+      folder: "System"
+extraObjects:
+- |
+  apiVersion: bitnami.com/v1alpha1
+  kind: SealedSecret
+  metadata:
+    name: cloudflare
+    namespace: traefik
+  spec:
+    encryptedData:
+      API_TOKEN: AgAx/UpyGxp8anJhTotaO0J0GafHNn88NT05cBRnj5LwXzP4s/UiH/CQpLRQInpG3lHVboXd1zBt3MinXyHHVse80oFRRDj5LKMM1tr7CkU1BjEpsygtGQCVC7qM+0UyxcSfJeDwa8wfsje87N2FtqPlx4r2kIpEHxGdzHi6Pw7mB60UJ6FhuHd2MATABYL3XKVpekKwZWdlteeREwptyL4DYWyyuFITHIU5AtlsuomR9cQ5yDfvLB3QlFN9wWCjKBnMAYTESsaE9s5z6e9AiT4HXjU0DsH/QCLE4pBdXDFRbh9oy9L8xpYT9JRiEWcdXj19mRCpHKYxp7toyzspbyV5g1aKChjGyICaCB1BTALgqt6Ufcj5OhUCjI/G9AXsaScSJR5+GEjZ/DZWnun9CKTtk7MBdZU+bGyK/TLk7D75hqbdCSAImTHzr8LnLl3W6C0rCYv2P6G38FpcaWIBSf9HB9T4cu0fBWIJ55H5BI5YUP9yKtEDqEOOR1XmDdfngUxqiTy7eDAA4i2aNeuE2laqGoCY9hnajbj+hg93yrjwGdg9dISJG8B3dXYfmsCrDxwVqrje1EKFirHGPnCJ1TNJX5evodGGJ4tsbbHh53hZUcCymJ9JIoAc3n7o1ZwkUrXgOQb2Ehqrdq0cZz6Hts9kaDhhlOY9I9ADh63RAOEap0cyoG/3ZvMkLbXaD1RaUAhHZCqN56eO90NXyDaQKWJiz+zhCVg6UemdpWYF80G7wkbJxMWLDnFG
+    template:
+      metadata:
+        name: cloudflare
+        namespace: traefik
+      type: Opaque
