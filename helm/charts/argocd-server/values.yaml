@@ -350,7 +350,7 @@ extraObjects:
       clientID: db2b13aa-2341-4f73-97d0-3bcfd8dd98d9
       clientSecret: $argocd:CLIENTSECRET
       requestedScopes: ["openid", "profile", "email", "groups"]
-    admin.enabled: 'false'
+    admin.enabled: 'true'
     users.anonymous.enabled: "false"
     application.instanceLabelKey: argocd.argoproj.io/instance
     application.sync.impersonation.enabled: 'false'
