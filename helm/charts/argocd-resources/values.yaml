@@ -67,9 +67,9 @@ extraObjects:
         {{- $appName := index .path.segments 2 -}}
         spec:
           syncPolicy:
-            # managedNamespaceMetadata:
-            #   labels:
-            #     istio.io/dataplane-mode: ambient
+            managedNamespaceMetadata:
+              labels:
+                test: test
             syncOptions:
               - Validate=true
               - CreateNamespace=true
