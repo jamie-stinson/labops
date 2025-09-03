@@ -3,7 +3,7 @@ service:
   type: "NodePort"
 
 certificate:
-  enabled: true
+  enabled: false
   spec:
     secretName: "letsencrypt-wildcard-certificate"
     dnsNames:
@@ -13,7 +13,7 @@ certificate:
       name: "istio-ingress-gateway"
       kind: Issuer
 issuer:
-  enabled: true
+  enabled: false
   type: Issuer
   spec:
     acme:
