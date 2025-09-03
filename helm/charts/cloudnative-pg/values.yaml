@@ -28,11 +28,11 @@ workload:
     preset: ""
     custom:
       requests:
-        cpu: "25m"
-        memory: "128Mi"
+        cpu: "50m"
+        memory: "256Mi"
         ephemeral-storage: "16Mi"
       limits:
-        memory: "128Mi"
+        memory: "256Mi"
         ephemeral-storage: "16Mi"
 
 service:
