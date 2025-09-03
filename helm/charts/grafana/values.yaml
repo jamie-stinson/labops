@@ -107,6 +107,18 @@ ingress:
         name: "grafana"
         port: 3000
 grafana:
+  datasource:
+    enabled: true
+    spec:
+      instanceSelector:
+        matchLabels:
+          dashboards: "grafana"
+      datasource:
+        name: prometheus
+        type: prometheus
+        access: proxy
+        basicAuth: true
+        url: http://victoria-metrics-select.victoria-metrics.svc.cluster.local:8481
   folder:
     enabled: false
     folders:
