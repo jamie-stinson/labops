@@ -28,11 +28,10 @@ workload:
     mountPath: /var/lib
     hostPath: /var/lib
     readOnly: true
-  # - name: var-lib-vl-connector
-  #   type: hostPath
-  #   mountPath: /vl-collector
-  #   hostPath: /var/lib/vl-connector
-  #   readOnly: false
+  - name: var-lib-vl-connector
+    type: emptyDir
+    mountPath: /vl-collector
+    readOnly: false
   - name: config
     type: configMap
     mountPath: /etc/vector
