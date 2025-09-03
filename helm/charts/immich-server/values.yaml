@@ -1,0 +1,190 @@
+namespace: "immich"
+
+workload:
+  image:
+    registry: ghcr.io
+    repository: immich-app/immich-server
+    tag: v1.140.1
+  envsSecret:
+    - name: DB_HOSTNAME
+      secret: immich-postgres-app
+      key: host
+    - name: DB_USERNAME
+      secret: immich-postgres-app
+      key: username
+    - name: DB_PASSWORD
+      secret: immich-postgres-app
+      key: password
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "100m"
+        memory: "2Gi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "2Gi"
+        ephemeral-storage: "16Mi"
+  envs:
+    - name: "DB_DATABASE_NAME"
+      value: "immich"
+    - name: "IMMICH_MACHINE_LEARNING_URL"
+      value: "http://immich-machine-learning.immich.svc.cluster.local:3003"
+    - name: "REDIS_HOSTNAME"
+      value: "immich-redis.immich.svc.cluster.local"
+    - name: "IMMICH_TELEMETRY_INCLUDE"
+      valie: "all"
+  probes:
+    readinessProbe:
+      path: "/api/server/ping"
+      port: 2283
+    livenessProbe:
+      path: "/api/server/ping"
+      port: 2283
+  storage:
+    - name: library
+      type: pvc
+      mountPath: /usr/src/app/upload
+      claimName: "immich-library"
+    - name: thumbnails
+      type: pvc
+      mountPath: /usr/src/app/upload/thumbs
+      claimName: "immich-thumbnails"
+    - name: profiles
+      type: pvc
+      mountPath: /usr/src/app/upload/profile
+      claimName: "immich-profiles"
+
+service:
+  ports:
+    - name: http
+      port: 2283
+      protocol: TCP
+
+ingress:
+  enabled: true
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "internalweb, internalwebsecure, externalweb, externalwebsecure"
+  hosts:
+    - host: immich.projectwhitebox.com
+      path: /
+      pathType: "Prefix"
+      tls:
+        enabled: false
+      backend:
+        service:
+          name: "immich-server"
+          port: 2283
+
+autoscaling:
+  enabled: false
+
+extraObjects:
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: immich-library
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+        - ReadWriteMany
+      nfs:
+        server: 10.0.0.10
+        path: "/mnt/hdd-pool/immich"
+      mountOptions:
+        - nfsvers=4.1 
+        - hard      
+        - noatime
+        - rsize=1048576 
+        - wsize=1048576 
+        - proto=tcp
+        - async
+        - nconnect=8
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: immich-library
+      namespace: immich
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ""
+      resources:
+        requests:
+          storage: 1Ti
+      volumeName: immich-library
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: immich-thumbnails
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+        - ReadWriteMany
+      nfs:
+        server: 10.0.0.10
+        path: "/mnt/data-pool/immich-thumbnails"
+      mountOptions:
+        - nfsvers=4.1 
+        - hard      
+        - noatime
+        - rsize=1048576 
+        - wsize=1048576 
+        - proto=tcp
+        - async
+        - nconnect=8
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: immich-thumbnails
+      namespace: immich
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ""
+      resources:
+        requests:
+          storage: 1Ti
+      volumeName: immich-thumbnails
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: immich-profiles
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+        - ReadWriteMany
+      nfs:
+        server: 10.0.0.10
+        path: "/mnt/data-pool/immich-profiles"
+      mountOptions:
+        - nfsvers=4.1 
+        - hard      
+        - noatime
+        - rsize=1048576 
+        - wsize=1048576 
+        - proto=tcp
+        - async
+        - nconnect=8
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: immich-profiles
+      namespace: immich
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ""
+      resources:
+        requests:
+          storage: 1Ti
+      volumeName: immich-profiles
