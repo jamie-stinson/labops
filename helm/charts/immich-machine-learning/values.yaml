@@ -41,10 +41,10 @@ workload:
     livenessProbe:
       path: "/ping"
       port: 3003
-  # storage:
-  #   - name: cache
-  #     type: emptyDir
-  #     mountPath: /cache
+  storage:
+    - name: cache
+      type: emptyDir
+      mountPath: /cache
   #   - name: tmp
   #     type: emptyDir
   #     mountPath: /tmp
