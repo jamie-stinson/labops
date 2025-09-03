@@ -31,7 +31,7 @@ extraObjects:
           owner: immich
       enableSuperuserAccess: true
       superuserSecret:
-        name: app-secret
+        name: primary-api-pg-superuser
       storage:
         pvcTemplate:
           accessModes:
