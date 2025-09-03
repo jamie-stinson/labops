@@ -48,7 +48,7 @@ extraObjects:
               jsonPointers:
                 - /webhooks/0/failurePolicy
             - group: apps
-              kind: Deployment
+              kind: DaemonSet
               jqPathExpressions:
                 - '.spec.template.spec.containers[].env[].valueFrom.resourceFieldRef.divisor'
           destination:
