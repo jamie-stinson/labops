@@ -1,22 +1,22 @@
 workload:
   type: "StatefulSet"
   image:
-    repository: "docker.io/victoriametrics/victoria-logs"
-    tag: "v1.31.0"
+    repository: "docker.io/victoriametrics/vmstorage"
+    tag: "v1.124.0-cluster"
   args:
     - '--envflag.enable'
-    - '--http.shutdownDelay=15s'
-    - '--httpListenAddr=:9491'
+    - '--envflag.prefix=VM_'
+    - '--httpListenAddr=:8482'
     - '--loggerFormat=json'
-    - '--retentionPeriod=7d'
+    - '--retentionPeriod=1'
     - '--storageDataPath=/storage'
   probes:
     readinessProbe:
       type: tcpSocket
-      port: 9491
+      port: 8482
     livenessProbe:
       type: tcpSocket
-      port: 9491
+      port: 8482
   resources:
     preset: ""
     custom:
@@ -33,11 +33,17 @@ workload:
       mountPath: /storage
       accessModes:
       - "ReadWriteOnce"
-      storageClass: "openebs"
-      size: "8Gi"
+      storageClass: "openebs-hdd"
+      size: "200Gi"
       readOnly: false
 service:
   ports:
   - name: http
     protocol: TCP
-    port: 9491
+    port: 8482
+  - name: vminsert
+    protocol: TCP
+    port: 8400
+  - name: vmselect
+    protocol: TCP
+    port: 8401
