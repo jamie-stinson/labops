@@ -111,10 +111,10 @@ configMap:
               api_key: !env_var RADARR_API_KEY
 
               media_naming:
-                folder: emby
+                folder: emby-tmdb
                 movie:
                   rename: true
-                  standard: emby
+                  standard: emby-tmdb
 
               quality_profiles:
                 - name: Default
@@ -443,13 +443,13 @@ configMap:
               api_key: !env_var SONARR_API_KEY
 
               media_naming:
-                series: emby
+                series: emby-tmdb
                 season: default
                 episodes:
                   rename: true
-                  standard: default
-                  daily: default
-                  anime: default
+                  standard: emby-tmdb
+                  daily: emby-tmdb
+                  anime: emby-anime-tmdb
 
               quality_profiles:
                   - name: Default
