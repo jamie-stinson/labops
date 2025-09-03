@@ -307,7 +307,7 @@ extraObjects:
         clientConfig:
           service:
             name: cnpg-webhook-service
-            namespace: cnpg
+            namespace: "cloudnative-pg"
             path: /mutate-postgresql-cnpg-io-v1-backup
             port: 443
         failurePolicy: Fail
@@ -334,7 +334,7 @@ extraObjects:
         clientConfig:
           service:
             name: cnpg-webhook-service
-            namespace: cnpg
+            namespace: "cloudnative-pg"
             path: /mutate-postgresql-cnpg-io-v1-cluster
             port: 443
         failurePolicy: Fail
@@ -361,7 +361,7 @@ extraObjects:
         clientConfig:
           service:
             name: cnpg-webhook-service
-            namespace: cnpg
+            namespace: "cloudnative-pg"
             path: /mutate-postgresql-cnpg-io-v1-database
             port: 443
         failurePolicy: Fail
@@ -388,7 +388,7 @@ extraObjects:
         clientConfig:
           service:
             name: cnpg-webhook-service
-            namespace: cnpg
+            namespace: "cloudnative-pg"
             path: /mutate-postgresql-cnpg-io-v1-scheduledbackup
             port: 443
         failurePolicy: Fail
@@ -421,7 +421,7 @@ extraObjects:
         clientConfig:
           service:
             name: cnpg-webhook-service
-            namespace: cnpg
+            namespace: "cloudnative-pg"
             path: /validate-postgresql-cnpg-io-v1-backup
             port: 443
         failurePolicy: Fail
@@ -447,7 +447,7 @@ extraObjects:
         clientConfig:
           service:
             name: cnpg-webhook-service
-            namespace: cnpg
+            namespace: "cloudnative-pg"
             path: /validate-postgresql-cnpg-io-v1-cluster
             port: 443
         failurePolicy: Fail
@@ -473,7 +473,7 @@ extraObjects:
         clientConfig:
           service:
             name: cnpg-webhook-service
-            namespace: cnpg
+            namespace: "cloudnative-pg"
             path: /validate-postgresql-cnpg-io-v1-scheduledbackup
             port: 443
         failurePolicy: Fail
@@ -499,7 +499,7 @@ extraObjects:
         clientConfig:
           service:
             name: cnpg-webhook-service
-            namespace: cnpg
+            namespace: "cloudnative-pg"
             path: /validate-postgresql-cnpg-io-v1-database
             port: 443
         failurePolicy: Fail
@@ -525,7 +525,7 @@ extraObjects:
         clientConfig:
           service:
             name: cnpg-webhook-service
-            namespace: cnpg
+            namespace: "cloudnative-pg"
             path: /validate-postgresql-cnpg-io-v1-pooler
             port: 443
         failurePolicy: Fail
