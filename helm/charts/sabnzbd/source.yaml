@@ -1,0 +1,3 @@
+repository: "ghcr.io/jamie-stinson/common-helm-library"
+chart: "common-helm-library"
+version: "1.*.*"
