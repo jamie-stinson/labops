@@ -83,10 +83,10 @@ extraObjects:
                 image: ghcr.io/jamie-stinson/k8s-secret-backup:v1.0.0
                 imagePullPolicy: IfNotPresent
                 env:
-                  # - name: RESTORE_MODE
-                  #   value: "true"
-                  # - name: FORCE_OVERWRITE
-                  #   value: "true"
+                  - name: RESTORE_MODE
+                    value: "true"
+                  - name: FORCE_OVERWRITE
+                    value: "true"
                   - name: NAMESPACES
                     valueFrom:
                       configMapKeyRef:

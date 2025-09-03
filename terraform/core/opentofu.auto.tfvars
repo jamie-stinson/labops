@@ -33,9 +33,11 @@ talos = {
         }
       }
       worker = {
-        install_disk    = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi0" # need to get disk
+        install_disk    = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi0"
         encryption_type = "local"
-        nodes           = {}
+        nodes           = {
+          "10.0.0.15" = {}
+        }
       }
     }
   }

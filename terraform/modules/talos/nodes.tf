@@ -42,7 +42,7 @@ resource "talos_machine_configuration_apply" "this" {
       templatefile("${path.module}/templates/global.yaml.tmpl", {
         hostname = format(
           "%s-%s",
-          contains(keys(var.talos.cluster.compute.control_plane.nodes), each.key) ? "controlplane" : "worker",
+          contains(keys(var.talos.cluster.compute.control_plane.nodes), each.key) ? "control-plane" : "worker",
           local.node_hostnames[each.key]
         )
         install_disk              = (contains(keys(var.talos.cluster.compute.control_plane.nodes), each.key) ? var.talos.cluster.compute.control_plane.install_disk : var.talos.cluster.compute.worker.install_disk)
