@@ -108,6 +108,7 @@ configMap:
                 certFile: /tls/tls.crt
                 keyFile: /tls/tls.key
 service:
+  type: "NodePort"
   ports:
   - name: ping
     port: 8080
