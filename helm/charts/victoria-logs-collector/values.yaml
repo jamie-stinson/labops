@@ -6,75 +6,70 @@ configMap:
   - name: "victoria-logs-collector"
     data:
       vector.yaml: |
-        data_dir: /vector-data-dir
         api:
-          enabled: false
           address: 0.0.0.0:8686
+          enabled: false
           playground: true
+        data_dir: /vector-data-dir
         sinks:
           exporter:
-            type: prometheus_exporter
             address: 0.0.0.0:9090
-            inputs: [internal_metrics]
-          vlogs:
-            type: elasticsearch
             inputs:
-              - parser
-              - audit_parser
-              - talos_service_logs_xform
-              - talos_kernel_logs_xform
-            endpoints:
-              - "http://victoria-logs-insert.victoria-logs.svc.cluster.local:9481/insert/elasticsearch/"
-            encoding:
-              except_fields:
-                - __host # this is always 127.0.0.1 so it's useless
-            mode: bulk
+            - internal_metrics
+            type: prometheus_exporter
+          vlogs-0:
             api_version: v8
             compression: gzip
+            encoding:
+              except_fields:
+              - __host
+            endpoints:
+            - http://victoria-logs-insert.victoria-logs.svc.cluster.local:9481/insert/elasticsearch
             healthcheck:
               enabled: false
+            inputs:
+            - parser
+            - audit_parser
+            - talos_service_logs_xform
+            - talos_kernel_logs_xform
+            mode: bulk
             request:
               headers:
-                VL-Time-Field: timestamp
-                VL-Stream-Fields: stream,kubernetes.pod_name,kubernetes.container_name,kubernetes.pod_namespace
+                AccountID: "0"
+                ProjectID: "0"
                 VL-Msg-Field: message,msg,_msg,log.msg,log.message,log
+                VL-Stream-Fields: stream,kubernetes.pod_name,kubernetes.container_name,kubernetes.pod_namespace
+                VL-Time-Field: timestamp
+            type: elasticsearch
         sources:
-          k8s:
-            type: kubernetes_logs
           internal_metrics:
             type: internal_metrics
+          k8s:
+            type: kubernetes_logs
           kubernetes_audit_logs:
-            type: file
             include:
-              - /var/log/audit/kube/*.log
+            - /var/log/audit/kube/*.log
+            type: file
           talos_kernel_logs:
             address: 0.0.0.0:6050
-            type: socket
-            mode: udp
-            max_length: 102400
             decoding:
               codec: json
             host_key: __host
+            max_length: 102400
+            mode: udp
+            type: socket
           talos_service_logs:
             address: 0.0.0.0:6051
-            type: socket
-            mode: udp
-            max_length: 102400
             decoding:
               codec: json
             host_key: __host
+            max_length: 102400
+            mode: udp
+            type: socket
         transforms:
-          parser:
-            type: remap
-            inputs:
-              - k8s
-            source: |
-              .log = parse_json(.message) ?? .message
-              del(.message)
           audit_parser:
-            type: remap
             inputs:
-              - kubernetes_audit_logs
+            - kubernetes_audit_logs
             source: |
               . = parse_json(.message) ?? .message
               parsed_timestamp, err = parse_timestamp(.requestReceivedTimestamp, format: "%Y-%m-%dT%H:%M:%S.%fZ")
@@ -93,9 +88,17 @@ configMap:
               } else {
                 .msg = .message
               }
-          talos_kernel_logs_xform:
             type: remap
-            inputs: [talos_kernel_logs]
+          parser:
+            inputs:
+            - k8s
+            source: |
+              .log = parse_json(.message) ?? .message
+              del(.message)
+            type: remap
+          talos_kernel_logs_xform:
+            inputs:
+            - talos_kernel_logs
             source: |
               del(.clock)
               parsed_timestamp, err = parse_timestamp(."talos-time", format: "%Y-%m-%dT%H:%M:%S.%fZ")
@@ -107,10 +110,11 @@ configMap:
               .message = parse_json(.msg) ?? .msg
               del(.msg)
               del(."talos-time")
-          talos_service_logs_xform:
             type: remap
-            inputs: [talos_service_logs]
-            source: |
+          talos_service_logs_xform:
+            inputs:
+            - talos_service_logs
+            source: |-
               parsed_timestamp, err = parse_timestamp(."talos-time", format: "%Y-%m-%dT%H:%M:%S.%fZ")
               if err == null {
                 .timestamp = to_unix_timestamp(parsed_timestamp)
@@ -124,6 +128,7 @@ configMap:
               del(."talos-time")
               del(."talos-level")
               del(."talos-service")
+            type: remap
 
 service:
   enabled: false
@@ -170,6 +175,10 @@ extraObjects:
         spec:
           containers:
             - name: victoria-logs-collector
+              args:
+                - '-w'
+                - '--config-dir'
+                - /etc/vector/
               env:
                 - name: NAME
                   valueFrom:
@@ -221,6 +230,22 @@ extraObjects:
                     fieldRef:
                       apiVersion: v1
                       fieldPath: spec.nodeName
+                - name: VECTOR_LOG
+                  value: info
+                - name: VECTOR_SELF_POD_NAME
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: metadata.name
+                - name: VECTOR_SELF_POD_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: metadata.namespace
+                - name: PROCFS_ROOT
+                  value: /host/proc
+                - name: SYSFS_ROOT
+                  value: /host/sys
               image: docker.io/timberio/vector:0.48.0-distroless-libc
               imagePullPolicy: IfNotPresent
               ports:
@@ -241,40 +266,31 @@ extraObjects:
                   cpu: 10m
                   ephemeral-storage: 16Mi
                   memory: 4Gi
-              securityContext:
-                allowPrivilegeEscalation: true
-                capabilities:
-                  drop:
-                    - ALL
-                privileged: true
-                readOnlyRootFilesystem: false
-                runAsGroup: 1000
-                runAsNonRoot: true
-                runAsUser: 1000
-                seccompProfile:
-                  type: RuntimeDefault
               terminationMessagePath: /dev/termination-log
               terminationMessagePolicy: File
               volumeMounts:
-                - mountPath: /var/log
+                - mountPath: /vector-data-dir
+                  name: data
+                - mountPath: /etc/vector/
+                  name: config
+                  readOnly: true
+                - mountPath: /var/log/
                   name: var-log
                   readOnly: true
                 - mountPath: /var/lib
                   name: var-lib
                   readOnly: true
-                - mountPath: /vector-data-dir
-                  name: var-lib-vl-connector
+                - mountPath: /host/proc
+                  name: procfs
+                  readOnly: true
+                - mountPath: /host/sys
+                  name: sysfs
+                  readOnly: true
                 - mountPath: /etc/vector
                   name: config
           dnsPolicy: ClusterFirstWithHostNet # without this the Vector pods can't resolve the VL pods because they're running in hostNetworking mode
           hostNetwork: true # needed for the sockets created below
           restartPolicy: Always
-          securityContext:
-            fsGroup: 1000
-            fsGroupChangePolicy: Always
-            runAsGroup: 1000
-            runAsNonRoot: true
-            runAsUser: 1000
           serviceAccount: victoria-logs-collector
           serviceAccountName: victoria-logs-collector
           terminationGracePeriodSeconds: 30
@@ -287,15 +303,25 @@ extraObjects:
               whenUnsatisfiable: ScheduleAnyway
           volumes:
             - hostPath:
-                path: /var/log
+                path: /var/lib/vector
+                type: ''
+              name: data
+            - hostPath:
+                path: /var/log/
                 type: ''
               name: var-log
             - hostPath:
-                path: /var/lib
+                path: /var/lib/
                 type: ''
               name: var-lib
-            - emptyDir: {}
-              name: var-lib-vl-connector
+            - hostPath:
+                path: /proc
+                type: ''
+              name: procfs
+            - hostPath:
+                path: /sys
+                type: ''
+              name: sysfs
             - configMap:
                 defaultMode: 420
                 name: victoria-logs-collector
