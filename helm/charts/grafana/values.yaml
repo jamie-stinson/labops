@@ -8,6 +8,9 @@ workload:
   image:
     repository: "docker.io/grafana/grafana"
     tag: "12.1.1"
+  envs:
+    - name: GF_INSTALL_PLUGINS
+      value: "victoriametrics-metrics-datasource"
   envsSecret:
   - name: GF_SECURITY_ADMIN_USER
     secret: grafana
@@ -110,9 +113,6 @@ grafana:
   datasource:
     enabled: true
     spec:
-      plugins:
-        - name: victoriametrics-metrics-datasource
-          version: "0.18.3"
       instanceSelector:
         matchLabels:
           dashboards: "grafana"
