@@ -133,7 +133,10 @@ configMap:
             type: remap
 
 service:
-  enabled: false
+  ports:
+  - name: http-metrics
+    protocol: TCP
+    port: 9090
 
 rbac:
   enabled: true
@@ -251,7 +254,7 @@ extraObjects:
               image: docker.io/timberio/vector:0.48.0-distroless-libc
               imagePullPolicy: IfNotPresent
               ports:
-                - name: prom-exporter
+                - name: http-metrics
                   containerPort: 9090
                   protocol: TCP
                 - name: talos-krnl-sckt
