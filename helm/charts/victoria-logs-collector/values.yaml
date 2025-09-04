@@ -7,7 +7,36 @@ configMap:
     data:
       vector.yaml: |
         data_dir: /vector-data-dir
-
+        api:
+          enabled: false
+          address: 0.0.0.0:8686
+          playground: true
+        sinks:
+          exporter:
+            type: prometheus_exporter
+            address: 0.0.0.0:9090
+            inputs: [internal_metrics]
+          vlogs:
+            type: elasticsearch
+            inputs:
+              - parser
+              - audit_parser
+              - talos_service_logs_xform
+              - talos_kernel_logs_xform
+            endpoints: http://victoria-logs-insert.victoria-logs.svc.cluster.local:9481/insert/elasticsearch/
+            encoding:
+              except_fields:
+                - __host # this is always 127.0.0.1 so it's useless
+            mode: bulk
+            api_version: v8
+            compression: gzip
+            healthcheck:
+              enabled: false
+            request:
+              headers:
+                VL-Time-Field: timestamp
+                VL-Stream-Fields: stream,kubernetes.pod_name,kubernetes.container_name,kubernetes.pod_namespace
+                VL-Msg-Field: message,msg,_msg,log.msg,log.message,log
         sources:
           k8s:
             type: kubernetes_logs
@@ -94,30 +123,6 @@ configMap:
               del(."talos-time")
               del(."talos-level")
               del(."talos-service")
-
-        sinks:
-          exporter:
-            type: prometheus_exporter
-            address: 0.0.0.0:9090
-            inputs: [internal_metrics]
-          remote_write_0:
-            type: http
-            inputs: [parser]
-            uri: "http://victoria-logs-insert.victoria-logs.svc.cluster.local:9481/insert/jsonline"
-            encoding:
-              codec: json
-            framing:
-              method: newline_delimited
-            healthcheck:
-              enabled: false
-            request:
-              headers:
-                AccountID: "0"
-                ProjectID: "0"
-                VL-Stream-Fields: kubernetes.pod_name,kubernetes.container_name,kubernetes.pod_namespace
-                VL-Msg-Field: message
-                VL-Time-Field: timestamp
-            compression: "zstd"
 
 service:
   enabled: false
