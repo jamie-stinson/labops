@@ -1,61 +1,99 @@
 workload:
-  type: "DaemonSet"
-  image:
-    repository: "docker.io/timberio/vector"
-    tag: "0.48.0-distroless-libc"
-  envsFromField:
-    - name: "VECTOR_SELF_NODE_NAME"
-      fieldPath: spec.nodeName
-  probes:
-    readinessProbe:
-      type: exec
-      command: ["ls", "-l"]
-    livenessProbe:
-      type: exec
-      command: ["ls", "-l"]
-  resources:
-    preset: ""
-    custom:
-      requests:
-        cpu: "10m"
-        memory: "4Gi"
-        ephemeral-storage: "16Mi"
-      limits:
-        memory: "4Gi"
-        ephemeral-storage: "16Mi"
-  storage:
-  - name: var-log
-    type: hostPath
-    mountPath: /var/log
-    hostPath: /var/log
-    readOnly: true
-  - name: var-lib
-    type: hostPath
-    mountPath: /var/lib
-    hostPath: /var/lib
-    readOnly: true
-  - name: var-lib-vl-connector
-    type: emptyDir
-    mountPath: /vl-collector
-    readOnly: false
-  - name: config
-    type: configMap
-    mountPath: /etc/vector
-    configMapName: victoria-logs-collector
+  enabled: false
 configMap:
   enabled: true
   configMaps:
   - name: "victoria-logs-collector"
     data:
       vector.yaml: |
-        data_dir: /vl-collector
+        data_dir: /vector-data-dir
 
         sources:
           k8s:
             type: kubernetes_logs
-            pod_annotation_fields:
-              # Disable "pod_ips" as "pod_ip" already includes required info
-              pod_ips: ""
+          internal_metrics:
+            type: internal_metrics
+          kubernetes_audit_logs:
+            type: file
+            include:
+              - /var/log/audit/kube/*.log
+          talos_kernel_logs:
+            address: 0.0.0.0:6050
+            type: socket
+            mode: udp
+            max_length: 102400
+            decoding:
+              codec: json
+            host_key: __host
+          talos_service_logs:
+            address: 0.0.0.0:6051
+            type: socket
+            mode: udp
+            max_length: 102400
+            decoding:
+              codec: json
+            host_key: __host
+        transforms:
+          parser:
+            type: remap
+            inputs:
+              - k8s
+            source: |
+              .log = parse_json(.message) ?? .message
+              del(.message)
+          audit_parser:
+            type: remap
+            inputs:
+              - kubernetes_audit_logs
+            source: |
+              . = parse_json(.message) ?? .message
+              parsed_timestamp, err = parse_timestamp(.requestReceivedTimestamp, format: "%Y-%m-%dT%H:%M:%S.%fZ")
+              if err == null {
+                .timestamp = to_unix_timestamp(parsed_timestamp)
+              } else {
+                .timestamp = to_unix_timestamp(now())
+              }
+              # multiline strings in VRL are weird; the escape char has to be inside an actual string and not an expression
+              composed_message, err = "User: " + .user.username + "; " + .verb + " \
+                " + .objectRef.apiGroup + "/" + .objectRef.apiVersion + ":\
+                " + .objectRef.resource + "; Decision: " + .annotations."authorization.k8s.io/decision" + "\
+                ; Reason: " + .annotations."authorization.k8s.io/reason"
+              if err == null {
+                .msg = composed_message
+              } else {
+                .msg = .message
+              }
+          talos_kernel_logs_xform:
+            type: remap
+            inputs: [talos_kernel_logs]
+            source: |
+              del(.clock)
+              parsed_timestamp, err = parse_timestamp(."talos-time", format: "%Y-%m-%dT%H:%M:%S.%fZ")
+              if err == null {
+                .timestamp = to_unix_timestamp(parsed_timestamp)
+              } else {
+                .timestamp = to_unix_timestamp(now())
+              }
+              .message = parse_json(.msg) ?? .msg
+              del(.msg)
+              del(."talos-time")
+          talos_service_logs_xform:
+            type: remap
+            inputs: [talos_service_logs]
+            source: |
+              parsed_timestamp, err = parse_timestamp(."talos-time", format: "%Y-%m-%dT%H:%M:%S.%fZ")
+              if err == null {
+                .timestamp = to_unix_timestamp(parsed_timestamp)
+              } else {
+                .timestamp = to_unix_timestamp(now())
+              }
+              .message = parse_json(.msg) ?? .msg
+              .level = ."talos-level"
+              .service = ."talos-service"
+              del(.msg)
+              del(."talos-time")
+              del(."talos-level")
+              del(."talos-service")
 
         transforms:
           json_parser:
@@ -65,6 +103,10 @@ configMap:
               .message = parse_json(.message) ?? .message
 
         sinks:
+          exporter:
+            type: prometheus_exporter
+            address: 0.0.0.0:9090
+            inputs: [internal_metrics]
           remote_write_0:
             type: http
             inputs: [json_parser]
@@ -102,3 +144,164 @@ rbac:
           - get
           - list
           - watch
+
+extraObjects: 
+  - |
+    apiVersion: apps/v1
+    kind: DaemonSet
+    metadata:
+      name: victoria-logs-collector
+      namespace: victoria-logs
+    spec:
+      revisionHistoryLimit: 10
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: victoria-logs-collector
+          app.kubernetes.io/name: victoria-logs-collector
+      template:
+        metadata:
+          annotations:
+            app.kubernetes.io/name: victoria-logs-collector
+          labels:
+            app.kubernetes.io/instance: victoria-logs-collector
+            app.kubernetes.io/managed-by: Helm
+            app.kubernetes.io/name: victoria-logs-collector
+            app.kubernetes.io/version: 0.48.0-distroless-libc
+            helm.sh/chart: victoria-logs-collector-0.48.0-distroless-libc
+        spec:
+          containers:
+            - env:
+                - name: NAME
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: metadata.name
+                - name: POD_NAME
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: metadata.name
+                - name: NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: metadata.namespace
+                - name: POD_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: metadata.namespace
+                - name: OPERATOR_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: metadata.namespace
+                - name: HOST_IP_ADDRESS
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: status.hostIP
+                - name: HOSTNAME
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: spec.nodeName
+                - name: NODE_NAME
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: spec.nodeName
+                - name: POD_IP
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: status.podIP
+                - name: VECTOR_SELF_NODE_NAME
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: spec.nodeName
+              image: docker.io/timberio/vector:0.48.0-distroless-libc
+              imagePullPolicy: IfNotPresent
+              ports:
+                - name: prom-exporter
+                  containerPort: 9090
+                  protocol: TCP
+                - name: talos-krnl-sckt
+                  containerPort: 6050
+                  protocol: UDP
+                - name: talos-svc-skct
+                  containerPort: 6051
+                  protocol: UDP
+              resources:
+                limits:
+                  ephemeral-storage: 16Mi
+                  memory: 4Gi
+                requests:
+                  cpu: 10m
+                  ephemeral-storage: 16Mi
+                  memory: 4Gi
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                privileged: false
+                readOnlyRootFilesystem: false
+                runAsGroup: 1000
+                runAsNonRoot: true
+                runAsUser: 1000
+                seccompProfile:
+                  type: RuntimeDefault
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+              volumeMounts:
+                - mountPath: /var/log
+                  name: var-log
+                  readOnly: true
+                - mountPath: /var/lib
+                  name: var-lib
+                  readOnly: true
+                - mountPath: /vector-data-dir
+                  name: var-lib-vl-connector
+                - mountPath: /etc/vector
+                  name: config
+          dnsPolicy: ClusterFirstWithHostNet # without this the Vector pods can't resolve the VL pods because they're running in hostNetworking mode
+          hostNetwork: true # needed for the sockets created below
+          restartPolicy: Always
+          securityContext:
+            fsGroup: 1000
+            fsGroupChangePolicy: Always
+            runAsGroup: 1000
+            runAsNonRoot: true
+            runAsUser: 1000
+          serviceAccount: victoria-logs-collector
+          serviceAccountName: victoria-logs-collector
+          terminationGracePeriodSeconds: 30
+          topologySpreadConstraints:
+            - labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: victoria-logs-collector
+              maxSkew: 1
+              topologyKey: kubernetes.io/hostname
+              whenUnsatisfiable: ScheduleAnyway
+          volumes:
+            - hostPath:
+                path: /var/log
+                type: ''
+              name: var-log
+            - hostPath:
+                path: /var/lib
+                type: ''
+              name: var-lib
+            - emptyDir: {}
+              name: var-lib-vl-connector
+            - configMap:
+                defaultMode: 420
+                name: victoria-logs-collector
+              name: config
+      updateStrategy:
+        rollingUpdate:
+          maxSurge: 0
+          maxUnavailable: 1
+        type: RollingUpdate
