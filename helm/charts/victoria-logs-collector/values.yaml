@@ -170,7 +170,8 @@ extraObjects:
             helm.sh/chart: victoria-logs-collector-0.48.0-distroless-libc
         spec:
           containers:
-            - env:
+            - name: victoria-logs-collector
+              env:
                 - name: NAME
                   valueFrom:
                     fieldRef:
