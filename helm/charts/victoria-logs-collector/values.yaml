@@ -95,13 +95,6 @@ configMap:
               del(."talos-level")
               del(."talos-service")
 
-        transforms:
-          json_parser:
-            type: remap
-            inputs: [k8s]
-            source: |
-              .message = parse_json(.message) ?? .message
-
         sinks:
           exporter:
             type: prometheus_exporter
