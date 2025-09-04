@@ -31,7 +31,7 @@
   "panels": [
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "913cd666-35d1-43ad-9724-16d0be099d5a"
       },
       "fieldConfig": {
@@ -91,7 +91,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "913cd666-35d1-43ad-9724-16d0be099d5a"
           },
           "editorMode": "code",
@@ -113,7 +113,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "913cd666-35d1-43ad-9724-16d0be099d5a"
       },
       "fieldConfig": {
@@ -173,7 +173,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "913cd666-35d1-43ad-9724-16d0be099d5a"
           },
           "editorMode": "code",
@@ -195,7 +195,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "913cd666-35d1-43ad-9724-16d0be099d5a"
       },
       "fieldConfig": {
@@ -255,7 +255,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "913cd666-35d1-43ad-9724-16d0be099d5a"
           },
           "editorMode": "code",
@@ -277,7 +277,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "913cd666-35d1-43ad-9724-16d0be099d5a"
       },
       "fieldConfig": {
@@ -336,7 +336,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "913cd666-35d1-43ad-9724-16d0be099d5a"
           },
           "editorMode": "code",
@@ -352,7 +352,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "913cd666-35d1-43ad-9724-16d0be099d5a"
       },
       "fieldConfig": {
@@ -412,7 +412,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "913cd666-35d1-43ad-9724-16d0be099d5a"
           },
           "editorMode": "code",
@@ -434,7 +434,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "913cd666-35d1-43ad-9724-16d0be099d5a"
       },
       "fieldConfig": {
@@ -494,7 +494,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "913cd666-35d1-43ad-9724-16d0be099d5a"
           },
           "editorMode": "code",
@@ -516,7 +516,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "913cd666-35d1-43ad-9724-16d0be099d5a"
       },
       "fieldConfig": {
@@ -783,7 +783,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "913cd666-35d1-43ad-9724-16d0be099d5a"
           },
           "editorMode": "code",
@@ -797,7 +797,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "913cd666-35d1-43ad-9724-16d0be099d5a"
           },
           "editorMode": "code",
@@ -811,7 +811,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "913cd666-35d1-43ad-9724-16d0be099d5a"
           },
           "editorMode": "code",
@@ -824,7 +824,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "913cd666-35d1-43ad-9724-16d0be099d5a"
           },
           "editorMode": "code",
@@ -838,7 +838,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "913cd666-35d1-43ad-9724-16d0be099d5a"
           },
           "editorMode": "code",
@@ -851,7 +851,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "913cd666-35d1-43ad-9724-16d0be099d5a"
           },
           "editorMode": "code",
@@ -865,7 +865,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "913cd666-35d1-43ad-9724-16d0be099d5a"
           },
           "editorMode": "code",
@@ -948,7 +948,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "913cd666-35d1-43ad-9724-16d0be099d5a"
       },
       "fieldConfig": {
@@ -1028,7 +1028,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "913cd666-35d1-43ad-9724-16d0be099d5a"
           },
           "editorMode": "code",
@@ -1050,7 +1050,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
+        "type": "victoriametrics-metrics-datasource",
         "uid": "913cd666-35d1-43ad-9724-16d0be099d5a"
       },
       "fieldConfig": {
@@ -1105,7 +1105,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
+            "type": "victoriametrics-metrics-datasource",
             "uid": "913cd666-35d1-43ad-9724-16d0be099d5a"
           },
           "expr": "kube_storageclass_info",
