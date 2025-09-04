@@ -10,7 +10,7 @@ workload:
     tag: "12.1.1"
   envs:
     - name: GF_INSTALL_PLUGINS
-      value: "victoriametrics-metrics-datasource"
+      value: "victoriametrics-metrics-datasource 0.18.3,victoriametrics-logs-datasource 0.19.3"
   envsSecret:
   - name: GF_SECURITY_ADMIN_USER
     secret: grafana
@@ -109,18 +109,6 @@ ingress:
       service:
         name: "grafana"
         port: 3000
-grafana:
-  datasource:
-    enabled: true
-    spec:
-      instanceSelector:
-        matchLabels:
-          dashboards: "grafana"
-      datasource:
-        name: victoria-metrics
-        type: victoriametrics-metrics-datasource
-        access: proxy
-        url: http://victoria-metrics-select.victoria-metrics.svc.cluster.local:8481/select/0/prometheus
   folder:
     enabled: false
     folders:

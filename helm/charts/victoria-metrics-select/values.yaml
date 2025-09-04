@@ -38,3 +38,16 @@ service:
   - name: http
     protocol: TCP
     port: 8481
+
+grafana:
+  datasource:
+    enabled: true
+    spec:
+      instanceSelector:
+        matchLabels:
+          dashboards: "grafana"
+      datasource:
+        name: victoria-metrics
+        type: victoriametrics-metrics-datasource
+        access: proxy
+        url: http://victoria-metrics-select.victoria-metrics.svc.cluster.local:8481/select/0/prometheus

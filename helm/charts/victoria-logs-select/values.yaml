@@ -31,3 +31,16 @@ service:
   - name: http
     protocol: TCP
     port: 9471
+
+grafana:
+  datasource:
+    enabled: true
+    spec:
+      instanceSelector:
+        matchLabels:
+          dashboards: "grafana"
+      datasource:
+        name: victoria-logs
+        type: victoriametrics-logs-datasource
+        access: proxy
+        url: http://victoria-logs-select.victoria-logs.svc.cluster.local:9428
