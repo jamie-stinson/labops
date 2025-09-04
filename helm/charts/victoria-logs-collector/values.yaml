@@ -23,7 +23,7 @@ configMap:
               - audit_parser
               - talos_service_logs_xform
               - talos_kernel_logs_xform
-            endpoints: http://victoria-logs-insert.victoria-logs.svc.cluster.local:9481/insert/elasticsearch/
+            endpoints: "http://victoria-logs-insert.victoria-logs.svc.cluster.local:9481/insert/elasticsearch/"
             encoding:
               except_fields:
                 - __host # this is always 127.0.0.1 so it's useless
