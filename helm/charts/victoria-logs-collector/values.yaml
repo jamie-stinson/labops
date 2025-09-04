@@ -65,11 +65,10 @@ configMap:
               .message = parse_json(.message) ?? .message
 
         sinks:
-
           remote_write_0:
             type: http
             inputs: [json_parser]
-            uri: "http://victoria-logs:9428/insert/jsonline"
+            uri: "http://victoria-logs-insert.victoria-logs.svc.cluster.local:9481/insert/jsonline"
             encoding:
               codec: json
             framing:
