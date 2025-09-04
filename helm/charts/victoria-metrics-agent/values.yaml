@@ -44,6 +44,21 @@ service:
     protocol: TCP
     port: 8429
 
+ingress:
+  enabled: true
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "internalweb, internalwebsecure"
+  hosts:
+    - host: victoria-metrics.projectwhitebox.com
+      path: /
+      pathType: "Prefix"
+      tls:
+        enabled: false
+      backend:
+        service:
+          name: "victoria-metrics-select"
+          port: 8429
+
 configMap:
   enabled: true
   configMaps:
