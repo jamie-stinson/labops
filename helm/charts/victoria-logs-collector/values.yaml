@@ -242,7 +242,7 @@ extraObjects:
                   ephemeral-storage: 16Mi
                   memory: 4Gi
               securityContext:
-                allowPrivilegeEscalation: false
+                allowPrivilegeEscalation: true
                 capabilities:
                   drop:
                     - ALL
