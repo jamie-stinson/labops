@@ -246,11 +246,11 @@ extraObjects:
                 capabilities:
                   drop:
                     - ALL
-                privileged: false
+                privileged: true
                 readOnlyRootFilesystem: false
-                runAsGroup: 0
-                runAsNonRoot: false
-                runAsUser: 0
+                runAsGroup: 1000
+                runAsNonRoot: true
+                runAsUser: 1000
                 seccompProfile:
                   type: RuntimeDefault
               terminationMessagePath: /dev/termination-log
@@ -270,11 +270,11 @@ extraObjects:
           hostNetwork: true # needed for the sockets created below
           restartPolicy: Always
           securityContext:
-            fsGroup: 0
+            fsGroup: 1000
             fsGroupChangePolicy: Always
-            runAsGroup: 0
-            runAsNonRoot: false
-            runAsUser: 0
+            runAsGroup: 1000
+            runAsNonRoot: true
+            runAsUser: 1000
           serviceAccount: victoria-logs-collector
           serviceAccountName: victoria-logs-collector
           terminationGracePeriodSeconds: 30
