@@ -1,5 +1,7 @@
 workload:
   enabled: false
+pdb:
+  enabled: false
 configMap:
   enabled: true
   configMaps:
@@ -301,6 +303,10 @@ extraObjects:
               maxSkew: 1
               topologyKey: kubernetes.io/hostname
               whenUnsatisfiable: ScheduleAnyway
+          tolerations:
+            - effect: NoSchedule
+              key: node-role.kubernetes.io/control-plane
+              operator: Exists
           volumes:
             - hostPath:
                 path: /var/lib/vector
