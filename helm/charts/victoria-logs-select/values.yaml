@@ -45,7 +45,7 @@ extraObjects:
         access: proxy
         name: victoria-logs
         type: victoriametrics-logs-datasource
-        url: http://victoria-logs-select.victoria-logs.svc.cluster.local:9428
+        url: http://victoria-logs-select.victoria-logs.svc.cluster.local:9471
       instanceSelector:
         matchLabels:
           dashboards: grafana
