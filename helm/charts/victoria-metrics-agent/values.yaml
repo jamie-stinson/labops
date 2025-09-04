@@ -40,7 +40,7 @@ workload:
     configMapName: victoria-metrics-agent
 service:
   ports:
-  - name: http
+  - name: http-metrics
     protocol: TCP
     port: 8429
 
