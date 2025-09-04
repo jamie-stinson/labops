@@ -56,7 +56,7 @@ ingress:
         enabled: false
       backend:
         service:
-          name: "victoria-metrics-select"
+          name: "victoria-metrics-agent"
           port: 8429
 
 configMap:
