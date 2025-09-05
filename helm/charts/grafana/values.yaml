@@ -114,33 +114,6 @@ ingress:
     folders:
     - name: "system"
       title: "System"
-  dashboard:
-    enabled: true
-    dashboards:
-    - name: kubernetes-global
-      title: "Kubernetes / Global"
-      url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/tmp/dashboards/kubernetes-global.json"
-      folder: "System"
-    - name: kubernetes-pods
-      title: "Kubernetes / Pods"
-      url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/tmp/dashboards/kubernetes-pods.json"
-      folder: "System"
-    - name: kubernetes-api-server
-      title: "Kubernetes / API Server"
-      url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/tmp/dashboards/kubernetes-api-server.json"
-      folder: "System"
-    - name: compute-cluster
-      title: "Compute / Cluster"
-      url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/tmp/dashboards/compute-cluster.json"
-      folder: "System"
-    - name: compute-nodes
-      title: "Compute / Nodes"
-      url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/tmp/dashboards/compute-nodes.json"
-      folder: "System"
-    - name: kubernetes-storage
-      title: "Kubernetes / Storage"
-      url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/tmp/dashboards/kubernetes-storage.json"
-      folder: "System"
 extraObjects:
 - |
   apiVersion: grafana.integreatly.org/v1beta1
@@ -174,3 +147,19 @@ extraObjects:
         name: grafana
         namespace: grafana
       type: Opaque
+- |
+  apiVersion: grafana.integreatly.org/v1beta1
+  kind: GrafanaDashboard
+  metadata:
+    name: kubernetes-pods
+    namespace: grafana
+  spec:
+    allowCrossNamespaceImport: true
+    contentCacheDuration: 1h
+    folder: System
+    instanceSelector:
+      matchLabels:
+        dashboards: grafana
+    resyncPeriod: 1m
+    gzipJson: |-
+      H4sIAGfbumgAA+1dUXPbNhJ+96/g8TI3yY3kWrbk2jfTB9tNZjJter46zc1d4tFAJCShhggGBG0rHt1vvwVIggQFypaiWFKLzqQSgSWw2F3sfh8kUw97nuejKGICCcKixP+H9wBN0EhJIuDqo7ry8lbVM0gJFW8j6Oy0ytYQCZSwlAdYj5H3iGks26oSrWp/SkLZPeJoiCLk665ZZXQcoQGVowie4kr7mISWVhKw6IJRxuW4fDRALw9a3mGnA//r9Vpe51VFAT9CE6XeWWkF72/eGcVcJFU5gfgIi/riKJkQ2dg5ODAWNUEiGJ9FU+gaIppgo1OgkbT0x+uW3U7JeMAQD+2maBSbqdfrvVzcxyERudW0Cv6QJAGi/8GIX8GCxDsWiTEIKOWlC+Lxe8aoILFuVN45UW8piW5Kxf0YRZgmOkgKuzSFgtb8lgSCcQJ2F5wESbt4tQZIER4vHsrumV5yS8+Jk4CTWLpPSl+y0Lu4/M1LEzTCHscUHHuLPcE8IhK4zsaBN59TnIhkX08IBsI0vGDRkIxM7UM8RCkVST0CgjzQqo0yAJiKTF+MYbYxo2HiVwRmhueDNBFsMj8GuifJOeMh5ldjdmcLpVzoAkcCcxz+F3O2SEyq+q5QDN8L3yL0MxpgqmyIwUSRVeaSogBPZCfIoVQwm9AVG4p36N7ME2YviYowq/QOED+jZBTl41u6/01CMX6DZBRJgf3jmkjI0d2VmKrQl0GL6+oNCaX/jFFAxFTt3Vo37IOQwOyFqZJgDKutDyJzzxtu8ZvcKXiEo9DuCrkT9B6z99+SL0Wf0TWrqUCiBNLULylV29Dmdrn6tzI4YkZRsTuSCWOw7S2iyrIgcljrixmJxBX5Is3Rq/XJhIJ/hHLBySDNp5gzSLH35SSI+wtXBdvl7lJOKBflR/gW87quCeSeRctOBApuSDSyqTLiLI1VxvfnDF/s2ohB0CxUstzXRaTNTVQMxobD2liNmWCC4hjUtlWHMo805po427GQ8ubsJXBcZuryv7rOlXwGdsI4mjORjE5EUznfQa1rVpddNPpfX5+dnxydLhq/91UTQDpcNPhprz64cX3d6KI0UgW/MLa6tBZqBnHLIUdkzpyrWCPou2SmN/1xUWvza5n0O5XN6N+bGdGfVvxQjq1KZk/L+Sw20Z1q1DnKLGeIBpbwC0kSUzQtMqJCh4ZAXC0JAyZkQTME5K7+2UiLdnijU6Ohlky2srpZN7zeABMo0KQ2LeNKJQkQKn6aM1lM0xGJPmCe5Emyc7jf2e+UwCDDf+YmMlRsRMCrQh915yL4U7NdjvnKEh/IV7P/Hk/AU3wOM6u+WG2cJJ285Ejgl4CiBYJ8zftBnPYVlOonGFrDpC8AK9MHiZ0hFQf4h0/+C33xyW95MQt/+B80wqu8JBO4+S8gJS8CCngHc3lP/vaTP/v4ot+Xs/aJrFawS69fvfIGU+8ljPDK+86TWt2kA9yH636pWQHl+gWUe7pOxa0gB+uTLb+zgRKA10Y9S6VMyxZqK2fJoWlWCw2hbMu9YRzogRR8eJBKebOZKcZRNJqnNbIDD9+GWemaC+XrMlKJyKBPgYJ/S6olQQejIGAczAnOoWkeStuG49/hCePTDUL5IbnHoeaTA1k/apvUgX0H9ncP7DcCV2kxdSujJFwMgx1pcKRhq0jD93O4fo2k4WR3SYPRsIA1HH1D1pAdRzbTBk5GY+FYQ7mqHWMNJSyfKMzWv2NcJlRgDaI/mAq8BDp/nDE8Hz3IVrNOhrBxWpCD6h1iBus+mI8BgAiB2wFFSUKCXQPsktddMAjSlSD79sFulov+CXC3w8ubxcshDqC6qGV11wik0UAd+uwAjH4M5c4NviTKNR27kTPxEzu6PTx1Z+IO3W7jmXgx7mqH5Pp2NQuMvd7j6Ta801N8M1x6oWfYsUNrB00NaHoumZ6DpbsGS91x8B8O3houcPB2TfBWnWRt+vi2AeD29MdvDuA6gJv3b/z49kngdgUku6Xw1R2u7jiCdeB118CrA527/B0Ehy01tiTRefzc4LJ+eNo5toPLoy0Gl7J6Pyu2rB1yO2y5zOFphIUEl32OA0xucYYulz1AffIR6RqOQn/NFA2/Bjq2/thubnsLHC3AVMmEiO339PtcU7G8s8+f/PWLcxSFdwqyOHrg6IHn6IGjB5mIoweWiRw90N8ffnZuMHfw3EgO9HdpHDlw5CDrXw85gDJ1A7bYZtDo6MGa6MEO+PpZCMKlsoP3KxLuEwRHEXS3owiFnKMIjiI4ilAZYHMUof7xwWG3gSHobOUYgmMIWf96GULIWRzjcJvRo2MKa2YKO+DzZ2QMifdjZg/HGhxrKLodayjkHGtwrMGxhsoAW/TBQiNt+N7RBkcbvgVtgMhmfKvPmh1bWBNb2H5XPwtJ+CWzi/dameMJHGEvH8qPOaYMGQhNKiBrrLyxlw2WPT0Plfmnq74yqp94rwb15YN6OLhI/5UojM4gtsY4LVswH0rbRDrG5FM6i7fZH6gUV7m39a0se/5iprhQISSq2GbBjxsEKedZ8jc2i0LulQ1R7ATTU0U19ocBOjgcnobt487xabs7CLrt02532A6OuydB2B10USewl9v8Bw2qtZFEEHshPlN/hFkrGvrXC+wkrKyX1TLof04xny5P6Up3d4zWEb6vkRfbbz7US9XTjd5gZLsBH/8diiWT2iMpzZgbDwngqbzyUsnq+krdJHs2VQQJDrLGkLXybGL8EMWqrs/HWsLvhlk+8+n7zDLGkzvLIFlyHdXEdKm39QcEFh9Q/C856muV9ttGm92iS4RcjpA6lij8XJ1ghQCUi24nU1jppCEWqxI7F5bykWnSmw/WctfydIU0wvVJsalvXTk6m6NwJbXt0dnWsjoo25uPSkTphyLA9v9eHfWReJU+scapyWd9ADIwRxWeXe9u8DaDuob4qD2hzwzo2i8KZYxsrrkIcxjqWwb41y6tIehBaslwP9xgEj46aEJbsseq+JNSlBWfV11YmbNGkxJMcSDxuv1MrdC8M/cwFK16p/lB4SvO1VswWW+V2eq0Y4FLGp2ynqVNmlc2WfNcR81zHa17rl7zXD1zLv3eCuY7ScsDF7c8MD28m8Ab+GeMrjdj/vHHyruxVkgU/BkLEbeBPEItwIbvr63bdrkh/jx16Xc2+Cpa8EipguGfkSmsywpbTyrUa/nbe/IcpTxuGGYfevkRu2t39Ib0BcsbfeO+mAQ3WH3GWbZ9kce+hW7lkc5P+iDF+867lMceqj+P4vKYpR/rvlt9NHO0N9v7P4s+eh8AcgAA
