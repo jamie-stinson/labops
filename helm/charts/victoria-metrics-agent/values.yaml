@@ -275,18 +275,18 @@ configMap:
           - job_name: 'coredns'
             kubernetes_sd_configs:
               - role: pod
-                namespaces:
-                  names:
-                    - kube-system
             relabel_configs:
-              - source_labels: [__meta_kubernetes_pod_label_k8s_app]
+              - source_labels: [__meta_kubernetes_pod_name]
+                regex: '.*coredns.*'
                 action: keep
-                regex: coredns
 
-              - source_labels: [__address__]
-                regex: (.*):.*
-                replacement: ${1}:9153
+              - source_labels: [__meta_kubernetes_pod_container_port_number]
+                regex: '9153'
+                action: keep
+
+              - source_labels: [__meta_kubernetes_pod_ip]
                 target_label: __address__
+                replacement: '$1:9153'
 
               - source_labels: [__meta_kubernetes_namespace]
                 target_label: namespace
