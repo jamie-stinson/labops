@@ -24,10 +24,10 @@ workload:
       requests:
         cpu: "10m"
         memory: "4Gi"
-        ephemeral-storage: "16Mi"
+        ephemeral-storage: "128Mi"
       limits:
         memory: "4Gi"
-        ephemeral-storage: "16Mi"
+        ephemeral-storage: "128Mi"
   storage:
   - name: tmp
     type: emptyDir
