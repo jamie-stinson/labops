@@ -22,10 +22,10 @@ workload:
     custom:
       requests:
         cpu: "10m"
-        memory: "128Mi"
+        memory: "1Gi"
         ephemeral-storage: "16Mi"
       limits:
-        memory: "128Mi"
+        memory: "1Gi"
         ephemeral-storage: "16Mi"
   storage:
   - name: cache
