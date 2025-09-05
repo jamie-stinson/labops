@@ -38,7 +38,7 @@ workload:
       readOnly: false
 service:
   ports:
-  - name: http
+  - name: http-metrics
     protocol: TCP
     port: 8482
   - name: vminsert

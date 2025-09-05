@@ -28,6 +28,6 @@ workload:
         ephemeral-storage: "16Mi"
 service:
   ports:
-  - name: http
+  - name: http-metrics
     protocol: TCP
     port: 8480
