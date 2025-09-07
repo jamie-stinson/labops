@@ -21,7 +21,7 @@ workload:
       requests:
         cpu: "25m"
         memory: "4Gi"
-        ephemeral-storage: "1GI"
+        ephemeral-storage: "1Gi"
       limits:
         memory: "4Gi"
         ephemeral-storage: "1Gi"
