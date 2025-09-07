@@ -9,6 +9,8 @@ workload:
     repository: "docker.io/grafana/grafana"
     tag: "12.1.1"
   envs:
+    - name: GF_LOG_LEVEL
+      value: "debug"
     - name: GF_INSTALL_PLUGINS
       value: "victoriametrics-metrics-datasource 0.18.3,victoriametrics-logs-datasource 0.19.3"
   envsSecret:
