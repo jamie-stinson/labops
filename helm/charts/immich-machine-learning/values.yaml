@@ -20,11 +20,11 @@ workload:
     custom:
       requests:
         cpu: "25m"
-        memory: "512Mi"
-        ephemeral-storage: "16Mi"
+        memory: "4Gi"
+        ephemeral-storage: "1GI"
       limits:
-        memory: "512Mi"
-        ephemeral-storage: "16Mi"
+        memory: "4Gi"
+        ephemeral-storage: "1Gi"
   envs:
     - name: "DB_DATABASE_NAME"
       value: "immich"
@@ -45,9 +45,9 @@ workload:
     - name: cache
       type: emptyDir
       mountPath: /cache
-  #   - name: tmp
-  #     type: emptyDir
-  #     mountPath: /tmp
+    - name: tmp
+      type: emptyDir
+      mountPath: /tmp
   securityContext:
     readOnlyRootFilesystem: false
 
