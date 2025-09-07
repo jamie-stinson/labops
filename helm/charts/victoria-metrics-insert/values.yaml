@@ -8,7 +8,7 @@ workload:
     - '--httpListenAddr=:8480'
     - '--loggerFormat=json'
     - >-
-      --storageNode=victoria-metrics-storage-0.victoria-metrics-storage.victoria-metrics.svc.cluster.local.:8400
+      --storageNode=victoria-metrics-storage-0.victoria-metrics-storage.victoria-metrics.svc.cluster.local:8400
   probes:
     readinessProbe:
       type: tcpSocket

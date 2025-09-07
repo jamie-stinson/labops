@@ -38,11 +38,11 @@ workload:
     custom:
       requests:
         cpu: "10m"
-        memory: "512Mi"
-        ephemeral-storage: "512Mi"
+        memory: "2Gi"
+        ephemeral-storage: "10Gi"
       limits:
-        memory: "512Mi"
-        ephemeral-storage: "512Mi"
+        memory: "2Gi"
+        ephemeral-storage: "10Gi"
   probes:
     readinessProbe:
       path: "/api/health"
