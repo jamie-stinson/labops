@@ -13,6 +13,8 @@ workload:
   - '--path.sysfs=/host/sys'
   - '--path.rootfs=/host/root'
   - '--path.udev.data=/host/root/run/udev/data'
+  - >
+    --collector.filesystem.fs-types-exclude='^(nfs|nfs4)$'
   probes:
     readinessProbe:
       path: "/metrics"
