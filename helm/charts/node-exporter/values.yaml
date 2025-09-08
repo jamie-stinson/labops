@@ -22,6 +22,24 @@ workload:
     livenessProbe:
       path: "/metrics"
       port: 9100
+  podSecurityContext:
+    runAsUser: 0
+    runAsGroup: 0
+    runAsNonRoot: false
+    fsGroup: 0
+    fsGroupChangePolicy: "Always"
+  securityContext:
+    runAsUser: 0
+    runAsGroup: 0
+    runAsNonRoot: false
+    allowPrivilegeEscalation: false
+    privileged: false
+    readOnlyRootFilesystem: false
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
   resources:
     preset: ""
     custom:
