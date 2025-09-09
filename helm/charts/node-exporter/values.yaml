@@ -1,4 +1,4 @@
-autoPatching:
+workload:
   enabled: false
 service:
   ports:
