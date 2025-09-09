@@ -13,10 +13,7 @@ extraObjects:
     metadata:
       labels:
         app.kubernetes.io/instance: node-exporter
-        app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: node-exporter
-        app.kubernetes.io/part-of: node-exporter
-        app.kubernetes.io/version: 1.9.1
       name: node-exporter
       namespace: node-exporter
     spec:
@@ -28,26 +25,66 @@ extraObjects:
       template:
         metadata:
           annotations:
-            cluster-autoscaler.kubernetes.io/safe-to-evict: 'true'
+            app.kubernetes.io/name: node-exporter
           labels:
             app.kubernetes.io/instance: node-exporter
-            app.kubernetes.io/managed-by: Helm
             app.kubernetes.io/name: node-exporter
-            app.kubernetes.io/part-of: node-exporter
-            app.kubernetes.io/version: 1.9.1
         spec:
           containers:
             - args:
+                - '--web.listen-address=0.0.0.0:9100'
                 - '--path.procfs=/host/proc'
                 - '--path.sysfs=/host/sys'
                 - '--path.rootfs=/host/root'
                 - '--path.udev.data=/host/root/run/udev/data'
-                - '--web.listen-address=[$(HOST_IP)]:9100'
                 - '--log.format=json'
               env:
-                - name: HOST_IP
-                  value: 0.0.0.0
-              image: quay.io/prometheus/node-exporter:v1.9.1
+                - name: NAME
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: metadata.name
+                - name: POD_NAME
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: metadata.name
+                - name: NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: metadata.namespace
+                - name: POD_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: metadata.namespace
+                - name: OPERATOR_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: metadata.namespace
+                - name: HOST_IP_ADDRESS
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: status.hostIP
+                - name: HOSTNAME
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: spec.nodeName
+                - name: NODE_NAME
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: spec.nodeName
+                - name: POD_IP
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: status.podIP
+              image: quay.io/prometheus/node-exporter:v1.8.2
               imagePullPolicy: IfNotPresent
               livenessProbe:
                 failureThreshold: 3
@@ -55,9 +92,10 @@ extraObjects:
                   path: /
                   port: http-metrics
                   scheme: HTTP
+                initialDelaySeconds: 15
                 periodSeconds: 10
                 successThreshold: 1
-                timeoutSeconds: 1
+                timeoutSeconds: 5
               name: node-exporter
               ports:
                 - containerPort: 9100
@@ -69,9 +107,10 @@ extraObjects:
                   path: /
                   port: http-metrics
                   scheme: HTTP
+                initialDelaySeconds: 15
                 periodSeconds: 10
                 successThreshold: 1
-                timeoutSeconds: 1
+                timeoutSeconds: 5
               resources:
                 limits:
                   ephemeral-storage: 128Mi
@@ -80,8 +119,6 @@ extraObjects:
                   cpu: 10m
                   ephemeral-storage: 128Mi
                   memory: 128Mi
-              securityContext:
-                readOnlyRootFilesystem: true
               terminationMessagePath: /dev/termination-log
               terminationMessagePolicy: File
               volumeMounts:
@@ -92,25 +129,28 @@ extraObjects:
                   name: sys
                   readOnly: true
                 - mountPath: /host/root
-                  mountPropagation: HostToContainer
                   name: root
+                  mountPropagation: HostToContainer
                   readOnly: true
           dnsPolicy: ClusterFirst
           hostNetwork: true
           hostPID: true
           restartPolicy: Always
           schedulerName: default-scheduler
-          securityContext:
-            fsGroup: 65534
-            runAsGroup: 65534
-            runAsNonRoot: true
-            runAsUser: 65534
           serviceAccount: node-exporter
           serviceAccountName: node-exporter
           terminationGracePeriodSeconds: 30
           tolerations:
             - effect: NoSchedule
+              key: node-role.kubernetes.io/control-plane
               operator: Exists
+          topologySpreadConstraints:
+            - labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: node-exporter
+              maxSkew: 1
+              topologyKey: kubernetes.io/hostname
+              whenUnsatisfiable: ScheduleAnyway
           volumes:
             - hostPath:
                 path: /proc
