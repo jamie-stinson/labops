@@ -10,6 +10,8 @@ workload:
     - '--loggerFormat=json'
     - '--retentionPeriod=7d'
     - '--storageDataPath=/storage'
+    - '--retention.maxDiskUsagePercent=90'
+    - '--retentionPeriod=100y'
   probes:
     readinessProbe:
       type: tcpSocket
