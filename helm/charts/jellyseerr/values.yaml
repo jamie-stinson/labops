@@ -43,10 +43,10 @@ workload:
       requests:
         cpu: "100m"
         memory: "1Gi"
-        ephemeral-storage: "16Mi"
+        ephemeral-storage: "512Mi"
       limits:
         memory: "1Gi"
-        ephemeral-storage: "16Mi"
+        ephemeral-storage: "512Mi"
 service:
   ports:
   - name: http
