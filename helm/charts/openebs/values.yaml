@@ -26,10 +26,10 @@ workload:
       requests:
         cpu: "25m"
         memory: "128Mi"
-        ephemeral-storage: "16Mi"
+        ephemeral-storage: "1Gi"
       limits:
         memory: "128Mi"
-        ephemeral-storage: "16Mi"
+        ephemeral-storage: "1Gi"
   probes:
     readinessProbe:
       type: exec
