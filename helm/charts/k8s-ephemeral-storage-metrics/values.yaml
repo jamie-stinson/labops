@@ -1,0 +1,31 @@
+workload:
+  image:
+    repository: ghcr.io/jmcgrath207/k8s-ephemeral-storage-metrics
+    tag: 1.18.1
+  probes:
+    readinessProbe:
+      type: tcpSocket
+      port: 9100
+    livenessProbe:
+      type: tcpSocket
+      port: 9100
+  envs:
+    - name: DEPLOY_TYPE
+      value: "deployment"
+    - name: "SCRAPE_INTERVAL"
+      value: "15"
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "50m"
+        memory: "128Mi"
+        ephemeral-storage: "512Mi"
+      limits:
+        memory: "128Mi"
+        ephemeral-storage: "512Mi"
+service:
+  ports:
+  - name: http-metrics
+    port: 9100
+    protocol: TCP
