@@ -72,7 +72,14 @@ extraObjects:
                 periodSeconds: 10
                 successThreshold: 1
                 timeoutSeconds: 1
-              resources: {}
+              resources:
+                limits:
+                  ephemeral-storage: 128Mi
+                  memory: 128Mi
+                requests:
+                  cpu: 10m
+                  ephemeral-storage: 128Mi
+                  memory: 128Mi
               securityContext:
                 readOnlyRootFilesystem: true
               terminationMessagePath: /dev/termination-log
