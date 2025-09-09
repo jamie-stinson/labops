@@ -6,7 +6,7 @@ workload:
   type: DaemonSet
   image:
     repository: "quay.io/prometheus/node-exporter"
-    tag: "v1.9.1"
+    tag: "v1.8.2"
   args:
   - '--web.listen-address=0.0.0.0:9100'
   - '--path.procfs=/host/proc'
@@ -14,6 +14,8 @@ workload:
   - '--path.rootfs=/host/root'
   - '--path.udev.data=/host/root/run/udev/data'
   - '--log.format=json'
+  - '--no-collector.nfs'
+  - '--no-collector.nfsd'
   - '--no-collector.zfs'
   probes:
     readinessProbe:
