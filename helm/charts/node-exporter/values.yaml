@@ -1,171 +1,57 @@
 workload:
-  enabled: false
+  type: DaemonSet
+  image:
+    repository: "quay.io/prometheus/node-exporter"
+    tag: "v1.8.2"
+  args:
+  - '--web.listen-address=0.0.0.0:9100'
+  - '--path.procfs=/host/proc'
+  - '--path.sysfs=/host/sys'
+  - '--path.rootfs=/host/root'
+  - '--path.udev.data=/host/root/run/udev/data'
+  - '--log.format=json'
+  - '--no-collector.nfs'
+  - '--no-collector.nfsd'
+  - '--no-collector.zfs'
+  probes:
+    readinessProbe:
+      path: "/"
+      port: 9100
+    livenessProbe:
+      path: "/"
+      port: 9100
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "10m"
+        memory: "128Mi"
+        ephemeral-storage: "128Mi"
+      limits:
+        memory: "128Mi"
+        ephemeral-storage: "128Mi"
+  tolerations:
+  - key: "node-role.kubernetes.io/control-plane"
+    operator: "Exists"
+    effect: "NoSchedule"
+  storage:
+  - name: proc
+    type: hostPath
+    mountPath: /host/proc
+    hostPath: /proc
+    readOnly: true
+  - name: sys
+    type: hostPath
+    mountPath: /host/sys
+    hostPath: /sys
+    readOnly: true
+  - name: root
+    type: hostPath
+    mountPath: /host/root
+    hostPath: /
+    readOnly: true
 service:
   ports:
   - name: http-metrics
     protocol: TCP
     port: 9100
-
-extraObjects:
-  - |
-    apiVersion: apps/v1
-    kind: DaemonSet
-    metadata:
-      labels:
-        app.kubernetes.io/instance: node-exporter
-        app.kubernetes.io/name: node-exporter
-      name: node-exporter
-      namespace: node-exporter
-    spec:
-      revisionHistoryLimit: 10
-      selector:
-        matchLabels:
-          app.kubernetes.io/instance: node-exporter
-          app.kubernetes.io/name: node-exporter
-      template:
-        metadata:
-          annotations:
-            app.kubernetes.io/name: node-exporter
-          labels:
-            app.kubernetes.io/instance: node-exporter
-            app.kubernetes.io/name: node-exporter
-        spec:
-          containers:
-            - args:
-                - '--web.listen-address=0.0.0.0:9100'
-                - '--path.procfs=/host/proc'
-                - '--path.sysfs=/host/sys'
-                - '--path.rootfs=/host/root'
-                - '--path.udev.data=/host/root/run/udev/data'
-                - '--log.format=json'
-              env:
-                - name: NAME
-                  valueFrom:
-                    fieldRef:
-                      apiVersion: v1
-                      fieldPath: metadata.name
-                - name: POD_NAME
-                  valueFrom:
-                    fieldRef:
-                      apiVersion: v1
-                      fieldPath: metadata.name
-                - name: NAMESPACE
-                  valueFrom:
-                    fieldRef:
-                      apiVersion: v1
-                      fieldPath: metadata.namespace
-                - name: POD_NAMESPACE
-                  valueFrom:
-                    fieldRef:
-                      apiVersion: v1
-                      fieldPath: metadata.namespace
-                - name: OPERATOR_NAMESPACE
-                  valueFrom:
-                    fieldRef:
-                      apiVersion: v1
-                      fieldPath: metadata.namespace
-                - name: HOST_IP_ADDRESS
-                  valueFrom:
-                    fieldRef:
-                      apiVersion: v1
-                      fieldPath: status.hostIP
-                - name: HOSTNAME
-                  valueFrom:
-                    fieldRef:
-                      apiVersion: v1
-                      fieldPath: spec.nodeName
-                - name: NODE_NAME
-                  valueFrom:
-                    fieldRef:
-                      apiVersion: v1
-                      fieldPath: spec.nodeName
-                - name: POD_IP
-                  valueFrom:
-                    fieldRef:
-                      apiVersion: v1
-                      fieldPath: status.podIP
-              image: quay.io/prometheus/node-exporter:v1.8.2
-              imagePullPolicy: IfNotPresent
-              livenessProbe:
-                failureThreshold: 3
-                httpGet:
-                  path: /
-                  port: http-metrics
-                  scheme: HTTP
-                initialDelaySeconds: 15
-                periodSeconds: 10
-                successThreshold: 1
-                timeoutSeconds: 5
-              name: node-exporter
-              ports:
-                - containerPort: 9100
-                  name: http-metrics
-                  protocol: TCP
-              readinessProbe:
-                failureThreshold: 3
-                httpGet:
-                  path: /
-                  port: http-metrics
-                  scheme: HTTP
-                initialDelaySeconds: 15
-                periodSeconds: 10
-                successThreshold: 1
-                timeoutSeconds: 5
-              resources:
-                limits:
-                  ephemeral-storage: 128Mi
-                  memory: 128Mi
-                requests:
-                  cpu: 10m
-                  ephemeral-storage: 128Mi
-                  memory: 128Mi
-              terminationMessagePath: /dev/termination-log
-              terminationMessagePolicy: File
-              volumeMounts:
-                - mountPath: /host/proc
-                  name: proc
-                  readOnly: true
-                - mountPath: /host/sys
-                  name: sys
-                  readOnly: true
-                - mountPath: /host/root
-                  name: root
-                  mountPropagation: HostToContainer
-                  readOnly: true
-          dnsPolicy: ClusterFirst
-          hostNetwork: true
-          hostPID: true
-          restartPolicy: Always
-          schedulerName: default-scheduler
-          serviceAccount: node-exporter
-          serviceAccountName: node-exporter
-          terminationGracePeriodSeconds: 30
-          tolerations:
-            - effect: NoSchedule
-              key: node-role.kubernetes.io/control-plane
-              operator: Exists
-          topologySpreadConstraints:
-            - labelSelector:
-                matchLabels:
-                  app.kubernetes.io/name: node-exporter
-              maxSkew: 1
-              topologyKey: kubernetes.io/hostname
-              whenUnsatisfiable: ScheduleAnyway
-          volumes:
-            - hostPath:
-                path: /proc
-                type: ''
-              name: proc
-            - hostPath:
-                path: /sys
-                type: ''
-              name: sys
-            - hostPath:
-                path: /
-                type: ''
-              name: root
-      updateStrategy:
-        rollingUpdate:
-          maxSurge: 0
-          maxUnavailable: 1
-        type: RollingUpdate
