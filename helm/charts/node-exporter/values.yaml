@@ -12,13 +12,11 @@ extraObjects:
     kind: DaemonSet
     metadata:
       labels:
-        app.kubernetes.io/component: metrics
         app.kubernetes.io/instance: node-exporter
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: node-exporter
         app.kubernetes.io/part-of: node-exporter
         app.kubernetes.io/version: 1.9.1
-        helm.sh/chart: node-exporter
       name: node-exporter
       namespace: node-exporter
     spec:
@@ -31,15 +29,12 @@ extraObjects:
         metadata:
           annotations:
             cluster-autoscaler.kubernetes.io/safe-to-evict: 'true'
-          creationTimestamp: null
           labels:
-            app.kubernetes.io/component: metrics
-            app.kubernetes.io/instance: node-exporter-test
+            app.kubernetes.io/instance: node-exporter
             app.kubernetes.io/managed-by: Helm
             app.kubernetes.io/name: node-exporter
             app.kubernetes.io/part-of: node-exporter
             app.kubernetes.io/version: 1.9.1
-            helm.sh/chart: node-exporter-4.47.3
         spec:
           containers:
             - args:
