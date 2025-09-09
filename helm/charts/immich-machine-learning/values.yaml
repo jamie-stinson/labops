@@ -21,10 +21,10 @@ workload:
       requests:
         cpu: "25m"
         memory: "4Gi"
-        ephemeral-storage: "1Gi"
+        ephemeral-storage: "4Gi"
       limits:
         memory: "4Gi"
-        ephemeral-storage: "1Gi"
+        ephemeral-storage: "4Gi"
   envs:
     - name: "DB_DATABASE_NAME"
       value: "immich"
