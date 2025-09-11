@@ -120,7 +120,7 @@ configMap:
               - role: node
             relabel_configs:
               - source_labels: [__meta_kubernetes_node_name]
-                regex: .*controlplane.*
+                regex: .*control-plane.*
                 action: keep
               - source_labels: [__meta_kubernetes_node_address_InternalIP]
                 regex: (.+)
@@ -157,7 +157,7 @@ configMap:
               - role: node
             relabel_configs:
               - source_labels: [__meta_kubernetes_node_name]
-                regex: .*controlplane.*
+                regex: .*control-plane.*
                 action: keep
               - source_labels: [__meta_kubernetes_node_address_InternalIP]
                 regex: (.+)
@@ -180,7 +180,7 @@ configMap:
               - role: node
             relabel_configs:
               - source_labels: [__meta_kubernetes_node_name]
-                regex: .*controlplane.*
+                regex: .*control-plane.*
                 action: keep
               - source_labels: [__meta_kubernetes_node_address_InternalIP]
                 regex: (.+)
@@ -229,7 +229,7 @@ configMap:
               - role: node
             relabel_configs:
               - source_labels: [__meta_kubernetes_node_name]
-                regex: .*controlplane.*
+                regex: .*control-plane.*
                 action: keep
               - source_labels: [__meta_kubernetes_node_address_InternalIP]
                 regex: (.+)
