@@ -88,24 +88,24 @@ configMap:
                 regex: __meta_kubernetes.*
 
           # Scraper for Kubernetes services with HTTPS metrics
-          - job_name: 'kube-https-services'
-            scheme: https
-            tls_config:
-              insecure_skip_verify: true
-            kubernetes_sd_configs:
-              - role: endpoints
-            relabel_configs:
-              - source_labels: [__meta_kubernetes_endpoint_port_name]
-                regex: https-metrics
-                action: keep
-              - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
-                target_label: service
-                separator: /
-                replacement: $1/$2
-              - source_labels: [__meta_kubernetes_pod_node_name]
-                target_label: instance
-              - action: labeldrop
-                regex: __meta_kubernetes.*
+          # - job_name: 'kube-https-services'
+          #   scheme: https
+          #   tls_config:
+          #     insecure_skip_verify: true
+          #   kubernetes_sd_configs:
+          #     - role: endpoints
+          #   relabel_configs:
+          #     - source_labels: [__meta_kubernetes_endpoint_port_name]
+          #       regex: https-metrics
+          #       action: keep
+          #     - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
+          #       target_label: service
+          #       separator: /
+          #       replacement: $1/$2
+          #     - source_labels: [__meta_kubernetes_pod_node_name]
+          #       target_label: instance
+          #     - action: labeldrop
+          #       regex: __meta_kubernetes.*
 
           # Scraper for kubernetes api server
           - job_name: "kube-apiserver"
