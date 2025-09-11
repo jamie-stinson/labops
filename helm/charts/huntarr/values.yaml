@@ -31,10 +31,10 @@ workload:
       requests:
         cpu: "25m"
         memory: "128Mi"
-        ephemeral-storage: "16Mi"
+        ephemeral-storage: "512Mi"
       limits:
         memory: "128Mi"
-        ephemeral-storage: "16Mi"
+        ephemeral-storage: "512Mi"
   storage:
   - name: config
     type: pvc

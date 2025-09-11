@@ -25,10 +25,10 @@ workload:
       requests:
         cpu: "10m"
         memory: "128Mi"
-        ephemeral-storage: "16Mi"
+        ephemeral-storage: "128Mi"
       limits:
         memory: "128Mi"
-        ephemeral-storage: "16Mi"
+        ephemeral-storage: "128Mi"
 service:
   ports:
   - name: http-metrics

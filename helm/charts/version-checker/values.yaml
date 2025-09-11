@@ -21,10 +21,10 @@ workload:
     custom:
       requests:
         cpu: "10m"
-        memory: "128Mi"
+        memory: "256Mi"
         ephemeral-storage: "128Mi"
       limits:
-        memory: "128Mi"
+        memory: "256Mi"
         ephemeral-storage: "128Mi"
 service:
   ports:
