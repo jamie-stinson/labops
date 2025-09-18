@@ -4,7 +4,8 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-    argocd.argoproj.io/sync-options: PreSync=true
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-10"
   name: clustercompliancereports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -270,7 +271,8 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-    argocd.argoproj.io/sync-options: PreSync=true
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-10"
   name: clusterconfigauditreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -437,7 +439,8 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-    argocd.argoproj.io/sync-options: PreSync=true
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-10"
   name: clusterinfraassessmentreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -603,7 +606,8 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-    argocd.argoproj.io/sync-options: PreSync=true
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-10"
   name: clusterrbacassessmentreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -769,7 +773,8 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-    argocd.argoproj.io/sync-options: PreSync=true
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-10"
   name: clustersbomreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -1159,7 +1164,8 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-    argocd.argoproj.io/sync-options: PreSync=true
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-10"
   name: clustervulnerabilityreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -1439,7 +1445,8 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-    argocd.argoproj.io/sync-options: PreSync=true
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-10"
   name: configauditreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -1607,7 +1614,8 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-    argocd.argoproj.io/sync-options: PreSync=true
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-10"
   name: exposedsecretreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -1809,7 +1817,8 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-    argocd.argoproj.io/sync-options: PreSync=true
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-10"
   name: infraassessmentreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -1975,7 +1984,8 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-    argocd.argoproj.io/sync-options: PreSync=true
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-10"
   name: rbacassessmentreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -2142,7 +2152,8 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-    argocd.argoproj.io/sync-options: PreSync=true
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-10"
   name: sbomreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -2534,7 +2545,8 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-    argocd.argoproj.io/sync-options: PreSync=true
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-10"
   name: vulnerabilityreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
