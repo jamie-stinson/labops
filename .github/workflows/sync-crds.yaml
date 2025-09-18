@@ -106,13 +106,6 @@ jobs:
               exit 1
             fi
 
-            # Add Argo CD PreSync hook + negative sync-wave annotations to all CRDs
-            yq eval '
-              .metadata.annotations = (.metadata.annotations // {}) |
-              .metadata.annotations += {
-              }
-            ' -i "$crd_file"
-
             # Log number of CRDs extracted
             crd_count=$(yq eval-all 'select(.kind == "CustomResourceDefinition")' "$crd_file" | yq eval 'length' - 2>/dev/null | wc -l)
             echo "$crd_file looks good ($crd_count CRDs)"
