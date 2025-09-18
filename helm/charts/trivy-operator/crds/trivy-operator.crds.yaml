@@ -4,6 +4,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
+    argocd.argoproj.io/sync-options: PreSync=true
   name: clustercompliancereports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -269,6 +270,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
+    argocd.argoproj.io/sync-options: PreSync=true
   name: clusterconfigauditreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -435,6 +437,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
+    argocd.argoproj.io/sync-options: PreSync=true
   name: clusterinfraassessmentreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -600,6 +603,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
+    argocd.argoproj.io/sync-options: PreSync=true
   name: clusterrbacassessmentreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -765,6 +769,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
+    argocd.argoproj.io/sync-options: PreSync=true
   name: clustersbomreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -1154,6 +1159,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
+    argocd.argoproj.io/sync-options: PreSync=true
   name: clustervulnerabilityreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -1433,6 +1439,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
+    argocd.argoproj.io/sync-options: PreSync=true
   name: configauditreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -1600,6 +1607,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
+    argocd.argoproj.io/sync-options: PreSync=true
   name: exposedsecretreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -1801,6 +1809,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
+    argocd.argoproj.io/sync-options: PreSync=true
   name: infraassessmentreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -1966,6 +1975,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
+    argocd.argoproj.io/sync-options: PreSync=true
   name: rbacassessmentreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -2132,6 +2142,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
+    argocd.argoproj.io/sync-options: PreSync=true
   name: sbomreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -2523,6 +2534,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
+    argocd.argoproj.io/sync-options: PreSync=true
   name: vulnerabilityreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io

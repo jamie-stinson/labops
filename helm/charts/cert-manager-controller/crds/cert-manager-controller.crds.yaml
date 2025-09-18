@@ -22,6 +22,7 @@ metadata:
   # START annotations
   annotations:
     helm.sh/resource-policy: keep
+    argocd.argoproj.io/sync-options: PreSync=true
   # END annotations
   labels:
     app: 'cert-manager'
@@ -331,7 +332,6 @@ spec:
                   format: date-time
       served: true
       storage: true
-
 # END crd
 ---
 # Source: cert-manager/templates/crds.yaml
@@ -343,6 +343,7 @@ metadata:
   # START annotations
   annotations:
     helm.sh/resource-policy: keep
+    argocd.argoproj.io/sync-options: PreSync=true
   # END annotations
   labels:
     app: 'cert-manager'
@@ -1128,7 +1129,6 @@ spec:
                   type: integer
       served: true
       storage: true
-
 # END crd
 ---
 # Source: cert-manager/templates/crds.yaml
@@ -1140,6 +1140,7 @@ metadata:
   # START annotations
   annotations:
     helm.sh/resource-policy: keep
+    argocd.argoproj.io/sync-options: PreSync=true
   # END annotations
   labels:
     app: 'cert-manager'
@@ -4338,7 +4339,6 @@ spec:
       storage: true
       subresources:
         status: {}
-
 # END crd
 ---
 # Source: cert-manager/templates/crds.yaml
@@ -4350,6 +4350,7 @@ metadata:
   # START annotations
   annotations:
     helm.sh/resource-policy: keep
+    argocd.argoproj.io/sync-options: PreSync=true
   # END annotations
   labels:
     app: 'cert-manager'
@@ -8080,7 +8081,6 @@ spec:
                   x-kubernetes-list-type: map
       served: true
       storage: true
-
 # END crd
 ---
 # Source: cert-manager/templates/crds.yaml
@@ -8092,6 +8092,7 @@ metadata:
   # START annotations
   annotations:
     helm.sh/resource-policy: keep
+    argocd.argoproj.io/sync-options: PreSync=true
   # END annotations
   labels:
     app: 'cert-manager'
@@ -11822,7 +11823,6 @@ spec:
                   x-kubernetes-list-type: map
       served: true
       storage: true
-
 # END crd
 ---
 # Source: cert-manager/templates/crds.yaml
@@ -11834,6 +11834,7 @@ metadata:
   # START annotations
   annotations:
     helm.sh/resource-policy: keep
+    argocd.argoproj.io/sync-options: PreSync=true
   # END annotations
   labels:
     app: 'cert-manager'
@@ -12096,5 +12097,4 @@ spec:
                   type: string
       served: true
       storage: true
-
 # END crd
