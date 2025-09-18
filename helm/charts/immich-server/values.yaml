@@ -20,10 +20,10 @@ workload:
     custom:
       requests:
         cpu: "100m"
-        memory: "2Gi"
+        memory: "4Gi"
         ephemeral-storage: "4Gi"
       limits:
-        memory: "2Gi"
+        memory: "4Gi"
         ephemeral-storage: "4Gi"
   envs:
     - name: "DB_DATABASE_NAME"
