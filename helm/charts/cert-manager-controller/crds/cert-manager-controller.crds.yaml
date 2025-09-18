@@ -331,6 +331,7 @@ spec:
                   format: date-time
       served: true
       storage: true
+
 # END crd
 ---
 # Source: cert-manager/templates/crds.yaml
@@ -1127,6 +1128,7 @@ spec:
                   type: integer
       served: true
       storage: true
+
 # END crd
 ---
 # Source: cert-manager/templates/crds.yaml
@@ -4336,6 +4338,7 @@ spec:
       storage: true
       subresources:
         status: {}
+
 # END crd
 ---
 # Source: cert-manager/templates/crds.yaml
@@ -8077,6 +8080,7 @@ spec:
                   x-kubernetes-list-type: map
       served: true
       storage: true
+
 # END crd
 ---
 # Source: cert-manager/templates/crds.yaml
@@ -11818,6 +11822,7 @@ spec:
                   x-kubernetes-list-type: map
       served: true
       storage: true
+
 # END crd
 ---
 # Source: cert-manager/templates/crds.yaml
@@ -12091,4 +12096,5 @@ spec:
                   type: string
       served: true
       storage: true
+
 # END crd
