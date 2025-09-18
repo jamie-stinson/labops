@@ -107,11 +107,13 @@ jobs:
             fi
 
             # Add Argo CD PreSync hook + negative sync-wave annotations to all CRDs
-            yq eval '(.metadata.annotations // {}) += {
-              "argocd.argoproj.io/hook": "PreSync",
-              "argocd.argoproj.io/sync-wave": "-10"
-            }' -i "$crd_file"
-
+            yq eval '
+              .metadata.annotations = (.metadata.annotations // {}) |
+              .metadata.annotations += {
+                "argocd.argoproj.io/hook": "PreSync",
+                "argocd.argoproj.io/sync-wave": "-10"
+              }
+            ' -i "$crd_file"
 
             # Log number of CRDs extracted
             crd_count=$(yq eval-all 'select(.kind == "CustomResourceDefinition")' "$crd_file" | yq eval 'length' - 2>/dev/null | wc -l)
