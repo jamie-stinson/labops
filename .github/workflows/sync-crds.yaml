@@ -110,8 +110,6 @@ jobs:
             yq eval '
               .metadata.annotations = (.metadata.annotations // {}) |
               .metadata.annotations += {
-                "argocd.argoproj.io/hook": "PreSync",
-                "argocd.argoproj.io/sync-wave": "-10"
               }
             ' -i "$crd_file"
 
