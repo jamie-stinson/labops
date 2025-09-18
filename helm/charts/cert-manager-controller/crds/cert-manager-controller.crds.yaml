@@ -22,8 +22,6 @@ metadata:
   # START annotations
   annotations:
     helm.sh/resource-policy: keep
-    argocd.argoproj.io/hook: PreSync
-    argocd.argoproj.io/sync-wave: "-10"
   # END annotations
   labels:
     app: 'cert-manager'
@@ -344,8 +342,6 @@ metadata:
   # START annotations
   annotations:
     helm.sh/resource-policy: keep
-    argocd.argoproj.io/hook: PreSync
-    argocd.argoproj.io/sync-wave: "-10"
   # END annotations
   labels:
     app: 'cert-manager'
@@ -1142,8 +1138,6 @@ metadata:
   # START annotations
   annotations:
     helm.sh/resource-policy: keep
-    argocd.argoproj.io/hook: PreSync
-    argocd.argoproj.io/sync-wave: "-10"
   # END annotations
   labels:
     app: 'cert-manager'
@@ -4353,8 +4347,6 @@ metadata:
   # START annotations
   annotations:
     helm.sh/resource-policy: keep
-    argocd.argoproj.io/hook: PreSync
-    argocd.argoproj.io/sync-wave: "-10"
   # END annotations
   labels:
     app: 'cert-manager'
@@ -8096,8 +8088,6 @@ metadata:
   # START annotations
   annotations:
     helm.sh/resource-policy: keep
-    argocd.argoproj.io/hook: PreSync
-    argocd.argoproj.io/sync-wave: "-10"
   # END annotations
   labels:
     app: 'cert-manager'
@@ -11839,8 +11829,6 @@ metadata:
   # START annotations
   annotations:
     helm.sh/resource-policy: keep
-    argocd.argoproj.io/hook: PreSync
-    argocd.argoproj.io/sync-wave: "-10"
   # END annotations
   labels:
     app: 'cert-manager'
