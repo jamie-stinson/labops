@@ -9,7 +9,7 @@ workload:
       secret: sonarr
       key: API_KEY
   envs:
-    - name: RADARR__AUTH__METHOD
+    - name: SONARR__AUTH__METHOD
       value: "External"
     - name: SONARR__AUTH__REQUIRED
       value: "Enabled"
