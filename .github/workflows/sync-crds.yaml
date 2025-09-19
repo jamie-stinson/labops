@@ -106,6 +106,14 @@ jobs:
               exit 1
             fi
 
+            yq eval '
+              .metadata.annotations = {
+                "argocd.argoproj.io/sync-wave": "-10"
+                "argocd.argoproj.io/sync-options": "Prune=confirm"
+                "argocd.argoproj.io/sync-options": "Delete=confirm"
+              }
+            ' -i "$crd_file"
+
             # Log number of CRDs extracted
             crd_count=$(yq eval-all 'select(.kind == "CustomResourceDefinition")' "$crd_file" | yq eval 'length' - 2>/dev/null | wc -l)
             echo "$crd_file looks good ($crd_count CRDs)"
