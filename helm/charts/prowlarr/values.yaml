@@ -140,7 +140,7 @@ extraObjects:
     kind: PersistentVolumeClaim
     metadata:
       name: prowlarr-config
-      namespace: radarr
+      namespace: prowlarr
     spec:
       accessModes:
         - ReadWriteMany
