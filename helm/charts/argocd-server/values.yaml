@@ -325,7 +325,7 @@ extraObjects:
     namespace: argocd
   spec:
     encryptedData:
-      CLIENTSECRET: AgCbKh0a6ETUw7Z4YjPzrd214v0gUG7DHTJFhs9JS2m3c+DeFuDefRAlE+eppIPIn5y4yqjSxMLNNn1BhxReeDSb3jYZh7gNIB1AAv2yt0G242ztres5xuOySIOe+r8QYiVx0RqkaE8FwaKnSLE0g/KMEs8CfV1DMRfom4EtBStR+AF5PDngbPQX0IizHE34LXBmFXbW42O4ycmd4HBdNgLhaodG6/PmTvORxB0anqKflDG0t/kgnnGWWEr+yEU/3zMjaRBUIA71YMROeYeRvD0cmfxnLj/A5rt7ovRX8D5x56OU0UDFWjsnQh5KmITF+fJDVlSGCUEqS+xUrgukW60bM7FemfzV/9GpRPnZGfx5jt8km+JpOzrN8d+a+TSoOJ3tPVzuZuxqIywBfa3axwgU5449bNd/Ml/LeGeNLsAjVhCguu4VwYvO9yLO1R+Lb0tzs1Tve/ijCo9wk+UVrOhpLne8rSiu2jrESzUa42nSyNBjtWjSQ8wuiizWtaHoYYO/V7tJq4PDyiSBoCgciDn0q07T/iEyhm/ShKudT/vEJkVABa3ZhtZg5qBM8b888PDCrfRts5wsm/dBDQcJM+IveLXzeFZzWNXHWoeNl1DwCAtUwwa8to+M7s6BVGUZjmI/MAt+kBNEgtyRPqDjXN0RUnTMJYrp2QPcPH9NfZbv01vYlBBJG1qe6wIeH7A6qlerHE1CvcoufIW99asFth8keUoOE/aA78BROb2NPJxw9Q==
+      CLIENTSECRET: AgA05hoKVOhmLtO/bY61WEugqIUYv5kiOePRBo6pof/XQXsJxhL8eErGTbMcZ8Zy9z1fX6Di4JE6936TyjGM7eHaJ9VFkZJRkBFHhFCiXP7RdXRed6QchcrezMKOF1E5DZfLblA+oV1HDKjTJoYxpHRS4ogm7aT1wtP08SQVIDvYp535AlfOEsh1PhBV8kczTkUPOjBQ2XEebUPirmUbUaCngkFxyFB9/s4eFynfT9/4cTpLRST4Rb0CWeQ6VOFy9z6hG4Y2isY2EVOHQR0iyQUKcf48QVcLaSLvaVCnpSetgorBdCvLg+bJQS38z8UiWFwGObYrSpCZS5lLsLwMnwJB8snpPZG8tbtmO0i5N09leZOqdvBIWluceQrCuacp2ZnYVvjGTIij2wksoH5W1Dr2GurFTeQmRkylGp37VsvVCPx9bf7IBbhaX2w+CNj3AeIOEXGd8AWsQb8YHyi5uW5wNzRSyHfhl+wKQ9b5LyL54tWGhfq8pFUpYHnoNf6yhQvHJnfyc23XL8aHvSk7GmLICtxl+eddw+cGnTf4groDdIwqB3dajcgYh2wyPh4VjrMkZvPrHCDKseF26V0zr4/wIkPYFp90fU6SVGs8oj0rkjY8v/Cy1mBDQN3FVDfMoxlpbK1ft5pwZafF0T1jxxfxduUhG4nDubYZNH35HuqqLB/cpwPk5JCdNZHytOfzc/48Wy6vLmQveVuk8zd8ERozzKVq9JxA/fON32okEX+jWQ==
     template:
       metadata:
         labels:
@@ -347,7 +347,7 @@ extraObjects:
     oidc.config: |
       name: Pocket ID
       issuer: https://auth.projectwhitebox.com
-      clientID: 93580f0c-920d-41e8-bb65-b6eaf7bd69ae
+      clientID: a4173227-ba1d-4fc6-b84b-05b4dd3ea3ca
       clientSecret: $argocd:CLIENTSECRET
       requestedScopes: ["openid", "profile", "email", "groups"]
     admin.enabled: 'true'
