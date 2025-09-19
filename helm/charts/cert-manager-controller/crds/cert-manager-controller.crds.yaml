@@ -22,7 +22,7 @@ metadata:
   # START annotations
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   # END annotations
   labels:
     app: 'cert-manager'
@@ -343,7 +343,7 @@ metadata:
   # START annotations
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   # END annotations
   labels:
     app: 'cert-manager'
@@ -1140,7 +1140,7 @@ metadata:
   # START annotations
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   # END annotations
   labels:
     app: 'cert-manager'
@@ -4350,7 +4350,7 @@ metadata:
   # START annotations
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   # END annotations
   labels:
     app: 'cert-manager'
@@ -8092,7 +8092,7 @@ metadata:
   # START annotations
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   # END annotations
   labels:
     app: 'cert-manager'
@@ -11834,7 +11834,7 @@ metadata:
   # START annotations
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   # END annotations
   labels:
     app: 'cert-manager'

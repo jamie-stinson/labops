@@ -3,7 +3,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: backups.postgresql.cnpg.io
 spec:
   group: postgresql.cnpg.io
@@ -432,7 +432,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: clusterimagecatalogs.postgresql.cnpg.io
 spec:
   group: postgresql.cnpg.io
@@ -512,7 +512,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: clusters.postgresql.cnpg.io
 spec:
   group: postgresql.cnpg.io
@@ -6756,7 +6756,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: databases.postgresql.cnpg.io
 spec:
   group: postgresql.cnpg.io
@@ -7124,7 +7124,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: imagecatalogs.postgresql.cnpg.io
 spec:
   group: postgresql.cnpg.io
@@ -7204,7 +7204,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: poolers.postgresql.cnpg.io
 spec:
   group: postgresql.cnpg.io
@@ -15664,7 +15664,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: publications.postgresql.cnpg.io
 spec:
   group: postgresql.cnpg.io
@@ -15853,7 +15853,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: scheduledbackups.postgresql.cnpg.io
 spec:
   group: postgresql.cnpg.io
@@ -16042,7 +16042,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: subscriptions.postgresql.cnpg.io
 spec:
   group: postgresql.cnpg.io

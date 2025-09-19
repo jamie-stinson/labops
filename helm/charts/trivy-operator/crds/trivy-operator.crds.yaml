@@ -4,7 +4,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: clustercompliancereports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -270,7 +270,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: clusterconfigauditreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -437,7 +437,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: clusterinfraassessmentreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -603,7 +603,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: clusterrbacassessmentreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -769,7 +769,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: clustersbomreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -1159,7 +1159,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: clustervulnerabilityreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -1439,7 +1439,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: configauditreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -1607,7 +1607,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: exposedsecretreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -1809,7 +1809,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: infraassessmentreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -1975,7 +1975,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: rbacassessmentreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -2142,7 +2142,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: sbomreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io
@@ -2534,7 +2534,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: vulnerabilityreports.aquasecurity.github.io
 spec:
   group: aquasecurity.github.io

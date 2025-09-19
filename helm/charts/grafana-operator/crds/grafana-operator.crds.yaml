@@ -3,7 +3,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: grafanaalertrulegroups.grafana.integreatly.org
 spec:
   group: grafana.integreatly.org
@@ -331,7 +331,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: grafanacontactpoints.grafana.integreatly.org
 spec:
   group: grafana.integreatly.org
@@ -599,7 +599,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: grafanadashboards.grafana.integreatly.org
 spec:
   group: grafana.integreatly.org
@@ -1082,7 +1082,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: grafanadatasources.grafana.integreatly.org
 spec:
   group: grafana.integreatly.org
@@ -1406,7 +1406,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: grafanafolders.grafana.integreatly.org
 spec:
   group: grafana.integreatly.org
@@ -1623,7 +1623,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: grafanalibrarypanels.grafana.integreatly.org
 spec:
   group: grafana.integreatly.org
@@ -2095,7 +2095,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: grafanamutetimings.grafana.integreatly.org
 spec:
   group: grafana.integreatly.org
@@ -2345,7 +2345,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: grafananotificationpolicies.grafana.integreatly.org
 spec:
   group: grafana.integreatly.org
@@ -2664,7 +2664,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: grafananotificationpolicyroutes.grafana.integreatly.org
 spec:
   group: grafana.integreatly.org
@@ -2897,7 +2897,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: grafananotificationtemplates.grafana.integreatly.org
 spec:
   group: grafana.integreatly.org
@@ -3097,7 +3097,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-10"
-    argocd.argoproj.io/sync-options: Delete=confirm
+    argocd.argoproj.io/sync-options: Prune=confirm, Delete=confirm
   name: grafanas.grafana.integreatly.org
 spec:
   group: grafana.integreatly.org
