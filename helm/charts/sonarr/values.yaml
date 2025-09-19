@@ -5,22 +5,11 @@ workload:
     repository: home-operations/sonarr
     tag: 4.0.15
   envsSecret:
-    - name: SONARR__POSTGRES__HOST
-      secret: sonarr-postgres-app
-      key: host
-    - name: SONARR__POSTGRES__USER
-      secret: sonarr-postgres-app
-      key: username
-    - name: SONARR__POSTGRES__PASSWORD
-      secret: sonarr-postgres-app
-      key: password
     - name: SONARR__AUTH__APIKEY
       secret: sonarr
       key: API_KEY
   envs:
-    - name: "SONARR__POSTGRES__PORT"
-      value: "5432"
-    - name: SONARR__AUTH__METHOD
+    - name: RADARR__AUTH__METHOD
       value: "External"
     - name: SONARR__AUTH__REQUIRED
       value: "Enabled"

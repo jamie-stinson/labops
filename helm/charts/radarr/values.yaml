@@ -5,21 +5,10 @@ workload:
     repository: home-operations/radarr
     tag: 5.26.2
   envsSecret:
-    - name: RADARR__POSTGRES__HOST
-      secret: radarr-postgres-app
-      key: host
-    - name: RADARR__POSTGRES__USER
-      secret: radarr-postgres-app
-      key: username
-    - name: RADARR__POSTGRES__PASSWORD
-      secret: radarr-postgres-app
-      key: password
     - name: RADARR__AUTH__APIKEY
       secret: radarr
       key: API_KEY
   envs:
-    - name: "RADARR__POSTGRES__PORT"
-      value: "5432"
     - name: RADARR__AUTH__METHOD
       value: "External"
     - name: RADARR__AUTH__REQUIRED
