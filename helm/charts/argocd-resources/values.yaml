@@ -24,7 +24,7 @@ extraObjects:
       namespace: argocd
     spec:
       syncPolicy:
-        preserveResourcesOnDeletion: false
+        preserveResourcesOnDeletion: true
       generators:
         - git:
             files:
