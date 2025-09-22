@@ -67,6 +67,23 @@ workload:
   - name: ARGOCD_SERVER_OTLP_ADDRESS
     configMap: argocd-cmd-params-cm
     key: otlp.address
+  extraContainers:
+    - name: grafana-dashboard-generator
+      image: quay.io/argoproj/argocd:v3.1.0
+      command: [/var/run/argocd/argocd-cmp-server]
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+      volumeMounts:
+        - name: var-files
+          mountPath: /var/run/argocd
+        - name: plugins
+          mountPath: /home/argocd/plugins          
+        - name: cmp-grafana-plugin-volume
+          mountPath: /home/argocd/cmp-server/config/plugin.yaml
+          subPath: plugin.yaml
+        - name: cmp-tmp
+          mountPath: /tmp
 service:
   ports:
   - name: http
