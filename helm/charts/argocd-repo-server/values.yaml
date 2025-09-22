@@ -17,10 +17,6 @@ extraObjects:
     metadata:
       annotations:
         app.kubernetes.io/name: argocd-repo-server
-        argocd.argoproj.io/tracking-id: argocd-repo-server:apps/Deployment:argocd/argocd-repo-server
-        deployment.kubernetes.io/revision: '3'
-      creationTimestamp: '2025-09-03T08:57:18Z'
-      generation: 5
       labels:
         app.kubernetes.io/instance: argocd-repo-server
         app.kubernetes.io/managed-by: Helm
@@ -29,8 +25,6 @@ extraObjects:
         helm.sh/chart: argocd-repo-server-v3.1.0
       name: argocd-repo-server
       namespace: argocd
-      resourceVersion: '14198380'
-      uid: 76f74a18-2725-4aad-a892-aa00fb168031
     spec:
       progressDeadlineSeconds: 600
       replicas: 1
@@ -57,6 +51,17 @@ extraObjects:
             app.kubernetes.io/version: v3.1.0
             helm.sh/chart: argocd-repo-server-v3.1.0
         spec:
+          initContainers:
+          - command:
+            - /bin/cp
+            - -n
+            - /usr/local/bin/argocd
+            - /var/run/argocd/argocd-cmp-server
+            image: quay.io/argoproj/argocd:v3.1.0
+            name: copyutil
+            volumeMounts:
+            - mountPath: /var/run/argocd
+              name: var-files
           containers:
             - args:
                 - '--port=8081'
@@ -253,6 +258,8 @@ extraObjects:
             - emptyDir: {}
               name: cmp-tmp
             - emptyDir: {}
+              name: var-files
+            - emptyDir: {}
               name: gpg-keys
             - emptyDir: {}
               name: plugins
@@ -260,4 +267,3 @@ extraObjects:
                 defaultMode: 420
                 name: cmp-grafana-plugin
               name: cmp-grafana-plugin-volume
-
