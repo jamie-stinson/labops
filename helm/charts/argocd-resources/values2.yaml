@@ -45,6 +45,7 @@ spec:
           {{- end }}
         - repoURL: 'https://github.com/js-labops/{{.repository}}.git'
           targetRevision: initial-commit
+          ref: dashboards
           plugin:
             name: grafana-dashboard-generator
   template:
