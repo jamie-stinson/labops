@@ -44,7 +44,7 @@ spec:
           path: crds
           {{- end }}
         - repoURL: 'https://github.com/js-labops/{{.repository}}.git'
-          targetRevision: 'HEAD' # Or use {{ .branch }} if you want per-branch dashboards
+          targetRevision: initial-commit
           plugin:
             name: grafana-dashboard-generator
   template:
