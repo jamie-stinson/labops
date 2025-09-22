@@ -51,6 +51,15 @@ workload:
     mountPath: /app/config/gpg/keys
     ramDisk: false
     readOnly: false
+  - name: var-files
+    type: emptyDir
+    mountPath: /var/run/argocd
+  - name: plugins
+    type: emptyDir
+    mountPath: /home/argocd/plugins
+  - name: cmp-grafana-plugin-volume
+    type: configMap
+    configMapName: cmp-grafana-plugin
   envsConfigMap:
   - name: ARGOCD_REPOSERVER_LOGFORMAT
     configMap: argocd-cmd-params-cm
@@ -82,7 +91,7 @@ workload:
         - name: cmp-grafana-plugin-volume
           mountPath: /home/argocd/cmp-server/config/plugin.yaml
           subPath: plugin.yaml
-        - name: cmp-tmp
+        - name: tmp
           mountPath: /tmp
 service:
   ports:
