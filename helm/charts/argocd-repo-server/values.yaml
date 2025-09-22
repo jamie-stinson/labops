@@ -59,6 +59,7 @@ workload:
     mountPath: /home/argocd/plugins
   - name: cmp-grafana-plugin-volume
     type: configMap
+    mountPath: /home/argocd/cmp-server/config
     configMapName: cmp-grafana-plugin
   envsConfigMap:
   - name: ARGOCD_REPOSERVER_LOGFORMAT
