@@ -256,8 +256,6 @@ extraObjects:
               name: gpg-keys
             - emptyDir: {}
               name: plugins
-            - emptyDir: {}
-              name: var-files
             - configMap:
                 defaultMode: 420
                 name: cmp-grafana-plugin
