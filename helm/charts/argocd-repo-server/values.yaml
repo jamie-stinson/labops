@@ -51,9 +51,6 @@ workload:
     mountPath: /app/config/gpg/keys
     ramDisk: false
     readOnly: false
-  - name: var-files
-    type: emptyDir
-    mountPath: /var/run/argocd
   - name: plugins
     type: emptyDir
     mountPath: /home/argocd/plugins
@@ -85,8 +82,6 @@ workload:
         runAsNonRoot: true
         runAsUser: 999
       volumeMounts:
-        - name: var-files
-          mountPath: /var/run/argocd
         - name: plugins
           mountPath: /home/argocd/plugins          
         - name: cmp-grafana-plugin-volume
