@@ -13,7 +13,7 @@ spec:
           - scmProvider:
               github:
                 organization: js-labops
-                allBranches: true
+                allBranches: false
                 appSecretName: repo-3704165071
               filters:
                 - repositoryMatch: ^helm-chart
