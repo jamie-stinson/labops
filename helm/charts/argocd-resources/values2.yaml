@@ -29,7 +29,7 @@ spec:
         {{- range $component := .components }}
         - repoURL: "ghcr.io/jamie-stinson/common-helm-library"
           chart: "common-helm-library"
-          targetRevision: "1.*.*"
+          targetRevision: "2.*.*"
           helm:
             releaseName: "{{ $component }}"
             valueFiles:
