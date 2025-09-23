@@ -4,7 +4,7 @@ workload:
   image:
     registry: ghcr.io
     repository: ghcr.io/immich-app/immich-machine-learning
-    tag: v1.142.1
+    tag: v1.143.0
   envsSecret:
     - name: DB_HOSTNAME
       secret: immich-postgres-app

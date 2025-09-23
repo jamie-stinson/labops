@@ -4,7 +4,7 @@ workload:
   image:
     registry: ghcr.io
     repository: immich-app/immich-server
-    tag: v1.142.1
+    tag: v1.143.0
   envsSecret:
     - name: DB_HOSTNAME
       secret: immich-postgres-app
