@@ -28,12 +28,12 @@ workload:
   - '--entryPoints.traefik.address=:8082/tcp'
   - '--entryPoints.metrics.address=:9100/tcp'
   # Timeouts
-  - '--entryPoints.externalweb.transport.respondingTimeouts.readTimeout=600'
-  - '--entryPoints.internalweb.transport.respondingTimeouts.readTimeout=600'
-  - '--entryPoints.externalweb.transport.respondingTimeouts.writeTimeout=600'
-  - '--entryPoints.internalweb.transport.respondingTimeouts.writeTimeout=600'
-  - '--entryPoints.externalweb.transport.respondingTimeouts.idleTimeout=600'
-  - '--entryPoints.internalweb.transport.respondingTimeouts.idleTimeout=600'
+  - '--entryPoints.externalweb.transport.respondingTimeouts.readTimeout=2000'
+  - '--entryPoints.internalweb.transport.respondingTimeouts.readTimeout=2000'
+  - '--entryPoints.externalweb.transport.respondingTimeouts.writeTimeout=2000'
+  - '--entryPoints.internalweb.transport.respondingTimeouts.writeTimeout=2000'
+  - '--entryPoints.externalweb.transport.respondingTimeouts.idleTimeout=2000'
+  - '--entryPoints.internalweb.transport.respondingTimeouts.idleTimeout=2000'
   # TLS
   - '--entryPoints.internalwebsecure.http.tls=true'
   - '--entryPoints.externalwebsecure.http.tls=true'
