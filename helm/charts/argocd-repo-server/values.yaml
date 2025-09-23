@@ -208,13 +208,13 @@ extraObjects:
                   name: gpg-keys
                 - mountPath: /var/run/argocd
                   name: var-files
-                - mountPath: /home/argocd/plugins
+                - mountPath: /home/argocd/cmp-server/plugins
                   name: plugins
                 - mountPath: /home/argocd/cmp-server/config
                   name: cmp-grafana-plugin-volume
             - command:
                 - /var/run/argocd/argocd-cmp-server
-              image: quay.io/argoproj/argocd:v3.1.0
+              image: busybox
               imagePullPolicy: IfNotPresent
               name: grafana-dashboard-generator
               resources: {}
