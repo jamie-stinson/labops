@@ -3,7 +3,7 @@ workload:
   image:
     registry: "docker.io"
     repository: linuxserver/emby
-    tag: 4.9.1.80
+    tag: beta-version-4.9.0.56
   strategy:
     type: OnDelete
   priorityClassName: "system-cluster-critical"
