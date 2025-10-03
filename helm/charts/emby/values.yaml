@@ -1,9 +1,9 @@
 workload:
   type: "StatefulSet"
   image:
-    registry: "docker.io"
+    registry: "ghcr.io"
     repository: linuxserver/emby
-    tag: beta-version-4.9.0.56
+    tag: 4.9.1
   strategy:
     type: OnDelete
   priorityClassName: "system-cluster-critical"
