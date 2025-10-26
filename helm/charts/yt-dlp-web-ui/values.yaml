@@ -108,7 +108,7 @@ extraObjects:
     apiVersion: v1
     kind: PersistentVolume
     metadata:
-      name: yt-dlp-msuic
+      name: yt-dlp-music
     spec:
       capacity:
         storage: 1Ti
