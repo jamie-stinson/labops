@@ -46,7 +46,7 @@ workload:
       claimName: "yt-dlp-music"
     - name: yt-dlp-config
       type: pvc
-      mountPath: /
+      mountPath: /config
       claimName: "yt-dlp-config"
 
 service:
