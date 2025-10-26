@@ -16,14 +16,14 @@ workload:
         memory: "1Gi"
         ephemeral-storage: "2Gi"
   podSecurityContext:
-    runAsUser: 1000
-    runAsGroup: 1000
-    runAsNonRoot: true
-    fsGroup: 1000
+    runAsUser: 0
+    runAsGroup: 0
+    runAsNonRoot: false
+    fsGroup: 0
     fsGroupChangePolicy: "OnRootMismatch"
   securityContext:
-    runAsUser: 1000
-    runAsGroup: 1000
+    runAsUser: 0
+    runAsGroup: 0
     runAsNonRoot: true
     allowPrivilegeEscalation: false
     privileged: false
@@ -46,7 +46,7 @@ workload:
       claimName: "yt-dlp-music"
     - name: yt-dlp-config
       type: pvc
-      mountPath: /config
+      mountPath: /
       claimName: "yt-dlp-config"
 
 service:
