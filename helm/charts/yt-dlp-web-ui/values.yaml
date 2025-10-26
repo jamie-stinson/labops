@@ -6,6 +6,9 @@ workload:
     tag: latest
   strategy:
     type: OnDelete
+  args: 
+    - '-out=/data/music'
+    - 'db=/conf'
   resources:
     preset: ""
     custom:
@@ -36,13 +39,17 @@ workload:
   storage:
     - name: yt-dlp-downloads
       type: pvc
-      mountPath: /data/downloads
+      mountPath: /downloads
       claimName: "yt-dlp-downloads"
     - name: yt-dlp-music
       type: pvc
       mountPath: /data/music
       claimName: "yt-dlp-music"
-  
+    - name: yt-dlp-config
+      type: pvc
+      mountPath: /conf
+      claimName: "yt-dlp-config"
+
 service:
   ports:
     - name: http
@@ -140,3 +147,39 @@ extraObjects:
         requests:
           storage: 1Ti
       volumeName: yt-dlp-music
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: yt-dlp-config
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+        - ReadWriteMany
+      nfs:
+        server: 10.0.0.10
+        path: "/mnt/hdd-pool/yt-dlp"
+      mountOptions:
+        - nfsvers=4.1 
+        - hard
+        - noatime
+        - rsize=1048576 
+        - wsize=1048576 
+        - proto=tcp
+        - async
+        - nconnect=8
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: yt-dlp-config
+      namespace: yt-dlp-web-ui
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ""
+      resources:
+        requests:
+          storage: 1Ti
+      volumeName: yt-dlp-config
