@@ -24,7 +24,7 @@ workload:
   securityContext:
     runAsUser: 0
     runAsGroup: 0
-    runAsNonRoot: true
+    runAsNonRoot: false
     allowPrivilegeEscalation: false
     privileged: false
     readOnlyRootFilesystem: false
