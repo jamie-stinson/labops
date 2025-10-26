@@ -95,7 +95,7 @@ extraObjects:
     kind: PersistentVolumeClaim
     metadata:
       name: yt-dlp-downloads
-      namespace: emby
+      namespace: yt-dlp-web-ui
     spec:
       accessModes:
         - ReadWriteMany
@@ -131,7 +131,7 @@ extraObjects:
     kind: PersistentVolumeClaim
     metadata:
       name: yt-dlp-music
-      namespace: emby
+      namespace: yt-dlp-web-ui
     spec:
       accessModes:
         - ReadWriteMany
