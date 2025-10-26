@@ -8,7 +8,6 @@ workload:
     type: OnDelete
   args: 
     - '-out=/data/music'
-    - '-db=/conf'
   resources:
     preset: ""
     custom:
@@ -47,7 +46,7 @@ workload:
       claimName: "yt-dlp-music"
     - name: yt-dlp-config
       type: pvc
-      mountPath: /conf
+      mountPath: /config
       claimName: "yt-dlp-config"
 
 service:
