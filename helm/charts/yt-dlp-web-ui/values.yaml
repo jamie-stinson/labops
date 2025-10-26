@@ -159,7 +159,7 @@ extraObjects:
         - ReadWriteMany
       nfs:
         server: 10.0.0.10
-        path: "/mnt/hdd-pool/yt-dlp"
+        path: "/mnt/data-pool/yt-dlp"
       mountOptions:
         - nfsvers=4.1 
         - hard
