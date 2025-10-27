@@ -139,4 +139,4 @@ extraObjects:
       resources:
         requests:
           storage: 1Ti
-      volumeName: navidrome
+      volumeName: navidrome-config
