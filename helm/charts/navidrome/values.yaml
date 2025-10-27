@@ -10,7 +10,7 @@ workload:
     preset: ""
     custom:
       requests:
-        cpu: "100m"
+        cpu: "1m"
         memory: "1Gi"
         ephemeral-storage: "2Gi"
   podSecurityContext:
