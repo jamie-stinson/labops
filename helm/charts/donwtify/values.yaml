@@ -29,7 +29,7 @@ workload:
   probes:
     readinessProbe:
       type: tcpSocket
-      port: 8000``
+      port: 8000
     livenessProbe:
       type: tcpSocket
       port: 8000
