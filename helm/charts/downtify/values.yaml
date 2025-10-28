@@ -15,7 +15,7 @@ workload:
         ephemeral-storage: "2Gi"
   envs:
     - name: "DOWNTIFY_PORT"
-      value: "8080"
+      value: "8000"
   envsSecret:
     - name: CLIENT_ID
       secret: downtify
