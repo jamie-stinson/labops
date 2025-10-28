@@ -21,15 +21,15 @@ workload:
       secret: downtify
       key: SPOTIFY_CLIENT_SECRET
   podSecurityContext:
-    runAsUser: 1000
-    runAsGroup: 1000
-    runAsNonRoot: true
-    fsGroup: 1000
+    runAsUser: 0
+    runAsGroup: 0
+    runAsNonRoot: false
+    fsGroup: 0
     fsGroupChangePolicy: "OnRootMismatch"
   securityContext:
-    runAsUser: 1000
-    runAsGroup: 1000
-    runAsNonRoot: true
+    runAsUser: 0
+    runAsGroup: 0
+    runAsNonRoot: false
     allowPrivilegeEscalation: false
     privileged: false
     readOnlyRootFilesystem: false
