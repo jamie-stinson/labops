@@ -32,7 +32,7 @@ workload:
     runAsNonRoot: true
     allowPrivilegeEscalation: false
     privileged: false
-    readOnlyRootFilesystem: true
+    readOnlyRootFilesystem: false
   probes:
     readinessProbe:
       type: tcpSocket
@@ -45,9 +45,6 @@ workload:
       type: pvc
       mountPath: /downloads
       claimName: "downtify-music"
-    - name: config
-      type: emptyDir
-      mountPath: /.config
 
 service:
   ports:
