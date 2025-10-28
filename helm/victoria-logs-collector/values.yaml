@@ -158,7 +158,7 @@ extraObjects:
   - |
     apiVersion: apps/v1
     kind: DaemonSet
-    metadata:
+    metad:
       name: victoria-logs-collector
       namespace: victoria-logs
     spec:
