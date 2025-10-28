@@ -40,7 +40,7 @@ workload:
       claimName: "slskd-config"
     - name: slskd-music
       type: pvc
-      mountPath: /downloads
+      mountPath: /music
       claimName: "slskd-music"
 
 service:
