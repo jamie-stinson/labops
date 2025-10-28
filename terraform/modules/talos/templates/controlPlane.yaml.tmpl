@@ -2,6 +2,16 @@ machine:
   install:
     diskSelector:
       size: '> 200GB'
+  kubelet:
+    extraConfig:
+      systemReserved:
+        cpu: ${reserved_system_cpu}
+        memory: ${reserved_system_memory}
+        ephemeral-storage: ${reserved_system_storage}
+      kubeReserved:
+        cpu: ${reserved_kube_cpu}
+        memory: ${reserved_kube_memory}
+        ephemeral-storage: ${reserved_kube_storage}
 cluster:
   allowSchedulingOnControlPlanes: false
   network:

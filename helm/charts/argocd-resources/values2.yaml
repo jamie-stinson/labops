@@ -14,14 +14,44 @@ spec:
               github:
                 organization: js-labops
                 allBranches: false
-                appSecretName: repo-3704165071
+                appSecretName: creds-47199450
               filters:
                 - repositoryMatch: ^helm-chart
+                  labelMatch: production
           - git:
               repoURL: 'https://github.com/js-labops/{{.repository}}.git'
               revision: initial-commit
               files:
                 - path: 'source.yaml'
+  template:
+    metadata:
+      name: '{{ regexReplaceAll "helm-chart-" .repository "" }}'
+      namespace: argocd
+    spec:
+      project: "production"
+      destination:
+        name: "in-cluster"
+        namespace: "{{ .namespace }}"
+      revisionHistoryLimit: 3
+      syncPolicy:
+        automated:
+          prune: true
+          allowEmpty: true
+          selfHeal: true
+        retry:
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 5m
+          limit: 3
+        syncOptions:
+          - Validate=true
+          - CreateNamespace=true
+          - PrunePropagationPolicy=foreground
+          - PruneLast=true
+          - ServerSideApply=true
+          - RespectIgnoreDifferences=false
+          - ApplyOutOfSyncOnly=false
   templatePatch: |
     spec:
       sources:
@@ -48,32 +78,3 @@ spec:
           ref: dashboards
           plugin:
             name: grafana-dashboard-generator
-  template:
-    metadata:
-      name: '{{ regexReplaceAll "helm-chart-" .repository "" }}'
-      namespace: argocd
-    spec:
-      project: "production"
-      revisionHistoryLimit: 3
-      syncPolicy:
-        automated:
-          prune: true
-          allowEmpty: true
-          selfHeal: true
-        retry:
-          backoff:
-            duration: 5s
-            factor: 2
-            maxDuration: 5m
-          limit: 3
-        syncOptions:
-          - Validate=true
-          - CreateNamespace=true
-          - PrunePropagationPolicy=foreground
-          - PruneLast=true
-          - ServerSideApply=true
-          - RespectIgnoreDifferences=false
-          - ApplyOutOfSyncOnly=false
-      destination:
-        name: "in-cluster"
-        namespace: "{{ .namespace }}"

@@ -59,6 +59,12 @@ resource "talos_machine_configuration_apply" "this" {
     ],
     contains(keys(var.talos.cluster.compute.worker.nodes), each.key) ? [
       templatefile("${path.module}/templates/worker.yaml.tmpl", {
+        reserved_system_cpu       = var.talos.cluster.compute.worker.resources.system.cpu
+        reserved_system_memory    = var.talos.cluster.compute.worker.resources.system.memory
+        reserved_system_storage   = var.talos.cluster.compute.worker.resources.system.storage
+        reserved_kube_cpu         = var.talos.cluster.compute.worker.resources.kube.cpu
+        reserved_kube_memory      = var.talos.cluster.compute.worker.resources.kube.memory
+        reserved_kube_storage     = var.talos.cluster.compute.worker.resources.kube.storage
       }),
     ] : [],
     # Control Plane Template
@@ -68,6 +74,12 @@ resource "talos_machine_configuration_apply" "this" {
         cni                       = var.talos.cluster.networking.cni
         pod_subnets               = var.talos.cluster.networking.pod_subnets
         service_subnets           = var.talos.cluster.networking.service_subnets
+        reserved_system_cpu       = var.talos.cluster.compute.control_plane.resources.system.cpu
+        reserved_system_memory    = var.talos.cluster.compute.control_plane.resources.system.memory
+        reserved_system_storage   = var.talos.cluster.compute.control_plane.resources.system.storage
+        reserved_kube_cpu         = var.talos.cluster.compute.control_plane.resources.kube.cpu
+        reserved_kube_memory      = var.talos.cluster.compute.control_plane.resources.kube.memory
+        reserved_kube_storage     = var.talos.cluster.compute.control_plane.resources.kube.storage
       }),
     # Disable Pod Security Admission
       templatefile("${path.module}/templates/podSecurityConfiguration.yaml.tmpl", {})

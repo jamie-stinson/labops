@@ -35,11 +35,35 @@ variable "talos" {
         control_plane = object({
           install_disk = string
           encryption_type = string
+          resources = object({
+            system = object({
+              cpu = string
+              memory = string
+              storage = string
+            })
+            kube = object({
+              cpu = string
+              memory = string
+              storage = string
+            })
+          })
           nodes = map(object({}))
         })
         worker        = object({
           install_disk = string
           encryption_type = string
+          resources = object({
+            system = object({
+              cpu = string
+              memory = string
+              storage = string
+            })
+            kube = object({
+              cpu = string
+              memory = string
+              storage = string
+            })
+          })
           nodes = map(object({}))
         })
       })

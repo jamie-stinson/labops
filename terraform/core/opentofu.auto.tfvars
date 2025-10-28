@@ -26,6 +26,18 @@ talos = {
       control_plane = {
         install_disk    = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi0" # need to get disk
         encryption_type = "local"
+        resources = {
+          system = {
+            cpu     = "250m"
+            memory  = "512Mi"
+            storage = "4Gi"
+          }
+          kube = {
+            cpu     = "1000m"
+            memory  = "2Gi"
+            storage = "10Gi"
+          }
+        }
         nodes = {
           "10.10.0.10" = {}
           "10.10.0.11" = {}
@@ -35,6 +47,18 @@ talos = {
       worker = {
         install_disk    = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi0"
         encryption_type = "local"
+        resources = {
+          system = {
+            cpu     = "250m"
+            memory  = "512Mi"
+            storage = "4Gi"
+          }
+          kube = {
+            cpu     = "1000m"
+            memory  = "2Gi"
+            storage = "10Gi"
+          }
+        }
         nodes           = {
           "10.0.0.15" = {}
         }
