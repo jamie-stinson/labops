@@ -13,16 +13,19 @@ workload:
         cpu: "100m"
         memory: "1Gi"
         ephemeral-storage: "2Gi"
+  envs:
+    - name: "SLSKD_REMOTE_CONFIGURATION"
+      value: "true"
   podSecurityContext:
-    runAsUser: 0
-    runAsGroup: 0
-    runAsNonRoot: false
-    fsGroup: 0
+    runAsUser: 1000
+    runAsGroup: 1000
+    runAsNonRoot: true
+    fsGroup: 1000
     fsGroupChangePolicy: "OnRootMismatch"
   securityContext:
-    runAsUser: 0
-    runAsGroup: 0
-    runAsNonRoot: false
+    runAsUser: 1000
+    runAsGroup: 1000
+    runAsNonRoot: true
     allowPrivilegeEscalation: false
     privileged: false
     readOnlyRootFilesystem: false
