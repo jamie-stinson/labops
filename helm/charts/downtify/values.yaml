@@ -45,6 +45,9 @@ workload:
       type: pvc
       mountPath: /downloads
       claimName: "downtify-music"
+    - name: config
+      type: emptyDir
+      mountPath: /.config
 
 service:
   ports:
