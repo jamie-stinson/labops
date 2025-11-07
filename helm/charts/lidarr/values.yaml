@@ -1,0 +1,177 @@
+workload:
+  type: "StatefulSet"
+  image:
+    registry: ghcr.io
+    repository: home-operations/lidarr
+    tag: 3.0.1
+  envs:
+    - name: LIDARR__AUTH__METHOD
+      value: "External"
+    - name: LIDARR__AUTH__REQUIRED
+      value: "Enabled"
+  strategy:
+    type: OnDelete
+  probes:
+    readinessProbe:
+      type: tcpSocket
+      port: 8686
+    livenessProbe:
+      type: tcpSocket
+      port: 8686
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "500m"
+        memory: "1Gi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "1Gi"
+        ephemeral-storage: "16Mi"
+  storage:
+    - name: config
+      type: pvc
+      mountPath: /config
+      claimName: "lidarr-config"
+    - name: lidarr-downloads
+      type: pvc
+      mountPath: /data/downloads
+      claimName: "lidarr-downloads"
+    - name: lidarr-music
+      type: pvc
+      mountPath: /data/music'
+      claimName: "lidarr-music"
+
+service:
+  ports:
+    - name: http
+      port: 8686
+      protocol: TCP
+
+ingress:
+  enabled: true
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "internalweb, internalwebsecure"
+  hosts:
+    - host: lidarr.projectwhitebox.com
+      path: /
+      pathType: "Prefix"
+      tls:
+        enabled: false
+      backend:
+        service:
+          name: "lidarr"
+          port: 8686
+
+autoscaling:
+  enabled: false
+
+extraObjects:
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: lidarr-downloads
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+        - ReadWriteMany
+      nfs:
+        server: 10.0.0.10
+        path: "/mnt/data-pool/downloads"
+      mountOptions:
+        - nfsvers=4.1 
+        - hard      
+        - noatime
+        - rsize=1048576 
+        - wsize=1048576 
+        - proto=tcp
+        - async
+        - nconnect=8
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: lidarr-downloads
+      namespace: lidarr
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ""
+      resources:
+        requests:
+          storage: 1Ti
+      volumeName: lidarr-downloads
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: lidarr-music
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+        - ReadWriteMany
+      nfs:
+        server: 10.0.0.10
+        path: "/mnt/hdd-pool/music"
+      mountOptions:
+        - nfsvers=4.1 
+        - hard      
+        - noatime
+        - rsize=1048576 
+        - wsize=1048576 
+        - proto=tcp
+        - async
+        - nconnect=8
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: lidarr-music
+      namespace: lidarr
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ""
+      resources:
+        requests:
+          storage: 1Ti
+      volumeName: lidarr-music
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: lidarr-config
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+        - ReadWriteMany
+      nfs:
+        server: 10.0.0.10
+        path: "/mnt/data-pool/lidarr"
+      mountOptions:
+        - nfsvers=4.1 
+        - hard      
+        - noatime
+        - rsize=1048576 
+        - wsize=1048576 
+        - proto=tcp
+        - async
+        - nconnect=8
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: lidarr-config
+      namespace: lidarr
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ""
+      resources:
+        requests:
+          storage: 1Ti
+      volumeName: lidarr-config
