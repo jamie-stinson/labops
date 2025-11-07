@@ -22,12 +22,10 @@ workload:
     preset: ""
     custom:
       requests:
-        cpu: "500m"
+        cpu: "10m"
         memory: "1Gi"
         ephemeral-storage: "16Mi"
-      limits:
-        memory: "1Gi"
-        ephemeral-storage: "16Mi"
+
   storage:
     - name: config
       type: pvc
