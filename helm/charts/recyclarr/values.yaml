@@ -367,9 +367,7 @@ configMap:
                 - trash_ids:
                     - cae4ca30163749b891686f95532519bd # AV1
                     - ae4cfaa9283a4f2150ac3da08e388723 # VP9
-                    - 58d6a88f13e2db7f5059c41047876f00 # DV
-                    - 55d53828b9d81cbe20b02efd00aa0efd # DV HLG
-                    - a3e19f8f627608af0211acd02bf89735 # DV SDR
+                    - b337d6812e06c200ec9a2d3cfa9d20a7 # DV
                     - d6e9318c875905d6cfb5bee961afcea9 # Not Original Language
                   assign_scores_to:
                     - name: Default
@@ -422,9 +420,7 @@ configMap:
                 - trash_ids:
                     - cae4ca30163749b891686f95532519bd # AV1
                     - ae4cfaa9283a4f2150ac3da08e388723 # VP9
-                    - 58d6a88f13e2db7f5059c41047876f00 # DV
-                    - 55d53828b9d81cbe20b02efd00aa0efd # DV HLG
-                    - a3e19f8f627608af0211acd02bf89735 # DV SDR
+                    - b337d6812e06c200ec9a2d3cfa9d20a7 # DV
                   assign_scores_to:
                     - name: Anime
                       score: -10000
@@ -650,9 +646,7 @@ configMap:
                   assign_scores_to:
                     - name: Default
                 - trash_ids:
-                    - 6d0d8de7b57e35518ac0308b0ddf404e # DV
-                    - 1f733af03141f068a540eec352589a89 # DV HLG
-                    - 27954b0a80aab882522a88a4d9eae1cd # DV SDR
+                    - 7c3a61a9c6cb04f52f1544be6d44a026 # DV
                     - 15a05bc7c1a36e2b57fd628f8977e2fc # AV1
                     - 90501962793d580d011511155c97e4e5 # VP9
                     - ae575f95ab639ba5d15f663bf019e3e8 # Not Original Language
@@ -706,9 +700,7 @@ configMap:
                     - name: Anime
                       score: -500
                 - trash_ids:
-                    - 6d0d8de7b57e35518ac0308b0ddf404e # DV
-                    - 1f733af03141f068a540eec352589a89 # DV HLG
-                    - 27954b0a80aab882522a88a4d9eae1cd # DV SDR
+                    - 7c3a61a9c6cb04f52f1544be6d44a026 # DV
                     - 15a05bc7c1a36e2b57fd628f8977e2fc # AV1
                     - 90501962793d580d011511155c97e4e5 # VP9
                   assign_scores_to:
