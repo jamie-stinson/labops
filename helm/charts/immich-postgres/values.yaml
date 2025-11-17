@@ -1,0 +1,49 @@
+namespace: "immich"
+
+service:
+  enabled: false
+
+serviceAccount:
+  enabled: false
+
+workload:
+  enabled: false
+
+pdb:
+  enabled: false
+
+autoscaling:
+  enabled: false
+
+extraObjects:
+  - |
+    apiVersion: postgresql.cnpg.io/v1
+    kind: Cluster
+    metadata:
+      name: immich-postgres
+    spec:
+      description: "Immich Database"
+      imageName: ghcr.io/cloudnative-pg/postgresql:17.5
+      instances: 1
+      bootstrap:
+        initdb:
+          database: "immich"
+          owner: immich
+      enableSuperuserAccess: true
+      superuserSecret:
+        name: primary-api-pg-superuser
+      storage:
+        pvcTemplate:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 25Gi
+          storageClassName: "openebs"
+          volumeMode: Filesystem
+      resources:
+        requests:
+          cpu: "10m"
+          memory: "2Gi"
+        limits:
+          memory: "2Gi"

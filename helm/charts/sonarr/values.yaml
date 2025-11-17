@@ -1,0 +1,274 @@
+workload:
+  type: "StatefulSet"
+  image:
+    registry: ghcr.io
+    repository: home-operations/sonarr
+    tag: 4.0.15
+  envsSecret:
+    - name: SONARR__AUTH__APIKEY
+      secret: sonarr
+      key: API_KEY
+  envs:
+    - name: SONARR__AUTH__METHOD
+      value: "External"
+    - name: SONARR__AUTH__REQUIRED
+      value: "Enabled"
+  probes:
+    readinessProbe:
+      type: tcpSocket
+      port: 8989
+    livenessProbe:
+      type: tcpSocket
+      port: 8989
+  strategy:
+    type: OnDelete
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "500m"
+        memory: "1Gi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "1Gi"
+        ephemeral-storage: "16Mi"
+  storage:
+    - name: config
+      type: pvc
+      mountPath: /config
+      claimName: "sonarr-config"
+    - name: sonarr-downloads
+      type: pvc
+      mountPath: /data/downloads
+      claimName: "sonarr-downloads"
+    - name: sonarr-tv
+      type: pvc
+      mountPath: /data/tv
+      claimName: "sonarr-tv"
+    - name: sonarr-anime
+      type: pvc
+      mountPath: /data/anime
+      claimName: "sonarr-anime"
+    # - name: tmp
+    #   type: emptyDir
+    #   mountPath: /tmp
+  extraContainers:
+    - name: exportarr
+      image: "ghcr.io/onedr0p/exportarr:v2.2.0"
+      ports:
+        - containerPort: 9707
+          name: http-metrics
+          protocol: TCP
+      env:
+        - name: "PORT"
+          value: "9707"
+        - name: "URL"
+          value: "http://localhost:8989"
+        - name: APIKEY
+          valueFrom:
+            secretKeyRef:
+              name: sonarr
+              key: API_KEY
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        privileged: false
+        readOnlyRootFilesystem: true
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      args:
+        - sonarr
+
+service:
+  ports:
+    - name: http
+      port: 8989
+      protocol: TCP
+    - name: http-metrics
+      port: 9707
+      protocol: TCP
+
+ingress:
+  enabled: true
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "internalweb, internalwebsecure"
+  hosts:
+    - host: sonarr.projectwhitebox.com
+      path: /
+      pathType: "Prefix"
+      tls:
+        enabled: false
+      backend:
+        service:
+          name: "sonarr"
+          port: 8989
+
+autoscaling:
+  enabled: false
+  
+extraObjects:
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: sonarr-downloads
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+        - ReadWriteMany
+      nfs:
+        server: 10.0.0.10
+        path: "/mnt/data-pool/downloads"
+      mountOptions:
+        - nfsvers=4.1 
+        - hard      
+        - noatime
+        - rsize=1048576 
+        - wsize=1048576 
+        - proto=tcp
+        - async
+        - nconnect=8
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: sonarr-downloads
+      namespace: sonarr
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ""
+      resources:
+        requests:
+          storage: 1Ti
+      volumeName: sonarr-downloads
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: sonarr-tv
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+        - ReadWriteMany
+      nfs:
+        server: 10.0.0.10
+        path: "/mnt/hdd-pool/tv"
+      mountOptions:
+        - nfsvers=4.1 
+        - hard      
+        - noatime
+        - rsize=1048576 
+        - wsize=1048576 
+        - proto=tcp
+        - async
+        - nconnect=8
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: sonarr-tv
+      namespace: sonarr
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ""
+      resources:
+        requests:
+          storage: 1Ti
+      volumeName: sonarr-tv
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: sonarr-anime
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+        - ReadWriteMany
+      nfs:
+        server: 10.0.0.10
+        path: "/mnt/hdd-pool/anime"
+      mountOptions:
+        - nfsvers=4.1 
+        - hard      
+        - noatime
+        - rsize=1048576 
+        - wsize=1048576 
+        - proto=tcp
+        - async
+        - nconnect=8
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: sonarr-anime
+      namespace: sonarr
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ""
+      resources:
+        requests:
+          storage: 1Ti
+      volumeName: sonarr-anime
+  - |
+    apiVersion: bitnami.com/v1alpha1
+    kind: SealedSecret
+    metadata:
+      creationTimestamp: null
+      name: sonarr
+      namespace: sonarr
+    spec:
+      encryptedData:
+        API_KEY: AgAYjAk5VGOOXQJA9DHlTZUq6McIBJ+qMq5FT3fryfcfwUTZ71r0C17CXORVJBLI5a9tA6BgYtycRsC/6RxCq9c5Czi8gDUCffeU+MbMiiuHIgTHkY8wt06ikn89iQZTLVTVxKWkyHSZd8hKw+2bQ8azfpawyuxmcHrkirAgwQtNjmRYdLAQ2z4QUBGXu2YdP37YKHqPkwItBRSMLBmpA/BvKQWdYOB198u9pTGSnMQy5P2henobOZ1TMt5hRTmQT2vpXak1unluviuIGeSooagJa/lzoXLT5z07mW2Ma0h9hCJUJUpmcd/LR6BZiWI4lD7Jo0HeL1YLFs3VhhrZL3wPddImhsvkf1sEcd/32hLQUKT3IgHDyYcYIElTUH2AM58674zaY07eBcnQhlgtRrKHFIBfqNx0gZ2NMEm9lDWPfELZid+pVY/ncdOszziSVX84RadY+/qXlJEOvK3Q5DTydqCI8NscXMDE8V36ERcFbvbAoWKZyX2aW5qygk+6BoFcb6bXNl/9A+TyAophRdvjGX8MGYbnylTH1iP4OUHcz5jt9fKmwyILCyxO84IFtinD2VIiFtaTW32nkHEhMknaLA5X9mPPJXpWiJy8EGdh29wLv7Q6Yd5nKHGAlcc1CJyKgB9QO6QDkVSxHF7yPaTwe/kK6Ilce1Bp7pSVYzOIEfra9JPxQeTvHcxkxy2OG5fhqSFeFvyYgYa5FLdVEWCZ8Ra+ppnE41vJsgjNLiXOtQ==
+      template:
+        metadata:
+          creationTimestamp: null
+          name: sonarr
+          namespace: sonarr
+        type: Opaque
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: sonarr-config
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+        - ReadWriteMany
+      nfs:
+        server: 10.0.0.10
+        path: "/mnt/data-pool/sonarr"
+      mountOptions:
+        - nfsvers=4.1 
+        - hard      
+        - noatime
+        - rsize=1048576 
+        - wsize=1048576 
+        - proto=tcp
+        - async
+        - nconnect=8
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: sonarr-config
+      namespace: sonarr
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ""
+      resources:
+        requests:
+          storage: 1Ti
+      volumeName: sonarr-config

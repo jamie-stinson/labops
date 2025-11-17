@@ -1,0 +1,269 @@
+namespace: "argocd"
+workload:
+  enabled: false
+service:
+  ports:
+  - name: http
+    port: 8081
+    protocol: TCP
+  - name: http-metrics
+    port: 8084
+    protocol: TCP
+
+extraObjects:
+  - |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      annotations:
+        app.kubernetes.io/name: argocd-repo-server
+      labels:
+        app.kubernetes.io/instance: argocd-repo-server
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: argocd-repo-server
+        app.kubernetes.io/version: v3.1.0
+        helm.sh/chart: argocd-repo-server-v3.1.0
+      name: argocd-repo-server
+      namespace: argocd
+    spec:
+      progressDeadlineSeconds: 600
+      replicas: 1
+      revisionHistoryLimit: 10
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: argocd-repo-server
+          app.kubernetes.io/name: argocd-repo-server
+      strategy:
+        rollingUpdate:
+          maxSurge: 1
+          maxUnavailable: 1
+        type: RollingUpdate
+      template:
+        metadata:
+          annotations:
+            app.kubernetes.io/name: argocd-repo-server
+            override-url.version-checker.io/argocd-repo-server: /quay.io/argoproj/argocd
+          creationTimestamp: null
+          labels:
+            app.kubernetes.io/instance: argocd-repo-server
+            app.kubernetes.io/managed-by: Helm
+            app.kubernetes.io/name: argocd-repo-server
+            app.kubernetes.io/version: v3.1.0
+            helm.sh/chart: argocd-repo-server-v3.1.0
+        spec:
+          initContainers:
+          - command:
+            - /bin/cp
+            - -n
+            - /usr/local/bin/argocd
+            - /var/run/argocd/argocd-cmp-server
+            image: quay.io/argoproj/argocd:v3.1.0
+            name: copyutil
+            volumeMounts:
+            - mountPath: /var/run/argocd
+              name: var-files
+          containers:
+            - args:
+                - '--port=8081'
+                - '--metrics-port=8084'
+                - '--logformat=text'
+                - '--loglevel=info'
+              command:
+                - argocd-repo-server
+              env:
+                - name: NAME
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: metadata.name
+                - name: POD_NAME
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: metadata.name
+                - name: NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: metadata.namespace
+                - name: POD_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: metadata.namespace
+                - name: OPERATOR_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: metadata.namespace
+                - name: HOST_IP_ADDRESS
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: status.hostIP
+                - name: HOSTNAME
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: spec.nodeName
+                - name: NODE_NAME
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: spec.nodeName
+                - name: POD_IP
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: status.podIP
+                - name: ARGOCD_REPO_SERVER_NAME
+                  value: argocd-repo-server
+                - name: ARGOCD_EXEC_TIMEOUT
+                  value: '180'
+                - name: ARGOCD_GIT_ATTEMPTS_COUNT
+                  value: '3'
+                - name: ARGOCD_HELM_ALLOW_CONCURRENCY
+                  value: 'true'
+                - name: ARGOCD_REPOSERVER_LOGFORMAT
+                  valueFrom:
+                    configMapKeyRef:
+                      key: reposerver.log.format
+                      name: argocd-cmd-params-cm
+                - name: ARGOCD_REPOSERVER_LOG_LEVEL
+                  valueFrom:
+                    configMapKeyRef:
+                      key: reposerver.log.level
+                      name: argocd-cmd-params-cm
+                - name: ARGOCD_REPOSERVER_PARALLELISM_LIMIT
+                  valueFrom:
+                    configMapKeyRef:
+                      key: reposerver.parallelism.limit
+                      name: argocd-cmd-params-cm
+                - name: REDIS_SERVER
+                  valueFrom:
+                    configMapKeyRef:
+                      key: redis.server
+                      name: argocd-cmd-params-cm
+                - name: ARGOCD_SERVER_OTLP_ADDRESS
+                  valueFrom:
+                    configMapKeyRef:
+                      key: otlp.address
+                      name: argocd-cmd-params-cm
+              image: quay.io/argoproj/argocd:v3.1.0
+              imagePullPolicy: IfNotPresent
+              livenessProbe:
+                failureThreshold: 3
+                httpGet:
+                  path: /healthz?full=true
+                  port: 8084
+                  scheme: HTTP
+                initialDelaySeconds: 15
+                periodSeconds: 10
+                successThreshold: 1
+                timeoutSeconds: 5
+              name: argocd-repo-server
+              ports:
+                - containerPort: 8081
+                  name: http
+                  protocol: TCP
+                - containerPort: 8084
+                  name: http-metrics
+                  protocol: TCP
+              readinessProbe:
+                failureThreshold: 3
+                httpGet:
+                  path: /healthz
+                  port: 8084
+                  scheme: HTTP
+                initialDelaySeconds: 15
+                periodSeconds: 10
+                successThreshold: 1
+                timeoutSeconds: 5
+              resources:
+                limits:
+                  ephemeral-storage: 1Gi
+                  memory: 512Mi
+                requests:
+                  cpu: 50m
+                  ephemeral-storage: 1Gi
+                  memory: 512Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                privileged: false
+                readOnlyRootFilesystem: false
+                runAsGroup: 1000
+                runAsNonRoot: true
+                runAsUser: 1000
+                seccompProfile:
+                  type: RuntimeDefault
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+              volumeMounts:
+                - mountPath: /tmp
+                  name: tmp
+                - mountPath: /app/config/gpg/keys
+                  name: gpg-keys
+                - mountPath: /var/run/argocd
+                  name: var-files
+                - mountPath: /home/argocd/cmp-server/plugins
+                  name: plugins
+                - mountPath: /home/argocd/cmp-server/config
+                  name: cmp-grafana-plugin-volume
+            - command:
+                - /var/run/argocd/argocd-cmp-server
+              image: busybox
+              imagePullPolicy: IfNotPresent
+              name: grafana-dashboard-generator
+              resources: {}
+              securityContext:
+                runAsNonRoot: true
+                runAsUser: 1000
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+              volumeMounts:
+                - mountPath: /home/argocd/cmp-server/plugins
+                  name: plugins
+                - mountPath: /var/run/argocd
+                  name: var-files
+                - mountPath: /home/argocd/cmp-server/config/plugin.yaml
+                  name: cmp-grafana-plugin-volume
+                  subPath: plugin.yaml
+                - mountPath: /tmp
+                  name: cmp-tmp
+          dnsPolicy: ClusterFirst
+          restartPolicy: Always
+          schedulerName: default-scheduler
+          securityContext:
+            fsGroup: 1000
+            fsGroupChangePolicy: Always
+            runAsGroup: 1000
+            runAsNonRoot: true
+            runAsUser: 1000
+          serviceAccount: argocd-repo-server
+          serviceAccountName: argocd-repo-server
+          terminationGracePeriodSeconds: 30
+          topologySpreadConstraints:
+            - labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: argocd-repo-server
+              maxSkew: 1
+              topologyKey: kubernetes.io/hostname
+              whenUnsatisfiable: ScheduleAnyway
+          volumes:
+            - emptyDir: {}
+              name: tmp
+            - emptyDir: {}
+              name: cmp-tmp
+            - emptyDir: {}
+              name: var-files
+            - emptyDir: {}
+              name: gpg-keys
+            - emptyDir: {}
+              name: plugins
+            - configMap:
+                defaultMode: 420
+                name: cmp-grafana-plugin
+              name: cmp-grafana-plugin-volume

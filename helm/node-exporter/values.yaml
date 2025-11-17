@@ -1,0 +1,57 @@
+workload:
+  type: DaemonSet
+  image:
+    repository: "quay.io/prometheus/node-exporter"
+    tag: "v1.8.2"
+  args:
+  - '--web.listen-address=0.0.0.0:9100'
+  - '--path.procfs=/host/proc'
+  - '--path.sysfs=/host/sys'
+  - '--path.rootfs=/host/root'
+  - '--path.udev.data=/host/root/run/udev/data'
+  - '--log.format=json'
+  - '--no-collector.nfs'
+  - '--no-collector.nfsd'
+  - '--no-collector.zfs'
+  probes:
+    readinessProbe:
+      path: "/"
+      port: 9100
+    livenessProbe:
+      path: "/"
+      port: 9100
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "10m"
+        memory: "128Mi"
+        ephemeral-storage: "128Mi"
+      limits:
+        memory: "128Mi"
+        ephemeral-storage: "128Mi"
+  tolerations:
+  - key: "node-role.kubernetes.io/control-plane"
+    operator: "Exists"
+    effect: "NoSchedule"
+  storage:
+  - name: proc
+    type: hostPath
+    mountPath: /host/proc
+    hostPath: /proc
+    readOnly: true
+  - name: sys
+    type: hostPath
+    mountPath: /host/sys
+    hostPath: /sys
+    readOnly: true
+  - name: root
+    type: hostPath
+    mountPath: /host/root
+    hostPath: /
+    readOnly: true
+service:
+  ports:
+  - name: http-metrics
+    protocol: TCP
+    port: 9100

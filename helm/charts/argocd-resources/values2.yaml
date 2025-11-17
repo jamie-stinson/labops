@@ -1,0 +1,80 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: org-helm-charts
+  namespace: argocd
+spec:
+  syncPolicy:
+    preserveResourcesOnDeletion: true
+  goTemplate: true
+  generators:
+    - matrix:
+        generators:
+          - scmProvider:
+              github:
+                organization: js-labops
+                allBranches: false
+                appSecretName: creds-47199450
+              filters:
+                - repositoryMatch: ^helm-chart
+                  labelMatch: production
+          - git:
+              repoURL: 'https://github.com/js-labops/{{.repository}}.git'
+              revision: initial-commit
+              files:
+                - path: 'source.yaml'
+  template:
+    metadata:
+      name: '{{ regexReplaceAll "helm-chart-" .repository "" }}'
+      namespace: argocd
+    spec:
+      project: "production"
+      destination:
+        name: "in-cluster"
+        namespace: "{{ .namespace }}"
+      revisionHistoryLimit: 3
+      syncPolicy:
+        automated:
+          prune: true
+          allowEmpty: true
+          selfHeal: true
+        retry:
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 5m
+          limit: 3
+        syncOptions:
+          - Validate=true
+          - CreateNamespace=true
+          - PrunePropagationPolicy=foreground
+          - PruneLast=true
+          - ServerSideApply=true
+          - RespectIgnoreDifferences=false
+          - ApplyOutOfSyncOnly=false
+  templatePatch: |
+    spec:
+      sources:
+        # Components
+        {{- range $component := .components }}
+        - repoURL: "ghcr.io/jamie-stinson/common-helm-library"
+          chart: "common-helm-library"
+          targetRevision: "2.*.*"
+          helm:
+            releaseName: "{{ $component }}"
+            valueFiles:
+              - "$values/components/global-values.yaml"
+              - "$values/components/{{ $component }}/values.yaml"
+        {{- end }}
+        # Values
+        - repoURL: 'https://github.com/js-labops/{{.repository}}.git'
+          targetRevision: initial-commit
+          ref: values
+          {{- if .installCRDs }}
+          path: crds
+          {{- end }}
+        - repoURL: 'https://github.com/js-labops/{{.repository}}.git'
+          targetRevision: initial-commit
+          ref: dashboards
+          plugin:
+            name: grafana-dashboard-generator

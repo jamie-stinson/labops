@@ -1,0 +1,52 @@
+workload:
+  image:
+    repository: "docker.io/victoriametrics/victoria-logs"
+    tag: "v1.31.0"
+  args:
+    - '--envflag.enable'
+    - '--http.shutdownDelay=15s'
+    - '--httpListenAddr=:9471'
+    - '--loggerFormat=json'
+    - >-
+      --storageNode=victoria-logs-storage-0.victoria-logs-storage.victoria-logs.svc.cluster.local.:9491
+  probes:
+    readinessProbe:
+      type: tcpSocket
+      port: 9471
+    livenessProbe:
+      type: tcpSocket
+      port: 9471
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "10m"
+        memory: "128Mi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "128Mi"
+        ephemeral-storage: "16Mi"
+service:
+  ports:
+  - name: http
+    protocol: TCP
+    port: 9471
+
+extraObjects:
+  - |
+    apiVersion: grafana.integreatly.org/v1beta1
+    kind: GrafanaDatasource
+    metadata:
+      name: victoria-logs-select
+      namespace: victoria-logs
+    spec:
+      allowCrossNamespaceImport: true
+      datasource:
+        access: proxy
+        name: victoria-logs
+        type: victoriametrics-logs-datasource
+        url: http://victoria-logs-select.victoria-logs.svc.cluster.local:9471/
+      instanceSelector:
+        matchLabels:
+          dashboards: grafana
+      resyncPeriod: 10m0s

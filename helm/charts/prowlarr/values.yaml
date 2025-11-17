@@ -1,0 +1,151 @@
+workload:
+  image:
+    registry: ghcr.io
+    repository: home-operations/prowlarr
+    tag: 1.37.0
+  envsSecret:
+    - name: PROWLARR__AUTH__APIKEY
+      secret: prowlarr
+      key: API_KEY
+  envs:
+    - name: PROWLARR__AUTH__METHOD
+      value: "External"
+    - name: PROWLARR__AUTH__REQUIRED
+      value: "Enabled"
+  probes:
+    readinessProbe:
+      type: tcpSocket
+      port: 9696
+    livenessProbe:
+      type: tcpSocket
+      port: 9696
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "10m"
+        memory: "256Mi"
+        ephemeral-storage: "128Mi"
+      limits:
+        memory: "256Mi"
+        ephemeral-storage: "128Mi"
+  storage:
+    - name: config
+      type: pvc
+      mountPath: /config
+      claimName: "prowlarr-config"
+    # - name: tmp
+    #   type: emptyDir
+    #   mountPath: /tmp
+  extraContainers:
+    - name: exportarr
+      image: "ghcr.io/onedr0p/exportarr:v2.2.0"
+      ports:
+        - containerPort: 9707
+          name: http-metrics
+          protocol: TCP
+      env:
+        - name: "PORT"
+          value: "9707"
+        - name: "URL"
+          value: "http://localhost:9696"
+        - name: APIKEY
+          valueFrom:
+            secretKeyRef:
+              name: prowlarr
+              key: API_KEY
+        - name: "PROWLARR__BACKFILL"
+          value: "true"
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        privileged: false
+        readOnlyRootFilesystem: true
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      args:
+        - prowlarr
+
+service:
+  ports:
+    - name: http
+      port: 9696
+      protocol: TCP
+    - name: http-metrics
+      port: 9707
+      protocol: TCP
+
+ingress:
+  enabled: true
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "internalweb, internalwebsecure"
+  hosts:
+    - host: prowlarr.projectwhitebox.com
+      path: /
+      pathType: "Prefix"
+      tls:
+        enabled: false
+      backend:
+        service:
+          name: "prowlarr"
+          port: 9696
+
+autoscaling:
+  enabled: false
+
+extraObjects:
+  - |
+    apiVersion: bitnami.com/v1alpha1
+    kind: SealedSecret
+    metadata:
+      name: prowlarr
+      namespace: prowlarr
+    spec:
+      encryptedData:
+        API_KEY: AgAhy0PlQfoAzXHMVOCGYCrb5YYU2+Y5gdAAw9hAGihlckwBOLOjqmTeHh/T/pMunJO1W/jhi3OUq75j3kD4o1+BXdV5Krs3mpoLNbeCr0t9YNCvbGF8DAsm1a13oOOO4ibElX9pIBOkPrUUk4GyVFnUJxy8tO7nraaqIpQ4mLwKa0lb0Hkm8oSgTLjuavLiROzRBbv44N1QjEDZj8hSKNsuGpZ8eBuiOTJ22O8o67wkO4LeyhIxceGyeybi3DHVw6WmRFiToA2Z7S4iFjAgt0vMPUrT5G7wHpIOXIv7cV+4t8SmyylY7VVhVwwuZ9i+Qd6ltJNaTNRcSrF4Fb6PdW+D1fDy/sbvgYROTOh1NCK7xG++lvO7hX/K5FxgnCzSSm/kkNpAMHEVAv9BqW7OXXmUs0jyWrEXtspGJL8FJAjO1W3H3P4NoyOfoTCbsZfaVKr8pfbQjWbJEpP8VCzZae1vJUYnR61jns4nLBiY3+yJuyebWZAah9wmjiiIB6ry5377CDMJJGHkmESRFrjNv3ycW/il9Dp1FUQyis0hzAR0G3jj6EqhCxLXGkfSAgWqluC4RIBPeq08IMZNjVyhk/Xr1SmAVTjZDpVYhhApE38ttXcr9rSEXtn85duAYIHfIQ2wOOVyLbjrBMs82USnL7zKBQX6IyUE4vP8pI3ELbBkwwWDnWT1ivu4/by/v9FK31T0gQEkEPE3atJkKAxO+46lCXQ4WJBfDU9jInEVkxbI1w==
+      template:
+        metadata:
+          name: prowlarr
+          namespace: prowlarr
+        type: Opaque
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: prowlarr-config
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+        - ReadWriteMany
+      nfs:
+        server: 10.0.0.10
+        path: "/mnt/data-pool/prowlarr"
+      mountOptions:
+        - nfsvers=4.1 
+        - hard      
+        - noatime
+        - rsize=1048576 
+        - wsize=1048576 
+        - proto=tcp
+        - async
+        - nconnect=8
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: prowlarr-config
+      namespace: prowlarr
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ""
+      resources:
+        requests:
+          storage: 1Ti
+      volumeName: prowlarr-config

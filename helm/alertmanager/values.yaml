@@ -1,0 +1,99 @@
+autoPatching:
+  enabled: true
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: "alertmanager=quay.io/prometheus/alertmanager:~v0"
+workload:
+  type: StatefulSet
+  image:
+    repository: quay.io/prometheus/alertmanager
+    tag: v0.28.1
+  args:
+    - '--config.file=/etc/config/alertmanager.yaml'
+    - '--storage.path=/alertmanager'
+    - '--web.listen-address=:9093'
+    - '--web.route-prefix=/'
+    - '--cluster.advertise-address=[$(POD_IP)]:9094'
+    - '--cluster.listen-address=0.0.0.0:9094'
+    # Each replica requires a cluster peer
+    - '--cluster.peer=alertmanager-0.alertmanager.alertmanager.svc.cluster.local:9094'
+    # - '--cluster.peer=alertmanager-1.alertmanager.alertmanager.svc.cluster.local:9094'
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "100m"
+        memory: "256Mi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "256Mi"
+        ephemeral-storage: "16Mi"
+  probes:
+    readinessProbe:
+      path: "/-/ready"
+      port: 9093
+    livenessProbe:
+      path: "/-/ready"
+      port: 9093
+  storage:
+    - name: config
+      type: configMap
+      mountPath: /etc/config
+      configMapName: alertmanager
+    - name: data
+      type: emptyDir
+      mountPath: /alertmanager
+      sizeLimit: 5Gi
+      ramDisk: false
+      readOnly: false
+
+autoscaling:
+  enabled: false
+
+service:
+  clusterIP: "None"
+  ports:
+    - name: http-metrics
+      port: 9093
+      protocol: TCP
+    - name: cluster
+      port: 9094
+      protocol: TCP
+
+configMap:
+  enabled: true
+  configMaps:
+    - name: "alertmanager"
+      data:
+        alertmanager.yaml: |
+          global: null
+          receivers:
+          - name: default-receiver
+          route:
+            group_interval: 5m
+            group_wait: 10s
+            receiver: default-receiver
+            repeat_interval: 3h
+
+ingress:
+  enabled: true
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "internalweb, internalwebsecure"
+  hosts:
+    - host: alertmanager.projectwhitebox.com
+      path: /
+      pathType: "Prefix"
+      tls:
+        enabled: false
+      backend:
+        service:
+          name: "alertmanager"
+          port: 9093
+
+grafana:
+  dashboard:
+    enabled: true
+    dashboards:
+      - name: alertmanager
+        title: "Alertmanager"
+        url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/charts/alertmanager/dashboards/alertmanager.json"
+        folder: "System"

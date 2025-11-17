@@ -1,0 +1,152 @@
+workload:
+  image:
+    repository: ghcr.io/pocket-id/pocket-id
+    tag: v1.10.0-distroless
+  probes:
+    readinessProbe:
+      type: tcpSocket
+      port: 1411
+    livenessProbe:
+      type: tcpSocket
+      port: 1411
+  envsSecret:
+    - name: DB_CONNECTION_STRING
+      secret: pocket-id-postgres-app
+      key: uri
+    - name: ENCRYPTION_KEY
+      secret: pocket-id
+      key: ENCRYPTION_KEY
+  envs:
+    - name: "APP_URL"
+      value: "https://auth.projectwhitebox.com"
+    - name: "TRUST_PROXY"
+      value: "true"
+    - name: "PUID"
+      value: "1000"
+    - name: "GUID"
+      value: "1000"
+    - name: "DB_PROVIDER"
+      value: "postgres"
+    - name: "KEYS_STORAGE"
+      value: "database"
+    - name: "UI_CONFIG_DISABLED"
+      value: "true"
+    - name: "APP_NAME"
+      value: "Project Whitebox"
+    - name: "SESSION_DURATION"
+      value: "720"
+    - name: "ALLOW_USER_SIGNUPS"
+      value: "withToken"
+    - name: "METRICS_ENABLED"
+      value: "true"
+    - name: "OTEL_METRICS_EXPORTER"
+      value: "prometheus"
+    - name: "OTEL_EXPORTER_PROMETHEUS_HOST"
+      value: "0.0.0.0"
+    - name: "OTEL_EXPORTER_PROMETHEUS_PORT"
+      value: "9464"
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "50m"
+        memory: "128Mi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "128Mi"
+        ephemeral-storage: "16Mi"
+  storage:
+    # - name: app-data
+    #   type: emptyDir
+    #   mountPath: /app/data
+    - name: uploads
+      type: pvc
+      mountPath: /app/data/uploads
+      claimName: "pocket-id-uploads"
+
+service:
+  ports:
+    - name: http
+      port: 1411
+      protocol: TCP
+    - name: http-metrics
+      port: 9464
+      protocol: TCP
+
+expose:
+  enabled: true
+  type: "NodePort"
+  ports:
+    - name: http
+      port: 1411
+      protocol: TCP
+      nodePort: 30195
+ingress:
+  enabled: true
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "internalweb, internalwebsecure, externalweb, externalwebsecure"
+  hosts:
+    - host: auth.projectwhitebox.com
+      path: /
+      pathType: "Prefix"
+      tls:
+        enabled: false
+      backend:
+        service:
+          name: "pocket-id"
+          port: 1411
+
+autoscaling:
+  enabled: false
+
+extraObjects:
+  - |
+    apiVersion: bitnami.com/v1alpha1
+    kind: SealedSecret
+    metadata:
+      name: pocket-id
+      namespace: pocket-id
+    spec:
+      encryptedData:
+        ENCRYPTION_KEY: AgAJYWrzEI7hr7iCKL0l944ssqJfLqeTQTpNzAW7bOgSbaQ84BGHZujJ3pLfLtRPGFXUyWmLUlgMdGh7Xj7wL7SMC47lhKnVwGigBek1L70f0/A9Bb0aaDyocGB1kv3TMYQWy+/FSHf9CbBa1KgJ/av1BatDhcGEvXEXpOpMlSWwciHe58W9B2F5ASPj/cUilx6CnW96XK2X42BOs7KneQk5AvMErjDpbdvjazY2i4zU9yFDn3h2F8sBCFYzIxHExzeKfnvaxmgVVMg/cRC2nE8skzqdLMAss8VroYGhrbN55Lru7hG2AoBQ90Dj8KyxzXB1i94YgjujOZn+na9zZsErqTqeWa/DpZjBisJUpSfvzul1k4E27eCy8e1TfznqwqwYwdzeLmedhPrWLfXMQVji+LbaXfKDJg7qJ0ekepo9yN/SIz35q0XUvYT/HB3GtpcDj3M6yFRirjNaBOElkFoWWZklCI1fOwUIhI/nqzzLUn9QDdYwe4SVvlLWP99v1qRS8f0jVKVn2ccllAhZTQFesMSqimgKcsnyfXzvxAr11S+hZVtFassdzrMmH/ey+65lX9SucnKJ6RlDt4rNhqEKbAXX/wFcGAdLkjRpY52q3DHLx6zIDZCg0SLPmS/FIIRTvqO+i4CKBXUmWlRemKJtoZL4G7IvLhp7SB8Y7KgKNkEl9+VdZTRu+IMrFq5sMXg95bJJxEQJJsXho3EJaS0ZbDok9FwdQ0W7jkgw6z3k935y6tRUHtPyaSEii8I=
+      template:
+        metadata:
+          name: pocket-id
+          namespace: pocket-id
+        type: Opaque
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: pocket-id-uploads
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+        - ReadWriteMany
+      nfs:
+        server: 10.0.0.10
+        path: "/mnt/data-pool/pocket-id"
+      mountOptions:
+        - nfsvers=4.1 
+        - hard      
+        - noatime
+        - rsize=1048576 
+        - wsize=1048576 
+        - proto=tcp
+        - async
+        - nconnect=8
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: pocket-id-uploads
+      namespace: pocket-id
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ""
+      resources:
+        requests:
+          storage: 1Ti
+      volumeName: pocket-id-uploads

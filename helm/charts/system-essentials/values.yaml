@@ -1,0 +1,42 @@
+namespace: "kube-system"
+
+workload:
+  enabled: false
+
+service:
+  enabled: false
+
+autoscaling:
+  enabled: false
+
+pdb:
+  enabled: false
+
+serviceAccount:
+  enabled: false
+
+extraObjects:
+  - |
+    apiVersion: scheduling.k8s.io/v1
+    kind: PriorityClass
+    metadata:
+      name: application-critical
+    value: 3000
+    globalDefault: false
+    description: "Critical platform components."
+  - |
+    apiVersion: scheduling.k8s.io/v1
+    kind: PriorityClass
+    metadata:
+      name: application-default
+    value: 2000
+    globalDefault: true
+    description: "Normal priority apps."
+  - |
+    apiVersion: scheduling.k8s.io/v1
+    kind: PriorityClass
+    metadata:
+      name: application-low
+    value: 1000
+    globalDefault: false
+    description: "Batch jobs, workers, or non-critical pods."

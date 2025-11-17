@@ -1,0 +1,35 @@
+machine:
+  install:
+    disk: "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi0"
+  kubelet:
+    extraConfig:
+      systemReserved:
+        cpu: ${reserved_system_cpu}
+        memory: ${reserved_system_memory}
+        ephemeral-storage: ${reserved_system_storage}
+      kubeReserved:
+        cpu: ${reserved_kube_cpu}
+        memory: ${reserved_kube_memory}
+        ephemeral-storage: ${reserved_kube_storage}
+    extraMounts:
+      - destination: /var/mnt/hdd-pool
+        type: bind
+        source: /var/mnt/hdd-pool
+        options:
+          - bind
+          - rshared
+          - rw
+      - destination: /var/mnt/ssd-pool
+        type: bind
+        source: /var/mnt/ssd-pool
+        options:
+          - bind
+          - rshared
+          - rw
+  disks:
+    - device: /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi1
+      partitions:
+        - mountpoint: /var/mnt/hdd-pool
+    - device: /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi2
+      partitions:
+        - mountpoint: /var/mnt/ssd-pool

@@ -1,0 +1,33 @@
+workload:
+  image:
+    repository: "docker.io/victoriametrics/victoria-logs"
+    tag: "v1.31.0"
+  args:
+    - '--envflag.enable'
+    - '--http.shutdownDelay=15s'
+    - '--httpListenAddr=:9481'
+    - '--loggerFormat=json'
+    - >-
+      --storageNode=victoria-logs-storage-0.victoria-logs-storage.victoria-logs.svc.cluster.local.:9491
+  probes:
+    readinessProbe:
+      type: tcpSocket
+      port: 9481
+    livenessProbe:
+      type: tcpSocket
+      port: 9481
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "10m"
+        memory: "1Gi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "1Gi"
+        ephemeral-storage: "16Mi"
+service:
+  ports:
+  - name: http
+    protocol: TCP
+    port: 9481

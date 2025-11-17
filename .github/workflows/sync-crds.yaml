@@ -1,0 +1,135 @@
+name: Sync CRDs
+
+on:
+  pull_request:
+    paths:
+      - "helm/charts/**/values.yaml"
+
+jobs:
+  sync-crds:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Fetch and Validate CRDs
+        run: |
+          set -euo pipefail
+
+          for chart in helm/charts/*; do
+            values="$chart/values.yaml"
+            [ -f "$values" ] || continue
+
+            tag=$(yq '.workload.image.tag' "$values")
+            chart_name=$(basename "$chart")
+            mkdir -p "$chart/crds"
+            crd_file="$chart/crds/$chart_name.crds.yaml"
+
+            case "$chart_name" in
+              cert-manager-controller)
+                url="https://github.com/cert-manager/cert-manager/releases/download/${tag}/cert-manager.crds.yaml"
+                ;;
+              grafana-operator)
+                url="https://github.com/grafana/grafana-operator/releases/download/${tag}/crds.yaml"
+                ;;
+              cloudnative-pg)
+                url="https://github.com/cloudnative-pg/cloudnative-pg/releases/download/v${tag}/cnpg-${tag}.yaml"
+                ;;
+              argo-rollouts-controller)
+                url="https://github.com/argoproj/argo-rollouts/releases/download/${tag}/install.yaml"
+                ;;
+              argo-cd-server)
+                url="https://raw.githubusercontent.com/argoproj/argo-cd/${tag}/manifests/ha/install.yaml"
+                ;;
+              sealed-secrets)
+                url="https://github.com/bitnami-labs/sealed-secrets/releases/download/v${tag}/controller.yaml"
+                ;;
+              trivy-operator)
+                url="https://raw.githubusercontent.com/aquasecurity/trivy-operator/refs/tags/v${tag}/deploy/static/trivy-operator.yaml"
+                ;;
+              minio-operator)
+                echo "Fetching $chart_name CRDs for tag $tag"
+                tmpdir=$(mktemp -d)
+
+                urls=$(curl -sSL "https://api.github.com/repos/minio/operator/contents/resources/base/crds?ref=${tag}" \
+                  | yq -r '.[] | .download_url')
+
+                for url in $urls; do
+                  echo "Fetching from $url"
+                  curl -sSL -f "$url" -o "$tmpdir/$(basename "$url")"
+                done
+
+                yq eval-all 'select(.kind == "CustomResourceDefinition")' "$tmpdir"/*.yaml > "$crd_file"
+
+                rm -rf "$tmpdir"
+                continue
+                ;;
+              *)
+                echo "No CRD fetch rule for $chart_name, skipping"
+                continue
+                ;;
+            esac
+
+            echo "Fetching $chart_name CRDs from $url"
+
+            if [[ "$chart_name" == "cert-manager-controller" || "$chart_name" == "grafana-operator" ]]; then
+              curl -sSL -f "$url" -o "$crd_file"
+            else
+              tmpfile=$(mktemp)
+              curl -sSL -f "$url" -o "$tmpfile"
+              yq eval-all 'select(.kind == "CustomResourceDefinition")' "$tmpfile" > "$crd_file"
+              rm -f "$tmpfile"
+            fi
+
+            # Validate CRDs exist and are non-empty
+            if [ ! -s "$crd_file" ]; then
+              echo "ERROR: $crd_file does not exist or is empty!"
+              echo "Downloaded file preview:"
+              head -n 20 "$crd_file" || true
+              exit 1
+            fi
+
+            # Ensure all documents are CRDs
+            if [ -n "$(yq eval-all 'select(.kind != "CustomResourceDefinition")' "$crd_file")" ]; then
+              echo "ERROR: $crd_file contains non-CRD resources!"
+              exit 1
+            fi
+
+            yq eval '
+              .metadata.annotations = {
+                "argocd.argoproj.io/sync-wave": "-10",
+                "argocd.argoproj.io/sync-options": "Prune=confirm, Delete=confirm"
+              }
+            ' -i "$crd_file"
+
+            # Log number of CRDs extracted
+            crd_count=$(yq eval-all 'select(.kind == "CustomResourceDefinition")' "$crd_file" | yq eval 'length' - 2>/dev/null | wc -l)
+            echo "$crd_file looks good ($crd_count CRDs)"
+          done
+
+      - name: Commit CRDs to PR branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Stage new/changed CRDs
+          git add helm/charts/*/crds || true
+
+          # Commit only if something is staged
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: sync CRDs for updated tags"
+            git push origin HEAD:${{ github.head_ref }}
+          else
+            echo "No CRD changes detected"
+          fi

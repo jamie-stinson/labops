@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cmp-grafana-plugin
+  namespace: argocd
+data:
+  plugin.yaml: |
+    apiVersion: argoproj.io/v1alpha1
+    kind: ConfigManagementPlugin
+    metadata:
+      name: grafana-dashboard-generator
+    spec:
+      discover:
+        find:
+          command: [sh, -c, 'find .. -maxdepth 1 -type d -name dashboards -print -quit']
+      generate:
+        command: [sh, -c]
+        args:
+          - |
+            #!/bin/sh
+            set -e
+
+            echo "--- Grafana Plugin: Starting script in $(pwd) ---" >&2
+
+            DASHBOARDS_PARENT_DIR="../dashboards"
+
+            if [ ! -d "$DASHBOARDS_PARENT_DIR" ]; then
+              echo "--- Grafana Plugin: '$DASHBOARDS_PARENT_DIR' directory NOT FOUND. Exiting. ---" >&2
+              exit 0
+            fi
+
+            echo "--- Grafana Plugin: Found '$DASHBOARDS_PARENT_DIR'. Searching for subfolders... ---" >&2
+
+            # Iterate over each subdirectory inside ../dashboards
+            for folder_path in "$DASHBOARDS_PARENT_DIR"/*/; do
+              [ -d "$folder_path" ] || continue
+              folder_name=$(basename "$folder_path")
+              echo "--- Grafana Plugin: Processing folder: ${folder_name} ---" >&2
+
+              # Find JSON files inside this folder
+              find "$folder_path" -type f -name "*.json" | while read -r file; do
+                echo "--- Grafana Plugin: Found file: ${file} ---" >&2
+
+                dashboard_name=$(basename "$file" .json | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g')
+                json_content=$(sed 's/^/    /' "$file")
+
+                cat <<EOF
+            ---
+            apiVersion: grafana.integreatly.org/v1beta1
+            kind: GrafanaDashboard
+            metadata:
+              name: "${dashboard_name}"
+              namespace: "${ARGOCD_APP_NAMESPACE}"
+            spec:
+              resyncPeriod: 30s
+              allowCrossNamespaceImport: true
+              folder: "${folder_name}"
+              resyncPeriod: "5m0s"
+              instanceSelector:
+                matchLabels:
+                  dashboards: "grafana"
+              json: |
+            ${json_content}
+            EOF
+              done
+            done
+
+            echo "--- Grafana Plugin: Script finished. ---" >&2

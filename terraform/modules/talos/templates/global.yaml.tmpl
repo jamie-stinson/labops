@@ -1,0 +1,69 @@
+machine:
+  logging:
+    destinations:
+      - endpoint: "udp://127.0.0.1:6051/"
+        format: "json_lines"
+        extraTags:
+          hostname: ${hostname}  
+  install:
+    image: ${talos_factory_image_url}
+    wipe: true
+    extraKernelArgs:
+        - console=ttyS1
+        - panic=10
+        - talos.logging.kernel=udp://127.0.0.1:6050/ 
+  %{~ if encryption_type == "local" ~} 
+  systemDiskEncryption:
+    ephemeral:
+      provider: luks2
+      keys:
+        - nodeID: {}
+          slot: 0
+    state:
+      provider: luks2
+      keys:
+        - nodeID: {}
+          slot: 0
+  %{~ endif ~}
+  network:
+    hostname: ${hostname}
+    nameservers:
+    %{~ for endpoint in dns_servers ~}
+      - ${endpoint}
+    %{~ endfor ~}
+  time:
+    servers:
+    %{~ for endpoint in ntp_servers ~}
+      - ${endpoint}
+    %{~ endfor ~}
+  %{~ if containerd_metrics_server ~}
+  files:
+    - content: |
+        [metrics]
+          address = "0.0.0.0:11234"        
+      path: /etc/cri/conf.d/20-customization.part
+      op: create
+  %{~ endif ~}
+  certSANs:
+    - ${api_server_endpoint}
+  %{~ if extra_mounts != null ~}
+  kubelet:
+    extraMounts:
+      %{~ for mount in extra_mounts ~}
+      - destination: ${mount.destination}
+        type: ${mount.type}
+        source: ${mount.source}
+        %{~ if mount.options != null ~}
+        options:
+          %{~ for option in mount.options ~}
+          - ${option}
+          %{~ endfor ~}
+        %{~ endif ~}
+      %{~ endfor ~}
+  %{~ endif ~}
+%{~ if kubernetes_metrics_server ~}
+cluster:
+  proxy:
+    extraArgs:
+      metrics-bind-address: 0.0.0.0:10249
+%{~ endif ~}

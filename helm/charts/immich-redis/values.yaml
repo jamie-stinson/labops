@@ -1,0 +1,188 @@
+namespace: "immich"
+autoPatching:
+  enabled: true
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: "argo-rollouts-dashboard=quay.io/argoproj/kubectl-argo-rollouts:~v1"
+
+workload:
+  replicaCount: 1
+  type: StatefulSet
+  image:
+    registry: "docker.io"
+    repository: "redis"
+    tag: "8.0.2"
+  args:
+    - "--save"
+    - ""
+    - "--appendonly"
+    - "no"
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "10m"
+        memory: "64Mi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "64Mi"
+        ephemeral-storage: "16Mi"
+  probes:
+    readinessProbe:
+      type: tcpSocket
+      port: 6379
+    livenessProbe:
+      type: tcpSocket
+      port: 6379
+
+autoscaling:
+  enabled: false
+
+service:
+  ports:
+    - name: redis
+      port: 6379
+      protocol: TCP
+
+# redis cluster disabled until supported by argocd
+
+# workload:
+#   type: StatefulSet
+#   replicaCount: 6
+#   image:
+#     repository: redis
+#     tag: 7.2.4-alpine
+#   envs:
+#     - name: NUM_SHARDS
+#       value: 3
+#   command:
+#     - sh
+#   args:
+#     - /conf/bootstrap-pod.sh
+#   resources:
+#     preset: micro
+#   podSecurityContext: {}
+#   securityContext:
+#     runAsUser: 999
+#     runAsGroup: 999
+#     runAsNonRoot: true
+#     allowPrivilegeEscalation: false
+#     privileged: false
+#     readOnlyRootFilesystem: true
+#     seccompProfile:
+#       type: RuntimeDefault
+#     capabilities:
+#       add:
+#         - SYS_RESOURCE
+#         - IPC_LOCK
+#       drop:
+#         - ALL
+#   storage:
+#     - name: conf
+#       type: configMap
+#       mountPath: /conf
+#       configMapName: argocd-redis
+#     - name: podinfo
+#       type: downwardAPI
+#       mountPath: /etc/podinfo
+#       readOnly: true
+#       items:
+#         - path: labels
+#           fieldRef:
+#             fieldPath: metadata.labels
+#         - path: annotations
+#           fieldRef:
+#             fieldPath: metadata.annotations
+#         - path: pod_name
+#           fieldRef:
+#             fieldPath: metadata.name
+#         - path: pod_namespace
+#           fieldRef:
+#             fieldPath: metadata.namespace
+#   probes:
+#     readinessProbe:
+#       type: exec
+#       command:
+#         - sh
+#         - -c
+#         - redis-cli -h $(hostname) ping
+#     livenessProbe:
+#       type: exec
+#       command:
+#         - sh
+#         - -c
+#         - redis-cli -h $(hostname) ping
+#   initContainers:
+#     - name: init-redis-cluster
+#       image: busybox:1.28
+#       command:
+#         - sh
+#         - -c
+#         - >
+#           until nslookup {{ .Release.Name }}-redis.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local;
+#           do echo waiting for redis-cluster; sleep 2; done
+
+# service:
+#   clusterIP: "None"
+#   publishNotReadyAddresses: true
+#   ports:
+#     - name: redis
+#       port: 6379
+#       protocol: TCP
+#     - name: gossip
+#       port: 16379
+#       protocol: TCP
+
+# configMap:
+#   enabled: true
+#   configMaps:
+#     - name: "argocd-redis"
+#       data:
+#         redis.conf: |
+#           cluster-enabled yes
+#           cluster-require-full-coverage no
+#           cluster-node-timeout 15000
+#           cluster-config-file nodes.conf
+#           cluster-migration-barrier 1 
+#           appendonly yes
+#           # Other cluster members need to be able to connect
+#           protected-mode no
+#         bootstrap-pod.sh: |
+#           #!/bin/sh
+#           set -ex
+#           # Find which member of the Stateful Set this pod is running
+#           # e.g. "redis-0" -> "0"
+#           PET_ORDINAL=$(cat /etc/podinfo/pod_name | rev | cut -d- -f1)
+#           MY_SHARD=$(($PET_ORDINAL % $NUM_SHARDS))
+#           redis-server /conf/redis.conf &
+#           # Wait until redis-server process is ready
+#           REDIS_READY=0
+#           # Loop until Redis server responds to commands
+#           while [ $REDIS_READY -eq 0 ]; do
+#             # Attempt to send a PING command to Redis using redis-cli
+#             # and check if the response is "PONG"
+#             if redis-cli PING | grep -q "PONG"; then
+#               # If Redis responds with PONG, it's ready.
+#               # Set the status to indicate this and break the loop.
+#               REDIS_READY=1
+#               echo "Redis server is ready."
+#             else
+#               # If Redis is not yet ready, wait for 5 seconds before retrying.
+#               echo "Waiting for Redis server to become ready..."
+#               sleep 5
+#             fi
+#           done
+#           if [ $PET_ORDINAL -lt $NUM_SHARDS ]; then
+#             # Set up primary nodes. Divide slots into equal(ish) contiguous blocks
+#             NUM_SLOTS=$(( 16384 / $NUM_SHARDS ))
+#             REMAINDER=$(( 16384 % $NUM_SHARDS ))
+#             START_SLOT=$(( $NUM_SLOTS * $MY_SHARD + ($MY_SHARD < $REMAINDER ? $MY_SHARD : $REMAINDER) ))
+#             END_SLOT=$(( $NUM_SLOTS * ($MY_SHARD+1) + ($MY_SHARD+1 < $REMAINDER ? $MY_SHARD+1 : $REMAINDER) - 1 ))
+#             PEER_IP=$(nslookup argocd-redis-0.argocd-redis.argocd.svc.cluster.local | awk '/^Address: / { print $2 }')
+#             redis-cli cluster meet $PEER_IP 6379
+#             redis-cli cluster addslots $(seq $START_SLOT $END_SLOT)
+#           else
+#             # Set up a replica
+#             PEER_IP=$(nslookup argocd-redis-$MY_SHARD.argocd-redis.argocd.svc.cluster.local | awk '/^Address: / { print $2 }')
+#             redis-cli --cluster add-node localhost:6379 $PEER_IP:6379 --cluster-slave
+#           fi
+#           wait

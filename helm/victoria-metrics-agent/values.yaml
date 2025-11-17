@@ -1,0 +1,338 @@
+workload:
+  image:
+    repository: "docker.io/victoriametrics/vmagent"
+    tag: "v1.124.0"
+  args:
+    - '--envflag.enable'
+    - '--envflag.prefix=VM_'
+    - '--httpListenAddr=:8429'
+    - '--loggerFormat=json'
+    - '--promscrape.config=/config/scrape/scrape.yaml'
+    - '--remoteWrite.tmpDataPath=/tmpData'
+    - >-
+      --remoteWrite.url=http://victoria-metrics-insert.victoria-metrics.svc.cluster.local:8480/insert/0/prometheus/
+  probes:
+    readinessProbe:
+      type: tcpSocket
+      port: 8429
+    livenessProbe:
+      type: tcpSocket
+      port: 8429
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "10m"
+        memory: "5Gi"
+        ephemeral-storage: "1Gi"
+      limits:
+        memory: "5Gi"
+        ephemeral-storage: "1Gi"
+  storage:
+  - name: tmp
+    type: emptyDir
+    mountPath: /tmpData
+    ramDisk: false
+    readOnly: false
+  - name: config
+    type: configMap
+    mountPath: /config/scrape
+    configMapName: victoria-metrics-agent
+service:
+  ports:
+  - name: http-metrics
+    protocol: TCP
+    port: 8429
+
+ingress:
+  enabled: true
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "internalweb, internalwebsecure"
+  hosts:
+    - host: victoria-metrics.projectwhitebox.com
+      path: /
+      pathType: "Prefix"
+      tls:
+        enabled: false
+      backend:
+        service:
+          name: "victoria-metrics-agent"
+          port: 8429
+
+configMap:
+  enabled: true
+  configMaps:
+  - name: "victoria-metrics-agent"
+    data:
+      scrape.yaml: |
+        global:
+          scrape_interval: 15s
+          scrape_timeout: 10s
+
+        scrape_configs:
+          # Scraper for Kubernetes services with HTTP metrics
+          - job_name: 'kube-http-services'
+            kubernetes_sd_configs:
+              - role: endpoints
+            relabel_configs:
+              - source_labels: [__meta_kubernetes_endpoint_port_name]
+                regex: http-metrics
+                action: keep
+              - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
+                target_label: service
+                separator: /
+                replacement: $1/$2
+              - source_labels: [__meta_kubernetes_pod_node_name]
+                target_label: instance
+              - action: labeldrop
+                regex: __meta_kubernetes.*
+
+          # Scraper for Kubernetes services with HTTPS metrics
+          # - job_name: 'kube-https-services'
+          #   scheme: https
+          #   tls_config:
+          #     insecure_skip_verify: true
+          #   kubernetes_sd_configs:
+          #     - role: endpoints
+          #   relabel_configs:
+          #     - source_labels: [__meta_kubernetes_endpoint_port_name]
+          #       regex: https-metrics
+          #       action: keep
+          #     - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name]
+          #       target_label: service
+          #       separator: /
+          #       replacement: $1/$2
+          #     - source_labels: [__meta_kubernetes_pod_node_name]
+          #       target_label: instance
+          #     - action: labeldrop
+          #       regex: __meta_kubernetes.*
+
+          # Scraper for kubernetes api server
+          - job_name: "kube-apiserver"
+            scheme: https
+            metrics_path: /metrics
+            authorization:
+              type: Bearer
+              credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+            tls_config:
+              ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            kubernetes_sd_configs:
+              - role: node
+            relabel_configs:
+              - source_labels: [__meta_kubernetes_node_name]
+                regex: .*control-plane.*
+                action: keep
+              - source_labels: [__meta_kubernetes_node_address_InternalIP]
+                regex: (.+)
+                replacement: ${1}:6443
+                target_label: __address__
+              - source_labels: [__meta_kubernetes_node_name]
+                target_label: instance
+
+          # Scraper for kubernetes proxy
+          - job_name: "kube-proxy"
+            scheme: http
+            metrics_path: /metrics
+            kubernetes_sd_configs:
+              - role: node
+            relabel_configs:
+              - source_labels: [__meta_kubernetes_node_address_InternalIP]
+                regex: (.+)
+                replacement: ${1}:10249
+                target_label: __address__
+              - source_labels: [__meta_kubernetes_node_name]
+                target_label: instance
+
+          # Scraper for kubernetes controller manager
+          - job_name: "kube-controller-manager"
+            scheme: https
+            metrics_path: /metrics
+            authorization:
+              type: Bearer
+              credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+            tls_config:
+              ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+              insecure_skip_verify: true
+            kubernetes_sd_configs:
+              - role: node
+            relabel_configs:
+              - source_labels: [__meta_kubernetes_node_name]
+                regex: .*control-plane.*
+                action: keep
+              - source_labels: [__meta_kubernetes_node_address_InternalIP]
+                regex: (.+)
+                replacement: ${1}:10257
+                target_label: __address__
+              - source_labels: [__meta_kubernetes_node_name]
+                target_label: instance
+
+          # Scraper for kubernetes scheduler
+          - job_name: "kube-scheduler"
+            scheme: https
+            metrics_path: /metrics
+            authorization:
+              type: Bearer
+              credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+            tls_config:
+              ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+              insecure_skip_verify: true
+            kubernetes_sd_configs:
+              - role: node
+            relabel_configs:
+              - source_labels: [__meta_kubernetes_node_name]
+                regex: .*control-plane.*
+                action: keep
+              - source_labels: [__meta_kubernetes_node_address_InternalIP]
+                regex: (.+)
+                replacement: ${1}:10259
+                target_label: __address__
+              - source_labels: [__meta_kubernetes_node_name]
+                target_label: instance
+
+          # Scraper for cadvisor
+          - job_name: "kube-cadvisor"
+            scheme: https
+            metrics_path: /metrics/cadvisor
+            authorization:
+              type: Bearer
+              credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+            tls_config:
+              ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+              insecure_skip_verify: true
+            kubernetes_sd_configs:
+              - role: node
+            relabel_configs:
+              - action: labelmap
+                regex: __meta_kubernetes_node_label_(.+)
+
+          # Kubelet
+          - job_name: "kubelet"
+            scheme: https
+            metrics_path: /metrics
+            authorization:
+              type: Bearer
+              credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+            tls_config:
+              ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+              insecure_skip_verify: true
+            kubernetes_sd_configs:
+              - role: node
+            relabel_configs:
+              - action: labelmap
+                regex: __meta_kubernetes_node_label_(.+)
+
+          # Scraper for kubernetes etcd cluster
+          - job_name: "etcd"
+            scheme: http
+            metrics_path: /metrics
+            kubernetes_sd_configs:
+              - role: node
+            relabel_configs:
+              - source_labels: [__meta_kubernetes_node_name]
+                regex: .*control-plane.*
+                action: keep
+              - source_labels: [__meta_kubernetes_node_address_InternalIP]
+                regex: (.+)
+                replacement: ${1}:2381
+                target_label: __address__
+              - source_labels: [__meta_kubernetes_node_name]
+                target_label: instance
+
+          # Scraper for containerd
+          - job_name: "containerd"
+            scheme: http
+            metrics_path: /v1/metrics
+            kubernetes_sd_configs:
+              - role: node
+            relabel_configs:
+              - source_labels: [__meta_kubernetes_node_address_InternalIP]
+                regex: (.+)
+                replacement: ${1}:11234
+                target_label: __address__
+              - source_labels: [__meta_kubernetes_node_name]
+                target_label: instance
+
+          - job_name: 'postgres-pods'
+            kubernetes_sd_configs:
+              - role: pod
+            relabel_configs:
+              - source_labels: [__meta_kubernetes_pod_name]
+                regex: '.*postgres.*'
+                action: keep
+
+              - source_labels: [__meta_kubernetes_pod_container_port_number]
+                regex: '9187'
+                action: keep
+
+              - source_labels: [__meta_kubernetes_pod_ip]
+                target_label: __address__
+                replacement: '$1:9187'
+
+              - source_labels: [__meta_kubernetes_namespace]
+                target_label: namespace
+              - source_labels: [__meta_kubernetes_pod_name]
+                target_label: pod
+
+          - job_name: 'coredns'
+            kubernetes_sd_configs:
+              - role: pod
+            relabel_configs:
+              - source_labels: [__meta_kubernetes_pod_name]
+                regex: '.*coredns.*'
+                action: keep
+
+              - source_labels: [__meta_kubernetes_pod_container_port_number]
+                regex: '9153'
+                action: keep
+
+              - source_labels: [__meta_kubernetes_pod_ip]
+                target_label: __address__
+                replacement: '$1:9153'
+
+              - source_labels: [__meta_kubernetes_namespace]
+                target_label: namespace
+              - source_labels: [__meta_kubernetes_pod_name]
+                target_label: pod
+
+rbac:
+  enabled: true
+  roles:
+    clusterRole:
+      rules:
+      - apiGroups:
+        - ''
+        resources:
+        - nodes
+        - nodes/proxy
+        - nodes/metrics
+        - services
+        - endpoints
+        - pods
+        - ingresses
+        - configmaps
+        verbs:
+        - get
+        - list
+        - watch
+      - apiGroups:
+        - extensions
+        - networking.k8s.io
+        resources:
+        - ingresses/status
+        - ingresses
+        verbs:
+        - get
+        - list
+        - watch
+      - apiGroups:
+        - discovery.k8s.io
+        resources:
+        - endpointslices
+        verbs:
+        - get
+        - list
+        - watch
+      - nonResourceURLs:
+        - /metrics
+        verbs:
+        - get

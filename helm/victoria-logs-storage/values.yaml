@@ -1,0 +1,45 @@
+workload:
+  type: "StatefulSet"
+  image:
+    repository: "docker.io/victoriametrics/victoria-logs"
+    tag: "v1.31.0"
+  args:
+    - '--envflag.enable'
+    - '--http.shutdownDelay=15s'
+    - '--httpListenAddr=:9491'
+    - '--loggerFormat=json'
+    - '--retentionPeriod=7d'
+    - '--storageDataPath=/storage'
+    - '--retention.maxDiskUsagePercent=90'
+    - '--retentionPeriod=100y'
+  probes:
+    readinessProbe:
+      type: tcpSocket
+      port: 9491
+    livenessProbe:
+      type: tcpSocket
+      port: 9491
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "10m"
+        memory: "4Gi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "4Gi"
+        ephemeral-storage: "16Mi"
+  storage:
+    - name: storage
+      type: pvcTemplate
+      mountPath: /storage
+      accessModes:
+      - "ReadWriteOnce"
+      storageClass: "openebs-hdd"
+      size: "200Gi"
+      readOnly: false
+service:
+  ports:
+  - name: http
+    protocol: TCP
+    port: 9491

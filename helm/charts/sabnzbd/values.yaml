@@ -1,0 +1,140 @@
+workload:
+  type: "StatefulSet"
+  image:
+    registry: ghcr.io
+    repository: home-operations/sabnzbd
+    tag: 4.5.1
+  envs:
+    - name: "SABNZBD__HOST_WHITELIST_ENTRIES"
+      value: "sabnzbd.projectwhitebox.com"
+  probes:
+    readinessProbe:
+      type: tcpSocket
+      port: 8080
+    livenessProbe:
+      type: tcpSocket
+      port: 8080
+  strategy:
+    type: OnDelete
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "500m"
+        memory: "4Gi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "4Gi"
+        ephemeral-storage: "16Mi"
+  storage:
+    - name: sabnzbd-config
+      type: pvc
+      mountPath: /config
+      claimName: "sabnzbd-config"
+    - name: sabnzbd-downloads
+      type: pvc
+      mountPath: /data/downloads
+      claimName: "sabnzbd-downloads"
+    # - name: tmp
+    #   type: emptyDir
+    #   mountPath: /tmp
+    #   ramDisk: false
+    #   readOnly: false
+
+service:
+  ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+
+ingress:
+  enabled: true
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "internalweb, internalwebsecure"
+  hosts:
+    - host: sabnzbd.projectwhitebox.com
+      path: /
+      pathType: "Prefix"
+      tls:
+        enabled: false
+      backend:
+        service:
+          name: "sabnzbd"
+          port: 8080
+
+autoscaling:
+  enabled: false
+
+extraObjects:
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: sabnzbd-config
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+        - ReadWriteMany
+      nfs:
+        server: 10.0.0.10
+        path: "/mnt/data-pool/sabnzbd"
+      mountOptions:
+        - nfsvers=4.1 
+        - hard      
+        - noatime
+        - rsize=1048576 
+        - wsize=1048576 
+        - proto=tcp
+        - async
+        - nconnect=8
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: sabnzbd-downloads
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+        - ReadWriteMany
+      nfs:
+        server: 10.0.0.10
+        path: "/mnt/data-pool/downloads"
+      mountOptions:
+        - nfsvers=4.1 
+        - hard      
+        - noatime
+        - rsize=1048576 
+        - wsize=1048576 
+        - proto=tcp
+        - async
+        - nconnect=8
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: sabnzbd-config
+      namespace: sabnzbd
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ""
+      resources:
+        requests:
+          storage: 1Ti
+      volumeName: sabnzbd-config
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: sabnzbd-downloads
+      namespace: sabnzbd
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ""
+      resources:
+        requests:
+          storage: 1Ti
+      volumeName: sabnzbd-downloads

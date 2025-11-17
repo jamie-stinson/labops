@@ -1,0 +1,548 @@
+workload:
+  image:
+    registry: "ghcr.io"
+    repository: "cloudnative-pg/cloudnative-pg"
+    tag: "1.26.0"
+  command:
+    - '/manager'
+  args:
+    - 'controller'
+    - '--webhook-port=9443'
+    - '--leader-elect'
+    - '--max-concurrent-reconciles=10'
+  probes:
+    readinessProbe:
+      port: 9443
+      scheme: "HTTPS"
+    livenessProbe:
+      path: "/readyz"
+      port: 9443
+      scheme: "HTTPS"
+  storage:
+    - name: webhook-certificates
+      type: secret
+      mountPath: "/run/secrets/cnpg.io/webhook"
+      secretName: cnpg-webhook-cert
+      optional: true
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "50m"
+        memory: "256Mi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "256Mi"
+        ephemeral-storage: "16Mi"
+
+service:
+  # Name cannot be changed
+  name: cnpg-webhook-service
+  ports:
+    - name: webhook
+      protocol: TCP
+      port: 9443
+    - name: http-metrics
+      protocol: TCP
+      port: 8080
+
+rbac:
+  enabled: true
+  roles:
+    clusterRole:
+      rules:
+        - apiGroups:
+            - ''
+          resources:
+            - nodes
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - admissionregistration.k8s.io
+          resources:
+            - mutatingwebhookconfigurations
+            - validatingwebhookconfigurations
+          verbs:
+            - get
+            - patch
+        - apiGroups:
+            - postgresql.cnpg.io
+          resources:
+            - clusterimagecatalogs
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - ''
+          resources:
+            - configmaps
+            - secrets
+            - services
+          verbs:
+            - create
+            - delete
+            - get
+            - list
+            - patch
+            - update
+            - watch
+        - apiGroups:
+            - ''
+          resources:
+            - configmaps/status
+            - secrets/status
+          verbs:
+            - get
+            - patch
+            - update
+        - apiGroups:
+            - ''
+          resources:
+            - events
+          verbs:
+            - create
+            - patch
+        - apiGroups:
+            - ''
+          resources:
+            - persistentvolumeclaims
+            - pods
+            - pods/exec
+          verbs:
+            - create
+            - delete
+            - get
+            - list
+            - patch
+            - watch
+        - apiGroups:
+            - ''
+          resources:
+            - pods/status
+          verbs:
+            - get
+        - apiGroups:
+            - ''
+          resources:
+            - serviceaccounts
+          verbs:
+            - create
+            - get
+            - list
+            - patch
+            - update
+            - watch
+        - apiGroups:
+            - apps
+          resources:
+            - deployments
+          verbs:
+            - create
+            - delete
+            - get
+            - list
+            - patch
+            - update
+            - watch
+        - apiGroups:
+            - batch
+          resources:
+            - jobs
+          verbs:
+            - create
+            - delete
+            - get
+            - list
+            - patch
+            - watch
+        - apiGroups:
+            - coordination.k8s.io
+          resources:
+            - leases
+          verbs:
+            - create
+            - get
+            - update
+        - apiGroups:
+            - monitoring.coreos.com
+          resources:
+            - podmonitors
+          verbs:
+            - create
+            - delete
+            - get
+            - list
+            - patch
+            - watch
+        - apiGroups:
+            - policy
+          resources:
+            - poddisruptionbudgets
+          verbs:
+            - create
+            - delete
+            - get
+            - list
+            - patch
+            - update
+            - watch
+        - apiGroups:
+            - postgresql.cnpg.io
+          resources:
+            - backups
+            - clusters
+            - databases
+            - poolers
+            - publications
+            - scheduledbackups
+            - subscriptions
+          verbs:
+            - create
+            - delete
+            - get
+            - list
+            - patch
+            - update
+            - watch
+        - apiGroups:
+            - postgresql.cnpg.io
+          resources:
+            - backups/status
+            - databases/status
+            - publications/status
+            - scheduledbackups/status
+            - subscriptions/status
+          verbs:
+            - get
+            - patch
+            - update
+        - apiGroups:
+            - postgresql.cnpg.io
+          resources:
+            - imagecatalogs
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - postgresql.cnpg.io
+          resources:
+            - clusters/finalizers
+            - poolers/finalizers
+          verbs:
+            - update
+        - apiGroups:
+            - postgresql.cnpg.io
+          resources:
+            - clusters/status
+            - poolers/status
+          verbs:
+            - get
+            - patch
+            - update
+            - watch
+        - apiGroups:
+            - rbac.authorization.k8s.io
+          resources:
+            - rolebindings
+            - roles
+          verbs:
+            - create
+            - get
+            - list
+            - patch
+            - update
+            - watch
+        - apiGroups:
+            - snapshot.storage.k8s.io
+          resources:
+            - volumesnapshots
+          verbs:
+            - create
+            - get
+            - list
+            - patch
+            - watch
+        - apiGroups:
+            - postgresql.cnpg.io
+          resources:
+            - backups
+            - clusters
+            - databases
+            - poolers
+            - publications
+            - scheduledbackups
+            - subscriptions
+          verbs:
+            - create
+            - delete
+            - deletecollection
+            - patch
+            - update
+            - get
+            - list
+            - watch
+
+grafana:
+  dashboard:
+    enabled: false
+    dashboards:
+      - name: cloudnative-pg
+        title: "CloudNative-PG"
+        url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/charts/cloudnative-pg/dashboards/cloudnative-pg.json"
+        folder: "System"
+
+extraObjects:
+  - |
+    apiVersion: admissionregistration.k8s.io/v1
+    kind: MutatingWebhookConfiguration
+    metadata:
+      name: cnpg-mutating-webhook-configuration
+    webhooks:
+      - admissionReviewVersions:
+          - v1
+        clientConfig:
+          service:
+            name: cnpg-webhook-service
+            namespace: "cloudnative-pg"
+            path: /mutate-postgresql-cnpg-io-v1-backup
+            port: 9443
+        failurePolicy: Fail
+        matchPolicy: Equivalent
+        name: mbackup.cnpg.io
+        namespaceSelector: {}
+        objectSelector: {}
+        reinvocationPolicy: Never
+        rules:
+          - apiGroups:
+              - postgresql.cnpg.io
+            apiVersions:
+              - v1
+            operations:
+              - CREATE
+              - UPDATE
+            resources:
+              - backups
+            scope: '*'
+        sideEffects: None
+        timeoutSeconds: 10
+      - admissionReviewVersions:
+          - v1
+        clientConfig:
+          service:
+            name: cnpg-webhook-service
+            namespace: "cloudnative-pg"
+            path: /mutate-postgresql-cnpg-io-v1-cluster
+            port: 9443
+        failurePolicy: Fail
+        matchPolicy: Equivalent
+        name: mcluster.cnpg.io
+        namespaceSelector: {}
+        objectSelector: {}
+        reinvocationPolicy: Never
+        rules:
+          - apiGroups:
+              - postgresql.cnpg.io
+            apiVersions:
+              - v1
+            operations:
+              - CREATE
+              - UPDATE
+            resources:
+              - clusters
+            scope: '*'
+        sideEffects: None
+        timeoutSeconds: 10
+      - admissionReviewVersions:
+          - v1
+        clientConfig:
+          service:
+            name: cnpg-webhook-service
+            namespace: "cloudnative-pg"
+            path: /mutate-postgresql-cnpg-io-v1-database
+            port: 9443
+        failurePolicy: Fail
+        matchPolicy: Equivalent
+        name: mdatabase.cnpg.io
+        namespaceSelector: {}
+        objectSelector: {}
+        reinvocationPolicy: Never
+        rules:
+          - apiGroups:
+              - postgresql.cnpg.io
+            apiVersions:
+              - v1
+            operations:
+              - CREATE
+              - UPDATE
+            resources:
+              - databases
+            scope: '*'
+        sideEffects: None
+        timeoutSeconds: 10
+      - admissionReviewVersions:
+          - v1
+        clientConfig:
+          service:
+            name: cnpg-webhook-service
+            namespace: "cloudnative-pg"
+            path: /mutate-postgresql-cnpg-io-v1-scheduledbackup
+            port: 9443
+        failurePolicy: Fail
+        matchPolicy: Equivalent
+        name: mscheduledbackup.cnpg.io
+        namespaceSelector: {}
+        objectSelector: {}
+        reinvocationPolicy: Never
+        rules:
+          - apiGroups:
+              - postgresql.cnpg.io
+            apiVersions:
+              - v1
+            operations:
+              - CREATE
+              - UPDATE
+            resources:
+              - scheduledbackups
+            scope: '*'
+        sideEffects: None
+        timeoutSeconds: 10
+  - |
+    apiVersion: admissionregistration.k8s.io/v1
+    kind: ValidatingWebhookConfiguration
+    metadata:
+      name: cnpg-validating-webhook-configuration
+    webhooks:
+      - admissionReviewVersions:
+          - v1
+        clientConfig:
+          service:
+            name: cnpg-webhook-service
+            namespace: "cloudnative-pg"
+            path: /validate-postgresql-cnpg-io-v1-backup
+            port: 9443
+        failurePolicy: Fail
+        matchPolicy: Equivalent
+        name: vbackup.cnpg.io
+        namespaceSelector: {}
+        objectSelector: {}
+        rules:
+          - apiGroups:
+              - postgresql.cnpg.io
+            apiVersions:
+              - v1
+            operations:
+              - CREATE
+              - UPDATE
+            resources:
+              - backups
+            scope: '*'
+        sideEffects: None
+        timeoutSeconds: 10
+      - admissionReviewVersions:
+          - v1
+        clientConfig:
+          service:
+            name: cnpg-webhook-service
+            namespace: "cloudnative-pg"
+            path: /validate-postgresql-cnpg-io-v1-cluster
+            port: 9443
+        failurePolicy: Fail
+        matchPolicy: Equivalent
+        name: vcluster.cnpg.io
+        namespaceSelector: {}
+        objectSelector: {}
+        rules:
+          - apiGroups:
+              - postgresql.cnpg.io
+            apiVersions:
+              - v1
+            operations:
+              - CREATE
+              - UPDATE
+            resources:
+              - clusters
+            scope: '*'
+        sideEffects: None
+        timeoutSeconds: 10
+      - admissionReviewVersions:
+          - v1
+        clientConfig:
+          service:
+            name: cnpg-webhook-service
+            namespace: "cloudnative-pg"
+            path: /validate-postgresql-cnpg-io-v1-scheduledbackup
+            port: 9443
+        failurePolicy: Fail
+        matchPolicy: Equivalent
+        name: vscheduledbackup.cnpg.io
+        namespaceSelector: {}
+        objectSelector: {}
+        rules:
+          - apiGroups:
+              - postgresql.cnpg.io
+            apiVersions:
+              - v1
+            operations:
+              - CREATE
+              - UPDATE
+            resources:
+              - scheduledbackups
+            scope: '*'
+        sideEffects: None
+        timeoutSeconds: 10
+      - admissionReviewVersions:
+          - v1
+        clientConfig:
+          service:
+            name: cnpg-webhook-service
+            namespace: "cloudnative-pg"
+            path: /validate-postgresql-cnpg-io-v1-database
+            port: 9443
+        failurePolicy: Fail
+        matchPolicy: Equivalent
+        name: vdatabase.cnpg.io
+        namespaceSelector: {}
+        objectSelector: {}
+        rules:
+          - apiGroups:
+              - postgresql.cnpg.io
+            apiVersions:
+              - v1
+            operations:
+              - CREATE
+              - UPDATE
+            resources:
+              - databases
+            scope: '*'
+        sideEffects: None
+        timeoutSeconds: 10
+      - admissionReviewVersions:
+          - v1
+        clientConfig:
+          service:
+            name: cnpg-webhook-service
+            namespace: "cloudnative-pg"
+            path: /validate-postgresql-cnpg-io-v1-pooler
+            port: 9443
+        failurePolicy: Fail
+        matchPolicy: Equivalent
+        name: vpooler.cnpg.io
+        namespaceSelector: {}
+        objectSelector: {}
+        rules:
+          - apiGroups:
+              - postgresql.cnpg.io
+            apiVersions:
+              - v1
+            operations:
+              - CREATE
+              - UPDATE
+            resources:
+              - poolers
+            scope: '*'
+        sideEffects: None
+        timeoutSeconds: 10

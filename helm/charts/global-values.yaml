@@ -1,0 +1,81 @@
+workload:
+  enabled: true
+  replicaCount: 1
+  strategy:
+    type: RollingUpdate
+    maxSurge: 1
+    maxUnavailable: 1
+  resources:
+    preset: "nano"
+  podSecurityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    runAsNonRoot: true
+    fsGroup: 1000
+    fsGroupChangePolicy: "Always"
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    privileged: false
+    readOnlyRootFilesystem: false
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+  probes:
+    readinessProbe:
+      type: httpGet
+      scheme: "HTTP"
+      path: "/readyz"
+      port: 8080
+      periodSeconds: 10
+      timeoutSeconds: 5
+      successThreshold: 1
+      failureThreshold: 3
+      initialDelaySeconds: 15
+    livenessProbe:
+      type: httpGet
+      scheme: "HTTP"
+      path: "/livez"
+      port: 8080
+      periodSeconds: 10
+      timeoutSeconds: 5
+      successThreshold: 1
+      failureThreshold: 3
+      initialDelaySeconds: 15
+  topologySpreadConstraints:
+    preset: "spread-across-nodes"
+
+service:
+  enabled: true
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 1
+  targetCPUUtilizationPercentage: 75
+  targetMemoryUtilizationPercentage: 75
+
+pdb:
+  enabled: true
+  maxUnavailable: "1"
+
+serviceAccount:
+  enabled: true
+  automountServiceAccountToken: true
+
+ingress:
+  ingressClass: "traefik"
+
+grafana:
+  dashboard:
+    cacheDuration: 1h
+    resyncPeriod: "1m"
+  folder:
+    resyncPeriod: "1m"
+
+versionChecker:
+  imageOverride: true

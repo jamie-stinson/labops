@@ -1,0 +1,127 @@
+workload:
+  type: "StatefulSet"
+  image:
+    registry: "ghcr.io"
+    repository: henriquesebastiao/downtify
+    tag: 1.1.1
+  strategy:
+    type: OnDelete
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "100m"
+        memory: "1Gi"
+        ephemeral-storage: "2Gi"
+  envs:
+    - name: "DOWNTIFY_PORT"
+      value: "8000"
+  envsSecret:
+    - name: CLIENT_ID
+      secret: downtify
+      key: SPOTIFY_CLIENT_ID
+    - name: CLIENT_SECRET
+      secret: downtify
+      key: SPOTIFY_CLIENT_SECRET
+  podSecurityContext:
+    runAsUser: 0
+    runAsGroup: 0
+    runAsNonRoot: false
+    fsGroup: 0
+    fsGroupChangePolicy: "OnRootMismatch"
+  securityContext:
+    runAsUser: 0
+    runAsGroup: 0
+    runAsNonRoot: false
+    allowPrivilegeEscalation: false
+    privileged: false
+    readOnlyRootFilesystem: false
+  probes:
+    readinessProbe:
+      type: tcpSocket
+      port: 8000
+    livenessProbe:
+      type: tcpSocket
+      port: 8000
+  storage:
+    - name: downtify-music
+      type: pvc
+      mountPath: /downloads
+      claimName: "downtify-music"
+
+service:
+  ports:
+    - name: http
+      port: 8000
+      protocol: TCP
+
+ingress:
+  enabled: true
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "internalweb, internalwebsecure"
+  hosts:
+    - host: music.projectwhitebox.com
+      path: /
+      pathType: "Prefix"
+      tls:
+        enabled: false
+      backend:
+        service:
+          name: "downtify"
+          port: 8000
+
+autoscaling:
+  enabled: false
+
+extraObjects:
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: downtify-music
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+        - ReadWriteMany
+      nfs:
+        server: 10.0.0.10
+        path: "/mnt/hdd-pool/music"
+      mountOptions:
+        - nfsvers=4.1 
+        - hard
+        - noatime
+        - rsize=1048576 
+        - wsize=1048576 
+        - proto=tcp
+        - async
+        - nconnect=8
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: downtify-music
+      namespace: downtify
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ""
+      resources:
+        requests:
+          storage: 1Ti
+      volumeName: downtify-music
+  - |
+    apiVersion: bitnami.com/v1alpha1
+    kind: SealedSecret
+    metadata:
+      name: downtify
+      namespace: downtify
+    spec:
+      encryptedData:
+        SPOTIFY_CLIENT_ID: AgCB8TNXefnzxWT1NfOyj+iFybSQiJ3d6JeV30x6rLU021jARp7STXOiNGQW68IH2zSGIxIn59S8sH/vf5RXUAFsrUGv4TIj0PE5hmzVYe+/UtR6NfkK1qErd/FTv19wwV/aEPb87iPYo+xOvf+JqVtSnRXVEallUErylL5pZ/mhsSloeauNqRlaZVAiXMRr8/72h5VubRhEG/b8Q38JOltq9xSeibYmutx/7plXgsTB2aKTUjhwtSWNJxUlUDwoX1FKDMES548YruIwfsPWXUXQQd5nMZXp0Wcbyw6wDhcGVz+0bBG7T7R5gYEbcdJ+nlVd2Jujc8tQ2ewvBF68pQIcheuOqHIv8SWSOtqU6opHH1v3nOkbMZlB+lrrJk6BFXYFxdb9ijvInjCNmizbKSJdc9DcbPSSBss39IvVI0KQrfSL66BDPj1WhHHXrLSsuh+NsbsKGYS8uXuooOywxRwMN/B/gu2FKiyjXb4LowJ2moL68VcJDauVVVfoxd2inOQnfdW+yk4MJAHkFk4gYJxI2jE8nNJrDSAXKRdJCvElay0B+1s4kO1JfxXlo7golIx6ryo3y0LU476DSPKt99oMBgZLT4tTn3uLO+23VRCoh8V7/U/03PgxZ78UAH1PIolXo71JPIFh3arziQqiAjDGUhxbCJFBSasEJz6Hc4L+PtSZu6nuxptvDFIJRlWn24oO6hb9fI0PLtOWibPQmt1dPfP2MMoKPbg7zGp4e15ZzQ==
+        SPOTIFY_CLIENT_SECRET: AgC7wSE/ZeLecQ7GC+v0Sm7q5RXBX8Ks/s6FzWQaezgZlQ/gyi7aMUyjY20YDvFBCNnXUcxoKXAebcMD205gttIABT7ug9Zs1D2Qas28bd8vAN4rVAOyEP9fR/CcEVThL3i++I6uqhBKrzIc3M1rLLhgaBuNOwFoUjtsdIuSQ63QMOVf8pu0A9FyVYKEcmwzhdVXFznNuAoEKatXYc9tjIBwkhRZR4Bnoc+rBgXsTFxpSsjuVGi/SJWni1gJfGSQ0ZOckbLtkEM2CwGkdRzsFk7krJGgyTu6ea9AYDp35JUU8gHjZ4/sSA87XBa4U/lqx4bJW6sOQ1nlrgXsOEr2An6y0bYOoGE1cTv9UEDw/nfjZZ+8pIYfRDNO+1CMdKabQdFQRdoFtl/7fr+RgAX65TjpvQQOtMtUvIme81zw205zdMzKZm9I/l1xxlvzTN0tmxqjWMY0EnP3K+eX9/tDxVFM0RsYP+vxX94UdVYKlpBhFJLrE47BVoBSW/vWBgDyjVGzoC63dOxaBwdVjfDfak4W6TbCOrN/LmKsw80NAvBZrLbHFhTDjFLtDsWBjoNaIK++DL4r2vgAq8M5oNQIJMue2Ig4iHTUCl+1s9/7Y4Dh7C6yXB/Ecj05O5G9CWiu0TtC/dJAXQa+iLtO1Rl95sAUfMnIN1g8wutSLpr74/01SCmZYoQoivPepy/2kJ+qaLpcD7nhnxmxSWx0tpzSS93elzKu+HHCsmXSdjRnsbXJLQ==
+      template:
+        metadata:
+          name: downtify
+          namespace: downtify
+        type: Opaque

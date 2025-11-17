@@ -1,0 +1,81 @@
+autoPatching:
+  enabled: true
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: "node-problem-detector=registry.k8s.io/node-problem-detector/node-problem-detector:~v0"
+workload:
+  type: DaemonSet
+  image:
+    repository: "registry.k8s.io/node-problem-detector/node-problem-detector"
+    tag: "v0.8.21"
+  args:
+    - '--logtostderr'
+    - '--config.system-log-monitor=/config/kernel-monitor.json'
+    - '--prometheus-address=0.0.0.0'
+    - '--prometheus-port=20257'
+    - '--k8s-exporter-heartbeat-period=5m0s'
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "10m"
+        memory: "64Mi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "64Mi"
+        ephemeral-storage: "16Mi"
+  probes:
+    readinessProbe:
+      path: "/metrics"
+      port: 20257
+    livenessProbe:
+      path: "/metrics"
+      port: 20257
+  securityContext:
+    runAsUser: 0
+    runAsGroup: 0
+    runAsNonRoot: false
+    allowPrivilegeEscalation: true
+    privileged: true
+  storage:
+    - name: log
+      type: hostPath
+      mountPath: /var/log
+      hostPath: /var/log
+      readOnly: true
+    - name: localtime
+      type: hostPath
+      mountPath: /etc/localtime
+      hostPath: /etc/localtime
+      readOnly: true
+
+service:
+  ports:
+    - name: http-metrics
+      protocol: TCP
+      port: 20257
+
+rbac:
+  enabled: true
+  roles:
+    clusterRole:
+      rules:
+        - apiGroups:
+            - ''
+          resources:
+            - nodes
+          verbs:
+            - get
+        - apiGroups:
+            - ''
+          resources:
+            - nodes/status
+          verbs:
+            - patch
+        - apiGroups:
+            - ''
+          resources:
+            - events
+          verbs:
+            - create
+            - patch
+            - update

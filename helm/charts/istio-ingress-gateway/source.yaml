@@ -1,0 +1,6 @@
+repository: "https://istio-release.storage.googleapis.com/charts"
+chart: "gateway"
+version: "1.27.*"
+namespace: "istio"
+commonHelmLibrary:
+  enabled: true

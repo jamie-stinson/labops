@@ -1,0 +1,241 @@
+autoPatching:
+  enabled: true
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: "kube-state-metrics=registry.k8s.io/kube-state-metrics/kube-state-metrics:~v2"
+workload:
+  replicaCount: 1
+  image:
+    repository: registry.k8s.io/kube-state-metrics/kube-state-metrics
+    tag: v2.16.0
+  args:
+  - '--port=8080'
+  - '--telemetry-port=8888'
+  - '--resources=certificatesigningrequests,configmaps,cronjobs,daemonsets,deployments,endpoints,horizontalpodautoscalers,ingresses,jobs,leases,limitranges,mutatingwebhookconfigurations,namespaces,networkpolicies,nodes,persistentvolumeclaims,persistentvolumes,poddisruptionbudgets,pods,replicasets,replicationcontrollers,resourcequotas,secrets,services,statefulsets,storageclasses,validatingwebhookconfigurations,volumeattachments'
+  probes:
+    readinessProbe:
+      port: 8888
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "10m"
+        memory: "128Mi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "128Mi"
+        ephemeral-storage: "16Mi"
+service:
+  ports:
+  - name: http
+    port: 8888
+    protocol: TCP
+  - name: http-metrics
+    port: 8080
+    protocol: TCP
+autoscaling:
+  enabled: false
+rbac:
+  enabled: true
+  roles:
+    clusterRole:
+      rules:
+      - apiGroups:
+        - certificates.k8s.io
+        resources:
+        - certificatesigningrequests
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - ''
+        resources:
+        - configmaps
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - batch
+        resources:
+        - cronjobs
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - extensions
+        - apps
+        resources:
+        - daemonsets
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - extensions
+        - apps
+        resources:
+        - deployments
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - ''
+        resources:
+        - endpoints
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - autoscaling
+        resources:
+        - horizontalpodautoscalers
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - extensions
+        - networking.k8s.io
+        resources:
+        - ingresses
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - batch
+        resources:
+        - jobs
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - coordination.k8s.io
+        resources:
+        - leases
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - ''
+        resources:
+        - limitranges
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - admissionregistration.k8s.io
+        resources:
+        - mutatingwebhookconfigurations
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - ''
+        resources:
+        - namespaces
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - networking.k8s.io
+        resources:
+        - networkpolicies
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - ''
+        resources:
+        - nodes
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - ''
+        resources:
+        - persistentvolumeclaims
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - ''
+        resources:
+        - persistentvolumes
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - policy
+        resources:
+        - poddisruptionbudgets
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - ''
+        resources:
+        - pods
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - extensions
+        - apps
+        resources:
+        - replicasets
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - ''
+        resources:
+        - replicationcontrollers
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - ''
+        resources:
+        - resourcequotas
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - ''
+        resources:
+        - secrets
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - ''
+        resources:
+        - services
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - apps
+        resources:
+        - statefulsets
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - storage.k8s.io
+        resources:
+        - storageclasses
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - admissionregistration.k8s.io
+        resources:
+        - validatingwebhookconfigurations
+        verbs:
+        - list
+        - watch
+      - apiGroups:
+        - storage.k8s.io
+        resources:
+        - volumeattachments
+        verbs:
+        - list
+        - watch

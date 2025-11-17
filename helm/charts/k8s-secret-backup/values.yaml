@@ -1,0 +1,111 @@
+workload:
+  enabled: false
+
+service:
+  enabled: false
+
+autoscaling:
+  enabled: false
+
+pdb:
+  enabled: false
+
+serviceAccount:
+  enabled: false
+
+extraObjects:
+  - |
+    apiVersion: bitnami.com/v1alpha1
+    kind: SealedSecret
+    metadata:
+      name: secret-backup-creds
+      namespace: k8s-secret-backup
+    spec:
+      encryptedData:
+        s3_access_key: AgBcDU5MFcXnqBviL2p4KxFL2K6WL7n1Mp04uebtLNXJpoNEJ7wMDWw6VW79SkxjW47GFVuuLw+7eZmlNGaPvj00OXGAcVTvhH7aNrHg2WAuxSO49phZZkTVdw+SJrUzzeUsE6bQggZVhJ6/uYwbMZ1YWHtVA9zb2AExKFVpp+Y1sxAkYPRKAJzV617gL6iI+g+HcYJGWyQDukQzezQlEiu5l3S8a4zZZm+7GaWqNxgZG1/WCrJWRGIfBp3uHj+hXyvZu46QCFPxC3qjA08hTnJAqiplGOb2HPO0WWde3fUP5ycybqcomADmrKz5vvOPE5qvdMFQHsEdeBCdLlsnhV4qMmBgKMIR8RGuN8O3iDVCyAA6W2gJxWqN3NhFl35cJSf6ytL1ghAuiT67zDJkj/PfSFr8ok51WZL0Un8eEjEp2DMmVVSyKp28aq0WFlXz9APdBQijNH9FcCEW4prkkBZEHEtc3KT+fjVeHbadFZA5sJLaxPUaFG8+w+fIbociipNeffNvOin+wTXIVcUnmpjMoL+p+IdSXc7yBq4Q0u6UjMbxzGdhQoJlqnOFkKyAiRbBRp8EUxcF2WPuM1UOzcNJ1frV3UxRHTX0YYTh6Ssj5c+dKcQy+vCah1WFyEQpXqKIFuU1jWJi1jCooPgx7qd9UjnWhKHkwA/OsezIdpgR/CJv7DPjLtMKB/T8QeE06jU/xSoIPL9eJwb0I1Z/JfnAdg+YTj/YE9qB
+        s3_secret_key: AgA2PArq9mvM5UjhSNEW4ZNwHcKjfMxQ3X2Mcp5XzbDiScB1He1+HPjKWU3eZ7MwIJCwdc4G5F8q2VQl5hd9sKGCT7tasFuKG+KY1Wa8fY0m+W9i7R6z3b3McL2d3oU8sDPPzatbi5aDkRy5sjEDKKa4hNfU42VkAfSiFYhiET7c/OvaV1TfH+wj8P6e7iG+OSAA2cGuv71zEv5wvvYWb8MxFt62/3Ji6pyJXLvlP2PWv8tDHXJvyfW9P0VVkfVkrfgEq1N6/Qfd3tAM7A87IuFyhsqHnFlkHCBtblXKTytGwBDb15Nr1f0MjvYYe/HjRIHkgXFP2+yb2bz3x7oXs6TrqYs2gPpjj7bvKKP+XYh97YLy+nh7HWQM7ybrBhkzETUZt5EISouYg5Rqv91BSBhuo3myTQ2If3iPWR7PhjxKO1EhWQu9SIM1YaoMsqPqotx6nz0eThjT5hn/QPJ7zxckF06xEsuXxOBzT7lXbLFYt53GU7ABfKnWg3/ThVz0WgC2lj/uq1dekxvIyo6LFh4cI1/YtKOH9Ip4yfN+eaX69WV5T6jxJSlFq1jNAFbdTw4tmq+iw0byVrob4gICO16r3TuNJ+Um3OD+FIfeeG7M6yx/sjtIpsGJnGbq/S0G+zwHRi2DWYoHiHo63uixmLBiXOFDHbpPVAWyCjKG8xIfTT2VrthO0RmckdDqcp3szZdEeQNLKmCkzvlMYh3C9dckucBo/D0lVIwdYdoKwKzB
+      template:
+        metadata:
+          name: secret-backup-creds
+          namespace: k8s-secret-backup
+        type: Opaque
+  - |
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: secret-backup-sa
+      namespace: k8s-secret-backup
+  - |
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRole
+    metadata:
+      name: secret-backup-role
+    rules:
+    - apiGroups: [""]
+      resources: ["secrets"]
+      verbs: ["get", "list", "watch", "create", "update", "patch"]
+  - |
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRoleBinding
+    metadata:
+      name: secret-backup-rolebinding
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: ClusterRole
+      name: secret-backup-role
+    subjects:
+    - kind: ServiceAccount
+      name: secret-backup-sa
+      namespace: k8s-secret-backup
+  - |
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: secret-backup-config
+      namespace: k8s-secret-backup
+    data:
+      namespaces: "sealed-secrets"
+  - |
+    apiVersion: batch/v1
+    kind: CronJob
+    metadata:
+      name: secret-backup-cron
+      namespace: k8s-secret-backup
+    spec:
+      schedule: "0 0 * * *"  # every day at midnight UTC
+      jobTemplate:
+        spec:
+          template:
+            spec:
+              serviceAccountName: secret-backup-sa
+              containers:
+              - name: secret-backup
+                image: ghcr.io/jamie-stinson/k8s-secret-backup:v1.0.0
+                imagePullPolicy: IfNotPresent
+                env:
+                  # - name: RESTORE_MODE
+                  #   value: "true"
+                  # - name: FORCE_OVERWRITE
+                  #   value: "true"
+                  - name: NAMESPACES
+                    valueFrom:
+                      configMapKeyRef:
+                        name: secret-backup-config
+                        key: namespaces
+                  - name: S3_ENDPOINT_URL
+                    value: "https://s3.eu-central-003.backblazeb2.com"
+                  - name: S3_ACCESS_KEY_ID
+                    valueFrom:
+                      secretKeyRef:
+                        name: secret-backup-creds
+                        key: s3_access_key
+                  - name: S3_SECRET_ACCESS_KEY
+                    valueFrom:
+                      secretKeyRef:
+                        name: secret-backup-creds
+                        key: s3_secret_key
+                  - name: S3_BUCKET_NAME
+                    value: "pw-bb-backups"
+                  - name: S3_BACKUP_DIR
+                    value: "k8s-secrets-backup"
+              restartPolicy: OnFailure

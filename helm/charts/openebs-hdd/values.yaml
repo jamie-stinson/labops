@@ -1,0 +1,137 @@
+workload:
+  image:
+    registry: "docker.io"
+    repository: "openebs/provisioner-localpv"
+    tag: "4.3.0"
+  envs:
+    - name: "OPENEBS_SERVICE_ACCOUNT"
+      value: "openebs"
+    - name: OPENEBS_IO_ENABLE_ANALYTICS
+      value: 'true'
+    - name: OPENEBS_IO_BASE_PATH
+      value: "/var/mnt/hdd-pool"
+    - name: OPENEBS_IO_HELPER_IMAGE
+      value: openebs/linux-utils:4.2.0
+    - name: OPENEBS_IO_HELPER_POD_HOST_NETWORK
+      value: 'false'
+    - name: OPENEBS_IO_INSTALLER_TYPE
+      value: localpv-charts-helm
+    - name: LEADER_ELECTION_ENABLED
+      value: 'true'
+    - name: OPENEBS_NAMESPACE
+      value: 'openebs-hdd'
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "25m"
+        memory: "128Mi"
+        ephemeral-storage: "1Gi"
+      limits:
+        memory: "128Mi"
+        ephemeral-storage: "1Gi"
+  probes:
+    readinessProbe:
+      type: exec
+      command: ['sh', '-c', 'test `pgrep -c "^provisioner-loc.*"` = 1']
+      initialDelaySeconds: 30
+      periodSeconds: 60
+    livenessProbe:
+      type: exec
+      command: ['sh', '-c', 'test `pgrep -c "^provisioner-loc.*"` = 1']
+      initialDelaySeconds: 30
+      periodSeconds: 60
+  # storage:
+  #   - name: tmp
+  #     type: emptyDir
+  #     mountPath: /tmp
+  #     ramDisk: false
+  #     readOnly: false
+  strategy:
+    type: "Recreate"
+
+service:
+  enabled: false
+
+rbac:
+  enabled: true
+  roles:
+    clusterRole:
+      rules:
+        - apiGroups:
+            - '*'
+          resources:
+            - nodes
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - '*'
+          resources:
+            - namespaces
+            - pods
+            - events
+            - endpoints
+          verbs:
+            - '*'
+        - apiGroups:
+            - '*'
+          resources:
+            - resourcequotas
+            - limitranges
+          verbs:
+            - list
+            - watch
+        - apiGroups:
+            - '*'
+          resources:
+            - storageclasses
+            - persistentvolumeclaims
+            - persistentvolumes
+          verbs:
+            - '*'
+        - apiGroups:
+            - apiextensions.k8s.io
+          resources:
+            - customresourcedefinitions
+          verbs:
+            - get
+            - list
+            - create
+            - update
+            - delete
+            - patch
+        - apiGroups:
+            - openebs.io
+          resources:
+            - '*'
+          verbs:
+            - '*'
+        - apiGroups:
+            - coordination.k8s.io
+          resources:
+            - leases
+          verbs:
+            - get
+            - create
+            - update
+        - nonResourceURLs:
+            - /metrics
+          verbs:
+            - get
+
+storageClass:
+  enabled: true
+  annotations:
+    cas.openebs.io/config: |
+      - name: StorageType
+        value: "hostpath"
+      - name: BasePath
+        value: "/var/mnt/hdd-pool"
+    openebs.io/cas-type: local
+    storageclass.kubernetes.io/is-default-class: 'false'
+  provisioner: "openebs.io/local"
+  reclaimPolicy: "Delete"
+  allowVolumeExpansion: "true"
+  volumeBindingMode: "WaitForFirstConsumer"

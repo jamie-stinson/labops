@@ -1,0 +1,276 @@
+workload:
+  type: "StatefulSet"
+  image:
+    registry: "ghcr.io"
+    repository: linuxserver/emby
+    tag: 4.9.1
+  strategy:
+    type: OnDelete
+  priorityClassName: "system-cluster-critical"
+  envs:
+    - name: "PUID"
+      value: "0"
+    - name: "PGID"
+      value: "0"
+    - name: "TZ"
+      value: "Europe/London"
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "6000m"
+        memory: "8Gi"
+        ephemeral-storage: "2Gi"
+      limits:
+        memory: "8Gi"
+        ephemeral-storage: "2Gi"
+  podSecurityContext:
+    runAsUser: 0
+    runAsGroup: 0
+    runAsNonRoot: false
+    fsGroup: 0
+    fsGroupChangePolicy: "OnRootMismatch"
+  securityContext:
+    runAsUser: 0
+    runAsGroup: 0
+    runAsNonRoot: false
+    allowPrivilegeEscalation: true
+    privileged: true
+    readOnlyRootFilesystem: false
+  probes:
+    readinessProbe:
+      type: tcpSocket
+      port: 8096
+    livenessProbe:
+      type: tcpSocket
+      port: 8096
+  storage:
+    - name: emby-config
+      type: pvc
+      mountPath: /config
+      claimName: "emby-config"
+    - name: emby-movies
+      type: pvc
+      mountPath: /media/movies
+      claimName: "emby-movies"
+    - name: emby-tv
+      type: pvc
+      mountPath: /media/tv
+      claimName: "emby-tv"
+    - name: emby-anime
+      type: pvc
+      mountPath: /media/anime
+      claimName: "emby-anime"
+    - name: emby-transcode
+      type: pvc
+      mountPath: /transcode
+      claimName: "emby-transcode"
+    # - name: tmp
+    #   type: emptyDir
+    #   mountPath: /tmp
+  
+service:
+  ports:
+    - name: http
+      port: 8096
+      protocol: TCP
+
+ingress:
+  enabled: true
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "internalweb, internalwebsecure, externalweb, externalwebsecure"
+  hosts:
+    - host: watch.projectwhitebox.com
+      path: /
+      pathType: "Prefix"
+      tls:
+        enabled: false
+      backend:
+        service:
+          name: "emby"
+          port: 8096
+
+autoscaling:
+  enabled: false
+
+extraObjects:
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: emby-config
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+        - ReadWriteMany
+      nfs:
+        server: 10.0.0.10
+        path: "/mnt/data-pool/emby"
+      mountOptions:
+        - nfsvers=4.1 
+        - hard      
+        - noatime
+        - rsize=1048576 
+        - wsize=1048576 
+        - proto=tcp
+        - async
+        - nconnect=8
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: emby-config
+      namespace: emby
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ""
+      resources:
+        requests:
+          storage: 1Ti
+      volumeName: emby-config
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: emby-movies
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+        - ReadWriteMany
+      nfs:
+        server: 10.0.0.10
+        path: "/mnt/hdd-pool/movies"
+      mountOptions:
+        - nfsvers=4.1 
+        - hard      
+        - noatime
+        - rsize=1048576 
+        - wsize=1048576 
+        - proto=tcp
+        - async
+        - nconnect=8
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: emby-movies
+      namespace: emby
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ""
+      resources:
+        requests:
+          storage: 1Ti
+      volumeName: emby-movies
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: emby-tv
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+        - ReadWriteMany
+      nfs:
+        server: 10.0.0.10
+        path: "/mnt/hdd-pool/tv"
+      mountOptions:
+        - nfsvers=4.1 
+        - hard      
+        - noatime
+        - rsize=1048576 
+        - wsize=1048576 
+        - proto=tcp
+        - async
+        - nconnect=8
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: emby-tv
+      namespace: emby
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ""
+      resources:
+        requests:
+          storage: 1Ti
+      volumeName: emby-tv
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: emby-anime
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+        - ReadWriteMany
+      nfs:
+        server: 10.0.0.10
+        path: "/mnt/hdd-pool/anime"
+      mountOptions:
+        - nfsvers=4.1 
+        - hard      
+        - noatime
+        - rsize=1048576 
+        - wsize=1048576 
+        - proto=tcp
+        - async
+        - nconnect=8
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: emby-anime
+      namespace: emby
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ""
+      resources:
+        requests:
+          storage: 1Ti
+      volumeName: emby-anime
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: emby-transcode
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+        - ReadWriteMany
+      nfs:
+        server: 10.0.0.10
+        path: "/mnt/data-pool/transcode"
+      mountOptions:
+        - nfsvers=4.1 
+        - hard
+        - noatime
+        - rsize=1048576 
+        - wsize=1048576 
+        - proto=tcp
+        - async
+        - nconnect=8
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: emby-transcode
+      namespace: emby
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ""
+      resources:
+        requests:
+          storage: 1Ti
+      volumeName: emby-transcode

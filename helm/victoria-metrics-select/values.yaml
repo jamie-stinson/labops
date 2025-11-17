@@ -1,0 +1,60 @@
+workload:
+  image:
+    repository: "docker.io/victoriametrics/vmselect"
+    tag: "v1.124.0-cluster"
+  args:
+    - '--cacheDataPath=/cache'
+    - '--envflag.enable'
+    - '--envflag.prefix=VM_'
+    - '--httpListenAddr=:8481'
+    - '--loggerFormat=json'
+    - >-
+      --storageNode=victoria-metrics-storage-0.victoria-metrics-storage.victoria-metrics.svc.cluster.local:8401
+  probes:
+    readinessProbe:
+      type: tcpSocket
+      port: 8481
+    livenessProbe:
+      type: tcpSocket
+      port: 8481
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "10m"
+        memory: "2Gi"
+        ephemeral-storage: "1Gi"
+      limits:
+        memory: "2Gi"
+        ephemeral-storage: "1Gi"
+  storage:
+  - name: cache
+    type: emptyDir
+    mountPath: /cache
+    ramDisk: false
+    readOnly: false
+service:
+  ports:
+  - name: http-metrics
+    protocol: TCP
+    port: 8481
+
+extraObjects:
+  - |
+    apiVersion: grafana.integreatly.org/v1beta1
+    kind: GrafanaDatasource
+    metadata:
+      name: victoria-metrics-select
+      namespace: victoria-metrics
+    spec:
+      allowCrossNamespaceImport: true
+      datasource:
+        access: proxy
+        name: victoria-metrics
+        type: victoriametrics-metrics-datasource
+        url: >-
+          http://victoria-metrics-select.victoria-metrics.svc.cluster.local:8481/select/0/prometheus
+      instanceSelector:
+        matchLabels:
+          dashboards: grafana
+      resyncPeriod: 10m0s

@@ -1,0 +1,79 @@
+autoPatching:
+  enabled: true
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: "huntarr=ghcr.io/plexguide/huntarr:~v8"
+workload:
+  type: "StatefulSet"
+  image:
+    repository: ghcr.io/plexguide/huntarr
+    tag: 8.2.10
+  envs:
+  - name: "TZ"
+    value: "Europe/London"
+  - name: "PUID"
+    value: "1000"
+  - name: "PGID"
+    value: "1000"
+  - name: "HUNTARR_PORT"
+    value: "9705"
+  strategy:
+    type: OnDelete
+  probes:
+    readinessProbe:
+      type: tcpSocket
+      port: 9705
+    livenessProbe:
+      type: tcpSocket
+      port: 9705
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "25m"
+        memory: "128Mi"
+        ephemeral-storage: "512Mi"
+      limits:
+        memory: "128Mi"
+        ephemeral-storage: "512Mi"
+  storage:
+  - name: config
+    type: pvc
+    mountPath: /config
+    claimName: "huntarr-config"
+service:
+  ports:
+  - name: http
+    port: 9705
+    protocol: TCP
+ingress:
+  enabled: true
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "internalweb, internalwebsecure"
+  hosts:
+  - host: huntarr.projectwhitebox.com
+    path: /
+    pathType: "Prefix"
+    tls:
+      enabled: false
+    backend:
+      service:
+        name: "huntarr"
+        port: 9705
+autoscaling:
+  enabled: false
+extraObjects:
+- "apiVersion: v1\nkind: PersistentVolume\nmetadata:\n  name: huntarr-config\nspec:\n  capacity:\n    storage: 1Ti\n  accessModes:\n    - ReadWriteMany\n  nfs:\n    server: 10.0.0.10\n    path: \"/mnt/data-pool/huntarr\"\n  mountOptions:\n    - nfsvers=4.1 \n    - hard      \n    - noatime\n    - rsize=1048576 \n    - wsize=1048576 \n    - proto=tcp\n    - async\n    - nconnect=8\n"
+- |
+  apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: huntarr-config
+    namespace: huntarr
+  spec:
+    accessModes:
+      - ReadWriteMany
+    storageClassName: ""
+    resources:
+      requests:
+        storage: 1Ti
+    volumeName: huntarr-config

@@ -1,0 +1,184 @@
+workload:
+  type: "StatefulSet"
+  image:
+    registry: "ghcr.io"
+    repository: marcopiovanello/yt-dlp-web-ui
+    tag: latest
+  strategy:
+    type: OnDelete
+  args: 
+    - '-out=/data/music'
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "100m"
+        memory: "1Gi"
+        ephemeral-storage: "2Gi"
+  podSecurityContext:
+    runAsUser: 0
+    runAsGroup: 0
+    runAsNonRoot: false
+    fsGroup: 0
+    fsGroupChangePolicy: "OnRootMismatch"
+  securityContext:
+    runAsUser: 0
+    runAsGroup: 0
+    runAsNonRoot: false
+    allowPrivilegeEscalation: false
+    privileged: false
+    readOnlyRootFilesystem: false
+  probes:
+    readinessProbe:
+      type: tcpSocket
+      port: 3033
+    livenessProbe:
+      type: tcpSocket
+      port: 3033
+  storage:
+    - name: yt-dlp-downloads
+      type: pvc
+      mountPath: /downloads
+      claimName: "yt-dlp-downloads"
+    - name: yt-dlp-music
+      type: pvc
+      mountPath: /data/music
+      claimName: "yt-dlp-music"
+    - name: yt-dlp-config
+      type: pvc
+      mountPath: /config
+      claimName: "yt-dlp-config"
+
+service:
+  ports:
+    - name: http
+      port: 3033
+      protocol: TCP
+
+ingress:
+  enabled: true
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: "internalweb, internalwebsecure"
+  hosts:
+    - host: music.projectwhitebox.com
+      path: /
+      pathType: "Prefix"
+      tls:
+        enabled: false
+      backend:
+        service:
+          name: "yt-dlp-web-ui"
+          port: 3033
+
+autoscaling:
+  enabled: false
+
+extraObjects:
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: yt-dlp-downloads
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+        - ReadWriteMany
+      nfs:
+        server: 10.0.0.10
+        path: "/mnt/data-pool/downloads"
+      mountOptions:
+        - nfsvers=4.1 
+        - hard
+        - noatime
+        - rsize=1048576 
+        - wsize=1048576 
+        - proto=tcp
+        - async
+        - nconnect=8
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: yt-dlp-downloads
+      namespace: yt-dlp-web-ui
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ""
+      resources:
+        requests:
+          storage: 1Ti
+      volumeName: yt-dlp-downloads
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: yt-dlp-music
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+        - ReadWriteMany
+      nfs:
+        server: 10.0.0.10
+        path: "/mnt/hdd-pool/music"
+      mountOptions:
+        - nfsvers=4.1 
+        - hard
+        - noatime
+        - rsize=1048576 
+        - wsize=1048576 
+        - proto=tcp
+        - async
+        - nconnect=8
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: yt-dlp-music
+      namespace: yt-dlp-web-ui
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ""
+      resources:
+        requests:
+          storage: 1Ti
+      volumeName: yt-dlp-music
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: yt-dlp-config
+    spec:
+      capacity:
+        storage: 1Ti
+      accessModes:
+        - ReadWriteMany
+      nfs:
+        server: 10.0.0.10
+        path: "/mnt/data-pool/yt-dlp"
+      mountOptions:
+        - nfsvers=4.1 
+        - hard
+        - noatime
+        - rsize=1048576 
+        - wsize=1048576 
+        - proto=tcp
+        - async
+        - nconnect=8
+  - |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: yt-dlp-config
+      namespace: yt-dlp-web-ui
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: ""
+      resources:
+        requests:
+          storage: 1Ti
+      volumeName: yt-dlp-config

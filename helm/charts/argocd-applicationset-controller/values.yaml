@@ -1,0 +1,163 @@
+namespace: "argocd"
+autoPatching:
+  enabled: true
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: "argocd-applicationset-controller=quay.io/argoproj/argocd:~v3"
+workload:
+  image:
+    repository: "quay.io/argoproj/argocd"
+    tag: "v3.1.0"
+  command:
+  - 'argocd-applicationset-controller'
+  args:
+  - '--metrics-addr=:8080'
+  - '--probe-addr=:8081'
+  - '--webhook-addr=:7000'
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "25m"
+        memory: "128Mi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "128Mi"
+        ephemeral-storage: "16Mi"
+  envs:
+  - name: ARGOCD_SERVER_NAME
+    value: argocd-server
+  envsConfigMap:
+  - name: ARGOCD_APPLICATIONSET_CONTROLLER_ENABLE_LEADER_ELECTION
+    configMap: argocd-cmd-params-cm
+    key: applicationsetcontroller.enable.leader.election
+  - name: ARGOCD_APPLICATIONSET_CONTROLLER_ENABLE_PROGRESSIVE_SYNCS
+    configMap: argocd-cmd-params-cm
+    key: applicationsetcontroller.enable.progressive.syncs
+  - name: ARGOCD_APPLICATIONSET_CONTROLLER_LOGFORMAT
+    configMap: argocd-cmd-params-cm
+    key: applicationsetcontroller.log.format
+  - name: ARGOCD_APPLICATIONSET_CONTROLLER_LOG_LEVEL
+    configMap: argocd-cmd-params-cm
+    key: applicationsetcontroller.log.level
+  - name: ARGOCD_APPLICATIONSET_CONTROLLER_NAMESPACES
+    configMap: argocd-cmd-params-cm
+    key: applicationsetcontroller.namespaces
+  - name: ARGOCD_APPLICATIONSET_CONTROLLER_POLICY
+    configMap: argocd-cmd-params-cm
+    key: applicationsetcontroller.policy
+  - name: ARGOCD_APPLICATIONSET_CONTROLLER_REPO_SERVER
+    configMap: argocd-cmd-params-cm
+    key: repo.server
+  probes:
+    readinessProbe:
+      type: tcpSocket
+      port: 8081
+    livenessProbe:
+      type: exec
+      command:
+      - pgrep
+      - -f
+      - argocd-applicationset-controller
+      # storage:
+      # - name: tmp
+      #   type: emptyDir
+      #   mountPath: /tmp
+      #   ramDisk: false
+      #   readOnly: false
+service:
+  ports:
+  - name: webhook
+    port: 7000
+    protocol: TCP
+  - name: http-metrics
+    port: 8080
+    protocol: TCP
+  - name: healthcheck
+    port: 8081
+    protocol: TCP
+rbac:
+  enabled: true
+  roles:
+    role:
+      rules:
+      - apiGroups:
+        - argoproj.io
+        resources:
+        - applications
+        - applicationsets
+        - applicationsets/finalizers
+        verbs:
+        - create
+        - delete
+        - get
+        - list
+        - patch
+        - update
+        - watch
+      - apiGroups:
+        - argoproj.io
+        resources:
+        - applicationsets/status
+        verbs:
+        - get
+        - patch
+        - update
+      - apiGroups:
+        - argoproj.io
+        resources:
+        - appprojects
+        verbs:
+        - get
+        - list
+        - watch
+      - apiGroups:
+        - ''
+        resources:
+        - events
+        verbs:
+        - create
+        - get
+        - list
+        - patch
+        - watch
+      - apiGroups:
+        - ''
+        resources:
+        - configmaps
+        verbs:
+        - create
+        - update
+        - delete
+        - get
+        - list
+        - patch
+        - watch
+      - apiGroups:
+        - ''
+        resources:
+        - secrets
+        verbs:
+        - get
+        - list
+        - watch
+      - apiGroups:
+        - apps
+        - extensions
+        resources:
+        - deployments
+        verbs:
+        - get
+        - list
+        - watch
+      - apiGroups:
+        - coordination.k8s.io
+        resources:
+        - leases
+        verbs:
+        - create
+        - delete
+        - get
+        - list
+        - patch
+        - update
+        - watch

@@ -1,0 +1,54 @@
+autoPatching:
+  enabled: true
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: "version-checker=quay.io/jetstack/version-checker:~v0"
+workload:
+  image:
+    repository: quay.io/jetstack/version-checker
+    tag: v0.9.3
+  command:
+  - 'version-checker'
+  args:
+  - '--metrics-serving-address=0.0.0.0:8080'
+  - '--log-level=info'
+  - '--image-cache-timeout=30m'
+  - '--test-all-containers=true'
+  probes:
+    livenessProbe:
+      path: "/readyz"
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "10m"
+        memory: "256Mi"
+        ephemeral-storage: "128Mi"
+      limits:
+        memory: "256Mi"
+        ephemeral-storage: "128Mi"
+service:
+  ports:
+  - name: http-metrics
+    port: 8080
+    protocol: TCP
+rbac:
+  enabled: true
+  roles:
+    clusterRole:
+      rules:
+      - apiGroups:
+        - ""
+        resources:
+        - "pods"
+        verbs:
+        - "get"
+        - "list"
+        - "watch"
+grafana:
+  dashboard:
+    enabled: false
+    dashboards:
+    - name: kubernetes-image-drift
+      title: "Kubernetes / Image Drift"
+      url: "https://raw.githubusercontent.com/jamie-stinson/helm-system-monorepo/refs/heads/main/charts/version-checker/dashboards/kubernetes-image-drift.json"
+      folder: "System"

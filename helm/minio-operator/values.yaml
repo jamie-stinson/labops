@@ -1,0 +1,287 @@
+workload:
+  image:
+    registry: quay.io
+    repository: minio/operator
+    tag: v7.1.1
+  args:
+    - controller
+  envs:
+    - name: "OPERATOR_STS_ENABLED"
+      value: "on"
+  probes:
+    readinessProbe:
+      type: tcpSocket
+      port: 4221
+    livenessProbe:
+      type: tcpSocket
+      port: 4221
+  # storage:
+  #   - name: tmp
+  #     type: emptyDir
+  #     mountPath: /tmp/sts
+  resources:
+    preset: ""
+    custom:
+      requests:
+        cpu: "10m"
+        memory: "128Mi"
+        ephemeral-storage: "16Mi"
+      limits:
+        memory: "128Mi"
+        ephemeral-storage: "16Mi"
+
+service:
+  ports:
+    - name: http-operator
+      port: 4221
+      protocol: TCP
+    - name: https-sts
+      port: 4223
+      protocol: TCP
+
+rbac:
+  enabled: true
+  roles:
+    clusterRole:
+      rules:
+        - apiGroups:
+            - "apiextensions.k8s.io"
+          resources:
+            - customresourcedefinitions
+          verbs:
+            - get
+            - update
+        - apiGroups:
+            - ""
+          resources:
+            - persistentvolumeclaims
+          verbs:
+            - get
+            - update
+            - list
+        - apiGroups:
+            - ""
+          resources:
+            - namespaces
+            - nodes
+          verbs:
+            - create
+            - get
+            - watch
+            - list
+        - apiGroups:
+            - ""
+          resources:
+            - pods
+            - services
+            - events
+            - configmaps
+          verbs:
+            - get
+            - watch
+            - create
+            - list
+            - delete
+            - deletecollection
+            - update
+            - patch
+        - apiGroups:
+            - ""
+          resources:
+            - secrets
+          verbs:
+            - get
+            - watch
+            - create
+            - update
+            - list
+            - delete
+            - deletecollection
+        - apiGroups:
+            - ""
+          resources:
+            - serviceaccounts
+          verbs:
+            - create
+            - delete
+            - get
+            - list
+            - patch
+            - update
+            - watch
+        - apiGroups:
+            - rbac.authorization.k8s.io
+          resources:
+            - roles
+            - rolebindings
+          verbs:
+            - create
+            - delete
+            - get
+            - list
+            - patch
+            - update
+            - watch
+        - apiGroups:
+            - apps
+          resources:
+            - statefulsets
+            - deployments
+            - deployments/finalizers
+          verbs:
+            - get
+            - create
+            - list
+            - patch
+            - watch
+            - update
+            - delete
+        - apiGroups:
+            - batch
+          resources:
+            - jobs
+          verbs:
+            - get
+            - create
+            - list
+            - patch
+            - watch
+            - update
+            - delete
+        - apiGroups:
+            - "certificates.k8s.io"
+          resources:
+            - "certificatesigningrequests"
+            - "certificatesigningrequests/approval"
+            - "certificatesigningrequests/status"
+          verbs:
+            - update
+            - create
+            - get
+            - delete
+            - list
+        - apiGroups:
+            - certificates.k8s.io
+          resourceNames:
+            - kubernetes.io/legacy-unknown
+            - kubernetes.io/kube-apiserver-client
+            - kubernetes.io/kubelet-serving
+            - beta.eks.amazonaws.com/app-serving
+          resources:
+            - signers
+          verbs:
+            - approve
+            - sign
+        - apiGroups:
+            - authentication.k8s.io
+          resources:
+            - tokenreviews
+          verbs:
+            - create
+        - apiGroups:
+            - minio.min.io
+            - sts.min.io
+            - job.min.io
+          resources:
+            - "*"
+          verbs:
+            - "*"
+        - apiGroups:
+            - min.io
+          resources:
+            - "*"
+          verbs:
+            - "*"
+        - apiGroups:
+            - monitoring.coreos.com
+          resources:
+            - prometheuses
+            - prometheusagents
+          verbs:
+            - get
+            - update
+            - list
+        - apiGroups:
+            - "coordination.k8s.io"
+          resources:
+            - leases
+          verbs:
+            - get
+            - update
+            - create
+        - apiGroups:
+            - policy
+          resources:
+            - poddisruptionbudgets
+          verbs:
+            - create
+            - delete
+            - get
+            - list
+            - patch
+            - update
+            - deletecollection
+
+storageClass:
+  enabled: true
+  provisioner: "kubernetes.io/no-provisioner"
+  reclaimPolicy: "Delete"
+  allowVolumeExpansion: "true"
+  volumeBindingMode: "WaitForFirstConsumer"
+
+extraObjects:
+  - |
+    apiVersion: bitnami.com/v1alpha1
+    kind: SealedSecret
+    metadata:
+      name: minio
+      namespace: minio
+    spec:
+      encryptedData:
+        config.env: AgA806+N/fEycqDbLWkoHPnCRT4mVKrftjdeWJG3CtyiUhzKwuRL0FM1Ncnr536Myaf+jDLZCq4y35TBUQvoeyOGW7/po8//ITT1gB/0TOOXp9n5EOXncXkA+AQLuf9spw0drbzrlY5xxgJkeMqoCzK8LlBXuvOWKQw5VaQxXlWzoFq30eExf2kd+XZ9UGl9GeYrvyrgSJSWYtB+zlGyCCrJVH4R4FVN78/ZZP/PofjYkz92SAx2Mo2iKtBLfukYZvyDTQVFxgAgh8hR+PyaiiuCv4R9BRo/vC84Mrp2J+5VzpKidSbCWDYEkRiOm2J5tH9J+3QAvTfNYzg0ERyo31hwcVUL1kTNlKlDkaWF+zyd75gybgFDJOsFM/eNnzwmKlVGsPVFw9IQl3IZhiwYIf8GH2Tr95x3E4nm/3uGmkwyZgRjHmjbHRKUnnGSJXIymPSrKSdMtyd31J9CiAV7CQ04+rXpz31prvNsAsDBiQVhvC7mN18ivuZy+9RTlnQb5Ow8+lMp82JzWSSWBQS4cvuOiF37SsGGXV0G0Tk4/HRX3Tn5Orv5G4BQwkyhA+JxlE0m3SJ2EL6D83Og1wowCK4+wmNlPnqITCqoIzHvNAtCtb+V3zoMCE3U8Uy63b0ARZa9Df5+uo9sTdiGVnQEEWyJFFGfqbFbx2jYjhZyDs7yNfjmaPYhHx7NkW7K5Vg9whtstFl2pJgdJX7hlkW8IXb2DvbpQ5DuEn/2V/EdynZXPGiwOU97qITsRX8dFfZ+Z7zXVN8At04G4LUWqx/T4UaLNPnVkxz7aTzAb2ZzNFuvCo0LCLbPxZ85TsRPtkcB0D67Hqac0+RkI0r1JEpngKlcl9v04jR1a+zTiXgqaH6stCfAWMdBJaoxJZTe/YIT9/8kiCErZsA=
+      template:
+        metadata:
+          name: minio
+          namespace: minio
+        type: Opaque
+  - |
+    apiVersion: bitnami.com/v1alpha1
+    kind: SealedSecret
+    metadata:
+      name: secret-name
+      namespace: minio
+    spec:
+      encryptedData:
+        accessKey: AgCQ3ycy+d0yM2sWrJvB7Z5HYdhRvwEYqX/rpGddaH543XW7Gp4r50cMpDfyfxLNC1DrKodCKVlORBE6m+nnEhAksXuroeDSrOvMsOBOosve/+hbxIs8Npswy/otkYu0yN85NPJosDgZLZ2ZWoqmBRV0xuecneYgCvVXhLnX1GV0NYv31QMx4LRqBhucLM+ynEHlELvyPRMX1rDwLNSooM3WwM+qVHijiP6dRuSVFVBkwL1mzEnzSftdIO2aVezycI5npC6bWE+q5/GiPjcjO4bRZOCd6GByTQXL8o+V5cOsbe1u+38bw/vY7N9cS7oyKxmddll/vly2m4QwbfvTQTuTBB5wQyFi9ksV20ERZrMy8wwc49VaO4ZmW2kfzwOyMHI4VxMUKx3bVc6NQRy0+pzdaD1cX5iUC9pISe+BvA5bOxPetPPu0R9pysVhWMPq7+FxBYrxaVvS5N3SGujCayoMjCukWs6i6z6a9p1HAW9SxQ9MLRgsUsZIryyglj/AM3uysg7PuDBl1uYvlnejZ4Qpz89EJ1vU7fcz2NExo94tdET0K4bphfBnPxlo4GZjFXNzmfzqQ91al7HKwg5ZMRUUm1fnRblsLEPd3wKAFxvUJzCAzHZaKXTeZZhXDJpO52XXHwSeZQtyZcLZaLEaOiiHO34PpV2gR198FBFtVnGwbKrLb9Svq5wowLgIu1LmVyy12nTbWH3mTH9LPtHYLBWN0YNCUL8=
+        secretKey: AgBMRSCpL23mcd3hTzBNH8+yf7ixUNvnog6/cZzsgJcExW4K92y/6Yp9cvJAQyAOCxyNdSpOBlnhNEAR8vX2q0vJV/k1SFzRJDW3sPwEhIxL1wpEt1BRsmhuI+Bx8vcVkZ0jIeLb44VZrmAkUtHlCKBt8MhFQ6kK/mM8tdZ4ZdQ73Dcy4EUSrrKG26vLgjqHPkYTNERzyPTirsgkEaglbh2j2OWi5KvMrbv4AmkjCB5d2sc00LbCPb14ZdwIjCKLb4VqxIZoJiZTcFNRnAo+p5yTlHPX4plM+4iBVUYRfOx2hCzZCmpPSF9ORdg55SIbCc7rY163xSM4rlIGKimbQYzlJzrdYV5SjgTNMZNOzmOJhyqKcNo2W8KJ5EKtwnPaubSV52MYzYPbFpdZ1e5jJFMRi/VOJ6ZAdDSTPHsXDa+uxttK/HomHNzWsdLPLl6Aocadk5sajx7THV8lSd7ccza0aKNlasLVlGwL5YKGW0ODnVwoPRAOhlmEW3YUBj5jDNydFU3fNQtzmkM2x0echyK4J0Zx79A51kwdP5TZN8hAakrJnzJxBlJ91gndaMEoYc8w01+ihBDOIFrQe5RoVQGi51OP2Biw4umsZzo9Oc5c1EuLdq1WmdYaG71sE37aVzRIrz0I27SUKO67284Udoio9/ZuP0JO7fPIUuVAF1/qgd4ay1uV20vzjYKz3xMBFej0fNjaj97O/1LjDgTWCjrDiUuDDyZBiO7qB2fm49OjxxYC8sp7Tnmu
+      template:
+        metadata:
+          name: secret-name
+          namespace: minio
+        type: Opaque
+  - |
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: minio-pv-qszsdjpr-disk1
+      labels:
+        type: local
+        disk: disk1
+    spec:
+      capacity:
+        storage: 465Gi
+      volumeMode: Filesystem
+      accessModes:
+        - ReadWriteOnce
+      persistentVolumeReclaimPolicy: Delete
+      storageClassName: minio-operator
+      local:
+        path: /var/mnt/minio-data/disk1
+      nodeAffinity:
+        required:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: kubernetes.io/hostname
+                  operator: In
+                  values:
+                    - worker-qszsdjpr
