@@ -301,16 +301,8 @@ configMap:
                     - 6ba9033150e7896bdc9ec4b44f2b230f # MP3
                     - a061e2e700f81932daf888599f8a8273 # Opus
                     # HDR
-                    - c53085ddbd027d9624b320627748612f # DV HDR10+
-                    - e23edd2482476e595fb990b12e7c609c # DV HDR10
-                    - b17886cb4158d9fea189859409975758 # HDR10+ Boost
-                    - b974a6cd08c1066250f1f177d7aa1225 # HDR10+
-                    - dfb86d5941bc9075d6af23b09c2aeecd # HDR10
-                    - e61e28db95d22bedcadf030b8f156d96 # HDR
-                    - 2a4d9069cc1fe3242ff9bdaebed239bb # HDR (undefined)
-                    - 08d6d8834ad9ec87b1dc7ec8148e7a1f # PQ
-                    - 9364dd386c9b4a1100dde8264690add7 # HLG
-                    - 55a5b50cb416dea5a50c4955896217ab # DV HDR10+ Boost
+                    - 493b6d1dbec3c3364c59d7607f7e3405 # HDR
+                    - caa37d0df9c348912df1fb1d88f9273a # HDR10Plus Boost
                     # Movie Versions
                     - 0f12c086e289cf966fa5948eac571f44 # Hybrid
                     - 570bc9ebecd92723d2d21500f4be314c # Remaster
@@ -599,16 +591,8 @@ configMap:
                     - 3e8b714263b26f486972ee1e0fe7606c # MP3
                     - 28f6ef16d61e2d1adfce3156ed8257e3 # Opus
                     # HDR
-                    - 2b239ed870daba8126a53bd5dc8dc1c8 # DV HDR10Plus
-                    - 7878c33f1963fefb3d6c8657d46c2f0a # DV HDR10
-                    - 0dad0a507451acddd754fe6dc3a7f5e7 # HDR10+ Boost
-                    - a3d82cbef5039f8d295478d28a887159 # HDR10+
-                    - 3497799d29a085e2ac2df9d468413c94 # HDR10
-                    - 3e2c4e748b64a1a1118e0ea3f4cf6875 # HDR
-                    - bb019e1cd00f304f80971c965de064dc # HDR (undefined)
-                    - 2a7e3be05d3861d6df7171ec74cad727 # PQ
-                    - 17e889ce13117940092308f48b48b45b # HLG
-                    - 385e9e8581d33133c3961bdcdeffb7b4 # DV HDR10+ Boost
+                    - 505d871304820ba7106b693be6fe4a9e # HDR
+                    - 0c4b99df9206d2cfac3c05ab897dd62a # HDR10Plus Boost
                     # HQ Release Groups
                     - 9965a052eb87b0d10313b1cea89eb451 # Remux Tier 01
                     - 8a1d0c3d7497e741736761a1da866a2e # Remux Tier 02
