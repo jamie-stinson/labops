@@ -2,8 +2,8 @@ workload:
   type: "StatefulSet"
   image:
     registry: ghcr.io
-    repository: home-operations/lidarr
-    tag: 3.0.1
+    repository: hotio/lidarr
+    tag: pr-plugins
   envs:
     - name: LIDARR__AUTH__METHOD
       value: "External"
