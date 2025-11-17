@@ -25,6 +25,19 @@ workload:
         cpu: "1m"
         memory: "10Mi"
         ephemeral-storage: "16Mi"
+  podSecurityContext:
+    runAsUser: 0
+    runAsGroup: 0
+    runAsNonRoot: false
+    fsGroup: 0
+    fsGroupChangePolicy: "OnRootMismatch"
+  securityContext:
+    runAsUser: 0
+    runAsGroup: 0
+    runAsNonRoot: false
+    allowPrivilegeEscalation: true
+    privileged: true
+    readOnlyRootFilesystem: false
 
   storage:
     - name: config
