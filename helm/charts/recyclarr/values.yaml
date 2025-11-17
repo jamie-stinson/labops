@@ -636,7 +636,6 @@ configMap:
                     - 3ac5d84fce98bab1b531393e9c82f467 # QiBi
                     # Optional Streaming Services
                     - 43b3cf48cb385cd3eac608ee6bca7f09 # UHD Streaming Boost
-                    - d2d299244a92b8a52d4921ce3897a256 # UHD Streaming Cut
                     # Unwanted
                     - 85c61753df5da1fb2aab6f2a47426b09 # BR-DISK
                     - fbcb31d8dabd2a319072b84fc0b7249c # Extras
